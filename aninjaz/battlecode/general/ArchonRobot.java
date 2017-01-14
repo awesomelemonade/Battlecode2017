@@ -15,7 +15,7 @@ public class ArchonRobot {
 			Util.checkWin();
 			int treeCount = controller.getTreeCount();
 			int gardenerCount = controller.readBroadcast(Constants.BROADCAST_GARDENER_COUNT);
-			if(treeCount>=gardenerCount*8){
+			if(treeCount>=(gardenerCount-1)*8){
 				if(Util.getReservedBullets()>=RobotType.GARDENER.bulletCost){
 					Direction direction = Util.randomDirection();
 					if(controller.canHireGardener(direction)){

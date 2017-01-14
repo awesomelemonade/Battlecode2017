@@ -19,4 +19,5 @@ public class Constants {
 	public static final int BROADCAST_GARDENER_COUNT = 1;
 	public static final int BROADCAST_REQUEST_GARDENER_COMMANDERS = 2; //Tells RobotPlayer to set Gardener Type to GardenerCommander
 	public static final int BROADCAST_REQUEST_ARCHON_GARDENER_COMMANDER = 3; //Tells Archons to build a commander robot
+	public static final int BROADCAST_SCOUT_COUNT = 1;
 }
