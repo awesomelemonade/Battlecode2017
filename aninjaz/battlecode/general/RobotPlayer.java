@@ -1,0 +1,46 @@
+package aninjaz.battlecode.general;
+
+import battlecode.common.*;
+
+public class RobotPlayer {
+	public static void run(RobotController controller){
+		Util.controller = controller;
+		while(true){
+			try{
+				switch (controller.getType()) {
+				case ARCHON:
+					ArchonRobot.run(controller);
+					break;
+				case GARDENER:
+					addGardener(controller);
+					break;
+				case SOLDIER:
+					SoldierRobot.run(controller);
+					break;
+				case LUMBERJACK:
+					LumberjackRobot.run(controller);
+					break;
+				case SCOUT:
+					break;
+				case TANK:
+					break;
+				}
+			}catch(GameActionException ex){
+				System.out.println(ex.getMessage());
+				ex.printStackTrace();
+			}catch(Exception ex){
+				System.out.println(ex.getMessage());
+				ex.printStackTrace();
+			}
+		}
+	}
+	public static void addGardener(RobotController controller) throws GameActionException{
+		int n = controller.readBroadcast(Constants.BROADCAST_REQUEST_GARDENER_COMMANDERS);
+		controller.broadcast(Constants.BROADCAST_REQUEST_GARDENER_COMMANDERS, n-1);
+		if(n>0){
+			GardenerCommander.run(controller);
+		}else{
+			GardenerRobot.run(controller);
+		}
+	}
+}
