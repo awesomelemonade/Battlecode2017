@@ -24,6 +24,7 @@ public class GardenerRobot {
 	private static float checkRadius = Constants.ROOT_2*3f;
 	private static RobotController controller;
 	public static void run(RobotController controller) throws GameActionException {
+		Util.broadcastCount = Constants.BROADCAST_GARDENER_COUNT;
 		GardenerRobot.controller = controller;
 		Direction randDirection = Util.randomDirection();
 		while(origin==null){

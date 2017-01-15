@@ -55,7 +55,11 @@ public class Util {
 	public static int getReservedBullets() throws GameActionException{
 		return controller.readBroadcast(Constants.BROADCAST_RESERVED_BULLETS);
 	}
-	public static void yieldByteCodes(){
+	public static int broadcastCount = -1;
+	public static void yieldByteCodes() throws GameActionException{
+		if(broadcastCount!=-1){
+			checkLowHealth(broadcastCount);
+		}
 		Clock.yield();
 	}
 	public static MapLocation floor(MapLocation location){
@@ -64,6 +68,15 @@ public class Util {
 	public static void checkWin() throws GameActionException{
 		if(controller.getTeamBullets()>GameConstants.VICTORY_POINTS_TO_WIN*10){
 			controller.donate(GameConstants.VICTORY_POINTS_TO_WIN*10);
+		}
+	}
+	private static boolean lowHealth = false;
+	public static void checkLowHealth(int broadcast) throws GameActionException{
+		if(!lowHealth){
+			if((controller.getHealth()/controller.getType().maxHealth)<Constants.LOW_HEALTH){ //If scout is about to die :(
+				controller.broadcast(broadcast, controller.readBroadcast(broadcast)-1);
+				lowHealth = true;
+			}
 		}
 	}
 }

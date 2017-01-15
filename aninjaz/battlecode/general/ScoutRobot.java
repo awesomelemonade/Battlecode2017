@@ -15,8 +15,8 @@ public class ScoutRobot {
 	private static MapLocation targetInitialArchon;
 	private static MapLocation targetLocation;
 	private static Direction direction = Util.randomDirection();
-	private static boolean lowHealth = false;
 	public static void run(RobotController controller) throws GameActionException{
+		Util.broadcastCount = Constants.BROADCAST_SCOUT_COUNT;
 		targetInitialArchon = getAverage(controller.getInitialArchonLocations(Constants.OTHER_TEAM));
 		while(true){
 			switch(currentState){
@@ -38,7 +38,7 @@ public class ScoutRobot {
 				controller.move(direction);
 				break;
 			case TARGET_DIRECTION_STATE:
-				if(!moveTowardsTarget(controller, targetLocation)){
+				if(!moveTowardsRobot(controller, targetLocation)){
 					while(!controller.canMove(direction)){
 						direction = Util.randomDirection();
 					}
@@ -66,14 +66,6 @@ public class ScoutRobot {
 					currentState = RANDOM_DIRECTION_STATE;
 				}
 			}
-			
-			if(!lowHealth){
-				if((controller.getHealth()/controller.getType().maxHealth)<Constants.LOW_HEALTH){ //If scout is about to die :(
-					controller.broadcast(Constants.BROADCAST_SCOUT_COUNT,
-							controller.readBroadcast(Constants.BROADCAST_SCOUT_COUNT)-1);
-					lowHealth = true;
-				}
-			}
 			Util.yieldByteCodes();
 		}
 	}
@@ -89,9 +81,26 @@ public class ScoutRobot {
 		if(controller.canMove(location)){
 			controller.move(location);
 			return true;
-		}else{
-			return false;
 		}
+		return false;
+	}
+	public static boolean moveTowardsRobot(RobotController controller, MapLocation location) throws GameActionException{
+		float distance = controller.getLocation().distanceTo(location)-2.01f;//2 because 1 radius for each robot. Distance is between the centers, so you have to subtract 2 to the radius
+		System.out.println("Distance: "+distance);
+		if(distance<=RobotType.SCOUT.strideRadius){
+			Direction direction = controller.getLocation().directionTo(location);
+			if(controller.canMove(direction, distance)){
+				controller.move(direction, distance);
+				return true;
+			}
+		}else{
+			if(controller.canMove(location)){
+				controller.move(location);
+				return true;
+			}
+		}
+		System.out.println("I can't move to target :(");
+		return false;
 	}
 	public static MapLocation getAverage(MapLocation[] locations){
 		float totalX = 0;

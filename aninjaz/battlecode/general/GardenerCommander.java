@@ -7,8 +7,8 @@ import battlecode.common.RobotType;
 
 public class GardenerCommander {
 	private static int scoutSpawnRate = 1000;
-	private static boolean lowHealth = false;
 	public static void run(RobotController controller) throws GameActionException{
+		Util.broadcastCount = Constants.BROADCAST_GARDENER_COMMANDER_COUNT;
 		Direction direction = Util.randomDirection();
 		while(true){
 			//Follows Archons
@@ -19,13 +19,6 @@ public class GardenerCommander {
 			}
 			if(tries>0){
 				controller.move(direction);
-			}
-			if(!lowHealth){
-				if((controller.getHealth()/controller.getType().maxHealth)<Constants.LOW_HEALTH){ //If commander about to die :(
-					controller.broadcast(Constants.BROADCAST_REQUEST_ARCHON_GARDENER_COMMANDER,
-							controller.readBroadcast(Constants.BROADCAST_REQUEST_ARCHON_GARDENER_COMMANDER)+1);
-					lowHealth = true;
-				}
 			}
 			hireScout(controller);
 			Util.yieldByteCodes();

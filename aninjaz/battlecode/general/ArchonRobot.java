@@ -14,10 +14,10 @@ public class ArchonRobot {
 		while(true){
 			Util.checkWin();
 			
-			int gardenerCommanderRequests = controller.readBroadcast(Constants.BROADCAST_REQUEST_ARCHON_GARDENER_COMMANDER);
-			if(gardenerCommanderRequests>0){
+			int gardenerCommanders = controller.readBroadcast(Constants.BROADCAST_GARDENER_COMMANDER_COUNT);
+			if(gardenerCommanders<1){
 				if(Util.getAvailableBullets()>=RobotType.GARDENER.bulletCost){
-					controller.broadcast(Constants.BROADCAST_REQUEST_ARCHON_GARDENER_COMMANDER, gardenerCommanderRequests-1);
+					controller.broadcast(Constants.BROADCAST_GARDENER_COMMANDER_COUNT, gardenerCommanders+1);
 					hireGardenerCommander(controller);
 				}
 			}
