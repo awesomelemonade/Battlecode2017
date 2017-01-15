@@ -5,6 +5,7 @@ import battlecode.common.*;
 public class RobotPlayer {
 	public static void run(RobotController controller){
 		Util.controller = controller;
+		Constants.OTHER_TEAM = controller.getTeam()==Team.A?Team.B:Team.A;
 		while(true){
 			try{
 				switch (controller.getType()) {
@@ -21,6 +22,7 @@ public class RobotPlayer {
 					LumberjackRobot.run(controller);
 					break;
 				case SCOUT:
+					ScoutRobot.run(controller);
 					break;
 				case TANK:
 					break;

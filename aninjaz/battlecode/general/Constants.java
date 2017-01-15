@@ -1,8 +1,10 @@
 package aninjaz.battlecode.general;
 
 import battlecode.common.Direction;
+import battlecode.common.Team;
 
 public class Constants {
+	public static Team OTHER_TEAM;
 	
 	public static final float ROOT_2 = 1.41421356237f;
 	public static final float EPSILON = 0.00001f;
@@ -20,4 +22,5 @@ public class Constants {
 	public static final int BROADCAST_REQUEST_GARDENER_COMMANDERS = 2; //Tells RobotPlayer to set Gardener Type to GardenerCommander
 	public static final int BROADCAST_REQUEST_ARCHON_GARDENER_COMMANDER = 3; //Tells Archons to build a commander robot
 	public static final int BROADCAST_SCOUT_COUNT = 1;
+	
 }
