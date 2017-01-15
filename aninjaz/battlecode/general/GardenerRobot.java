@@ -59,7 +59,10 @@ public class GardenerRobot {
 			if(controller.isBuildReady()){
 				int i = nextPlantIndex();
 				if(i!=-1){ //Invalid plant index
-					if(Util.reserveBullets((int)GameConstants.BULLET_TREE_COST)){
+					float currentBullets = Util.getAvailableBullets();
+					int currentReserved = Util.getReservedBullets();
+					if(currentBullets-currentReserved>GameConstants.BULLET_TREE_COST){
+						Util.setReservedBullets((int) (currentReserved+GameConstants.BULLET_TREE_COST));
 						Direction movement = plantMovement[i];
 						Direction direction = plantDirection[i];
 						if(movement!=null){
@@ -76,7 +79,7 @@ public class GardenerRobot {
 								Util.yieldByteCodes();
 								yielded = true;
 							}
-							Util.subtractBullets((int)GameConstants.BULLET_TREE_COST);
+							Util.subtractReservedBullets((int)GameConstants.BULLET_TREE_COST);
 							planted[i] = true;
 							controller.plantTree(direction);
 							if(!yielded){
@@ -92,7 +95,7 @@ public class GardenerRobot {
 								Util.yieldByteCodes();
 							}
 							planted[i] = true;
-							Util.subtractBullets((int)GameConstants.BULLET_TREE_COST);
+							Util.subtractReservedBullets((int)GameConstants.BULLET_TREE_COST);
 							controller.plantTree(direction);
 						}
 					}

@@ -40,21 +40,20 @@ public class Util {
 		}
 		controller.move(target);
 	}
-	public static float getReservedBullets() throws GameActionException{
-		return controller.getTeamBullets()-controller.readBroadcast(Constants.BROADCAST_RESERVED_BULLETS);
+	public static void addReservedBullets(int bullets) throws GameActionException{
+		setReservedBullets(getReservedBullets()+bullets);
 	}
-	public static boolean reserveBullets(int bullets) throws GameActionException{
-		float current = controller.getTeamBullets();
-		int reserved = controller.readBroadcast(Constants.BROADCAST_RESERVED_BULLETS);
-		if(current-reserved>=bullets){
-			controller.broadcast(Constants.BROADCAST_RESERVED_BULLETS, reserved+bullets);
-			return true;
-		}
-		return false;
+	public static void subtractReservedBullets(int bullets) throws GameActionException{
+		setReservedBullets(getReservedBullets()-bullets);
 	}
-	public static void subtractBullets(int bullets) throws GameActionException{
-		int reserved = controller.readBroadcast(Constants.BROADCAST_RESERVED_BULLETS);
-		controller.broadcast(Constants.BROADCAST_RESERVED_BULLETS, reserved-bullets);
+	public static void setReservedBullets(int bullets) throws GameActionException{
+		controller.broadcast(Constants.BROADCAST_RESERVED_BULLETS, bullets);
+	}
+	public static float getAvailableBullets() throws GameActionException{
+		return controller.getTeamBullets()-getReservedBullets();
+	}
+	public static int getReservedBullets() throws GameActionException{
+		return controller.readBroadcast(Constants.BROADCAST_RESERVED_BULLETS);
 	}
 	public static void yieldByteCodes(){
 		Clock.yield();

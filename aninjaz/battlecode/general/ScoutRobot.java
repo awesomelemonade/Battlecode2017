@@ -5,6 +5,7 @@ import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
+import battlecode.common.RobotType;
 
 public class ScoutRobot {
 	public static final int TO_INITIAL_ARCHON_STATE = 0;
@@ -18,20 +19,6 @@ public class ScoutRobot {
 	public static void run(RobotController controller) throws GameActionException{
 		targetInitialArchon = getAverage(controller.getInitialArchonLocations(Constants.OTHER_TEAM));
 		while(true){
-			RobotInfo[] nearbyRobots = controller.senseNearbyRobots(-1, Constants.OTHER_TEAM);
-			if(nearbyRobots.length>0){
-				Direction direction = controller.getLocation().directionTo(nearbyRobots[0].getLocation());
-				if(controller.canFireSingleShot()){
-					controller.fireSingleShot(direction);
-				}
-				targetLocation = nearbyRobots[0].getLocation();
-				currentState = TARGET_DIRECTION_STATE;
-			}else{
-				if(currentState==TARGET_DIRECTION_STATE){
-					currentState = RANDOM_DIRECTION_STATE;
-				}
-			}
-			
 			switch(currentState){
 			case TO_INITIAL_ARCHON_STATE:
 				if(!moveTowardsTarget(controller, targetInitialArchon)){
@@ -54,17 +41,38 @@ public class ScoutRobot {
 				moveTowardsTarget(controller, targetLocation);
 				break;
 			}
+			RobotInfo[] nearbyRobots = controller.senseNearbyRobots(-1, Constants.OTHER_TEAM);
+			if(nearbyRobots.length>0){
+				RobotInfo robot = getNearestNonArchon(nearbyRobots);
+				Direction direction = controller.getLocation().directionTo(robot.getLocation());
+				if(controller.canFireSingleShot()){
+					controller.fireSingleShot(direction);
+				}
+				targetLocation = robot.getLocation();
+				currentState = TARGET_DIRECTION_STATE;
+			}else{
+				if(currentState==TARGET_DIRECTION_STATE){
+					currentState = RANDOM_DIRECTION_STATE;
+				}
+			}
+			
 			if(!lowHealth){
 				if((controller.getHealth()/controller.getType().maxHealth)<Constants.LOW_HEALTH){ //If scout is about to die :(
-					System.out.println("LOW HEALTH: "+controller.readBroadcast(Constants.BROADCAST_SCOUT_COUNT));
 					controller.broadcast(Constants.BROADCAST_SCOUT_COUNT,
 							controller.readBroadcast(Constants.BROADCAST_SCOUT_COUNT)-1);
-					System.out.println("LOW HEALTH 2: "+controller.readBroadcast(Constants.BROADCAST_SCOUT_COUNT));
 					lowHealth = true;
 				}
 			}
 			Util.yieldByteCodes();
 		}
+	}
+	public static RobotInfo getNearestNonArchon(RobotInfo[] nearbyRobots){
+		for(RobotInfo robot: nearbyRobots){
+			if(robot.getType()!=RobotType.ARCHON){
+				return robot;
+			}
+		}
+		return nearbyRobots[0];
 	}
 	public static boolean moveTowardsTarget(RobotController controller, MapLocation location) throws GameActionException{
 		if(controller.canMove(location)){
