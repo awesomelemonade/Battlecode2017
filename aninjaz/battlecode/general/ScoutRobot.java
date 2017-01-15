@@ -55,8 +55,11 @@ public class ScoutRobot {
 					}
 				}else{
 					Direction direction = controller.getLocation().directionTo(robot.getLocation());
-					if(controller.canFireSingleShot()){
-						controller.fireSingleShot(direction);
+					float distance = controller.getLocation().distanceTo(robot.getLocation())-2f;
+					if(distance<RobotType.SCOUT.bulletSpeed){
+						if(controller.canFireSingleShot()){
+							controller.fireSingleShot(direction);
+						}
 					}
 					targetLocation = robot.getLocation();
 					currentState = TARGET_DIRECTION_STATE;
@@ -85,8 +88,7 @@ public class ScoutRobot {
 		return false;
 	}
 	public static boolean moveTowardsRobot(RobotController controller, MapLocation location) throws GameActionException{
-		float distance = controller.getLocation().distanceTo(location)-2.01f;//2 because 1 radius for each robot. Distance is between the centers, so you have to subtract 2 to the radius
-		System.out.println("Distance: "+distance);
+		float distance = controller.getLocation().distanceTo(location)-2f;//2 because 1 radius for each robot. Distance is between the centers, so you have to subtract 2 to the radius
 		if(distance<=RobotType.SCOUT.strideRadius){
 			Direction direction = controller.getLocation().directionTo(location);
 			if(controller.canMove(direction, distance)){
@@ -99,7 +101,6 @@ public class ScoutRobot {
 				return true;
 			}
 		}
-		System.out.println("I can't move to target :(");
 		return false;
 	}
 	public static MapLocation getAverage(MapLocation[] locations){
