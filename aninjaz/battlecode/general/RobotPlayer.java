@@ -6,6 +6,7 @@ public class RobotPlayer {
 	public static void run(RobotController controller){
 		Util.controller = controller;
 		Constants.OTHER_TEAM = controller.getTeam()==Team.A?Team.B:Team.A;
+		
 		while(true){
 			try{
 				switch (controller.getType()) {
