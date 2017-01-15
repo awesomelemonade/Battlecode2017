@@ -38,7 +38,12 @@ public class ScoutRobot {
 				controller.move(direction);
 				break;
 			case TARGET_DIRECTION_STATE:
-				moveTowardsTarget(controller, targetLocation);
+				if(!moveTowardsTarget(controller, targetLocation)){
+					while(!controller.canMove(direction)){
+						direction = Util.randomDirection();
+					}
+					controller.move(direction);
+				}
 				break;
 			}
 			RobotInfo[] nearbyRobots = controller.senseNearbyRobots(-1, Constants.OTHER_TEAM);
@@ -46,7 +51,7 @@ public class ScoutRobot {
 				RobotInfo robot = getNearestNonArchon(nearbyRobots);
 				if(robot==null){
 					if(currentState==TARGET_DIRECTION_STATE){
-						currentState = TARGET_DIRECTION_STATE;
+						currentState = RANDOM_DIRECTION_STATE;
 					}
 				}else{
 					Direction direction = controller.getLocation().directionTo(robot.getLocation());
