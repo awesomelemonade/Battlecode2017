@@ -15,8 +15,8 @@ public class ArchonRobot {
 			Util.checkWin();
 			int treeCount = controller.getTreeCount();
 			int gardenerCount = controller.readBroadcast(Constants.BROADCAST_GARDENER_COUNT);
-			if(treeCount>=(gardenerCount-1)*8){
-				if(Util.getReservedBullets()>=RobotType.GARDENER.bulletCost){
+			if(treeCount>=(gardenerCount-1)*8+4){
+				if(Util.getAvailableBullets()>=RobotType.GARDENER.bulletCost){
 					Direction direction = Util.randomDirection();
 					if(controller.canHireGardener(direction)){
 						controller.hireGardener(direction);
@@ -26,9 +26,12 @@ public class ArchonRobot {
 			}
 			
 			int gardenerCommanderRequests = controller.readBroadcast(Constants.BROADCAST_REQUEST_ARCHON_GARDENER_COMMANDER);
+			System.out.println("Requests: "+gardenerCommanderRequests);
 			if(gardenerCommanderRequests>0){
-				controller.broadcast(Constants.BROADCAST_REQUEST_ARCHON_GARDENER_COMMANDER, gardenerCommanderRequests-1);
-				hireGardenerCommander(controller);
+				if(Util.getAvailableBullets()>=RobotType.GARDENER.bulletCost){
+					controller.broadcast(Constants.BROADCAST_REQUEST_ARCHON_GARDENER_COMMANDER, gardenerCommanderRequests-1);
+					hireGardenerCommander(controller);
+				}
 			}
 			
 			//Moves in random direction
@@ -54,6 +57,7 @@ public class ArchonRobot {
 		}
 	}
 	public static void hireGardenerCommander(RobotController controller) throws GameActionException{
+		System.out.println("Respawning GardenerCommander");
 		Direction randomDirection = Util.randomDirection();
 		while(!controller.canHireGardener(randomDirection)){
 			randomDirection = Util.randomDirection();

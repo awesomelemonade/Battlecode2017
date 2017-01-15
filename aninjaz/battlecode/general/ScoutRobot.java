@@ -44,12 +44,18 @@ public class ScoutRobot {
 			RobotInfo[] nearbyRobots = controller.senseNearbyRobots(-1, Constants.OTHER_TEAM);
 			if(nearbyRobots.length>0){
 				RobotInfo robot = getNearestNonArchon(nearbyRobots);
-				Direction direction = controller.getLocation().directionTo(robot.getLocation());
-				if(controller.canFireSingleShot()){
-					controller.fireSingleShot(direction);
+				if(robot==null){
+					if(currentState==TARGET_DIRECTION_STATE){
+						currentState = TARGET_DIRECTION_STATE;
+					}
+				}else{
+					Direction direction = controller.getLocation().directionTo(robot.getLocation());
+					if(controller.canFireSingleShot()){
+						controller.fireSingleShot(direction);
+					}
+					targetLocation = robot.getLocation();
+					currentState = TARGET_DIRECTION_STATE;
 				}
-				targetLocation = robot.getLocation();
-				currentState = TARGET_DIRECTION_STATE;
 			}else{
 				if(currentState==TARGET_DIRECTION_STATE){
 					currentState = RANDOM_DIRECTION_STATE;
@@ -72,7 +78,7 @@ public class ScoutRobot {
 				return robot;
 			}
 		}
-		return nearbyRobots[0];
+		return null;
 	}
 	public static boolean moveTowardsTarget(RobotController controller, MapLocation location) throws GameActionException{
 		if(controller.canMove(location)){

@@ -59,7 +59,7 @@ public class GardenerRobot {
 			if(controller.isBuildReady()){
 				int i = nextPlantIndex();
 				if(i!=-1){ //Invalid plant index
-					float currentBullets = Util.getAvailableBullets();
+					float currentBullets = controller.getTeamBullets();
 					int currentReserved = Util.getReservedBullets();
 					if(currentBullets-currentReserved>GameConstants.BULLET_TREE_COST){
 						Util.setReservedBullets((int) (currentReserved+GameConstants.BULLET_TREE_COST));

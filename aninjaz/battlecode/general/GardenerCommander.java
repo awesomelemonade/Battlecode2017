@@ -23,10 +23,11 @@ public class GardenerCommander {
 			}
 			if(!lowHealth){
 				if((controller.getHealth()/controller.getType().maxHealth)<Constants.LOW_HEALTH){ //If commander about to die :(
+					System.out.println("LOWHEALTH :(");
 					controller.broadcast(Constants.BROADCAST_REQUEST_ARCHON_GARDENER_COMMANDER,
 							controller.readBroadcast(Constants.BROADCAST_REQUEST_ARCHON_GARDENER_COMMANDER)+1);
+					lowHealth = true;
 				}
-				lowHealth = true;
 			}
 			hireScout(controller);
 			Util.yieldByteCodes();
@@ -37,7 +38,7 @@ public class GardenerCommander {
 			return;
 		}
 		int scoutCount = controller.readBroadcast(Constants.BROADCAST_SCOUT_COUNT);
-		if(scoutCount*scoutSpawnRate<controller.getTeamBullets()){
+		if((scoutCount+scoutQueue)*scoutSpawnRate<controller.getTeamBullets()){
 			Util.addReservedBullets(RobotType.SCOUT.bulletCost);
 			scoutQueue++;
 		}
