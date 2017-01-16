@@ -7,7 +7,7 @@ public class Constants {
 	public static Team OTHER_TEAM;
 	
 	public static final float ROOT_2 = 1.41421356237f;
-	public static final float EPSILON = 0.001f;
+	public static final float EPSILON = 0.00001f;
 
 	public static final Direction NORTH_EAST = new Direction(ROOT_2/2f);
 	public static final Direction NORTH_WEST = new Direction(3f*ROOT_2/2f);

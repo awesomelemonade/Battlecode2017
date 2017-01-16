@@ -119,18 +119,22 @@ public class SoldierRobot {
 				}
 			}
 		}else{
-			if(controller.canMove(directionToShoot, distance)){
-				controller.move(directionToShoot, distance);
+			if(controller.canMove(directionToShoot, distance-Constants.EPSILON)){
+				controller.move(directionToShoot, distance-Constants.EPSILON);
 			}else{
 				Direction clockwise = directionToShoot.rotateLeftDegrees(45);
 				if(controller.canMove(clockwise)){
 					controller.move(clockwise);
 				}else{
-					direction = Util.tryRandomMove(direction);
+					Direction counterclockwise = directionToShoot.rotateRightDegrees(45);
+					if(controller.canMove(counterclockwise)){
+						controller.move(counterclockwise);
+					}
 				}
 				directionToShoot = controller.getLocation().directionTo(robot.getLocation());
 			}
 		}
+		distance = controller.getLocation().distanceTo(robot.getLocation())-2; //Recalculate distance after moving
 		if(!Util.inFiringRange(controller.senseNearbyRobots(distance, controller.getTeam()), directionToShoot, 50)){
 			if(distance<RobotType.SOLDIER.bulletSpeed*1.6f){
 				if(robot.getType()==RobotType.SOLDIER||robot.getType()==RobotType.TANK){

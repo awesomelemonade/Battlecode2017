@@ -11,16 +11,16 @@ import battlecode.common.TreeInfo;
 
 public class GardenerRobot {
 	//Planet corners first, then sides
-	private static int[] plantOffsetX = new int[]{-2, -2, 2, 2}; //Offsets from origin; Used for checking for valid origin purposes
-	private static int[] plantOffsetY = new int[]{-2, 2, -2, 2}; //Offsets from origin; Used for checking for valid origin purposes
+	private static Direction[] plantOffset = new Direction[]
+			{Constants.SOUTH_WEST, Constants.NORTH_WEST, Constants.SOUTH_EAST, Constants.NORTH_EAST};
+	private static final float offsetDistance = 0.01f;
+	private static float[] plantOffsetX = new float[]{-2-offsetDistance, -2-offsetDistance, 2+offsetDistance, 2+offsetDistance}; //Offsets from origin; Used for checking for valid origin purposes
+	private static float[] plantOffsetY = new float[]{-2-offsetDistance, 2+offsetDistance, -2-offsetDistance, 2+offsetDistance}; //Offsets from origin; Used for checking for valid origin purposes
 	private static Direction[] plantDirection = new Direction[]
 			{Direction.getWest(), Direction.getWest(), Direction.getEast(), Direction.getEast(),
 					Direction.getWest(), Direction.getEast(), Direction.getSouth(), Direction.getNorth()};
 	private static Direction[] plantMovement = new Direction[]
 			{Direction.getSouth(), Direction.getNorth(), Direction.getSouth(), Direction.getNorth(), null, null, null, null};
-	private static Direction[] plantOffset = new Direction[]
-			{Constants.SOUTH_WEST, Constants.NORTH_WEST, Constants.SOUTH_EAST, Constants.NORTH_EAST};
-	private static float offsetDistance = 0.01f;
 	private static MapLocation origin;
 	private static float checkRadius = Constants.ROOT_2*3f;
 	private static RobotController controller;

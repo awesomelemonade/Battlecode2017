@@ -52,41 +52,60 @@ public class ScoutRobot {
 		float distance = controller.getLocation().distanceTo(bestRobot.getLocation())-2;
 		Direction directionTowards = controller.getLocation().directionTo(bestRobot.getLocation());
 		if(bestRobot.getType()==RobotType.GARDENER||bestRobot.getType()==RobotType.SCOUT){
-			if(controller.canMove(directionTowards, distance)){
-				controller.move(directionTowards, distance);
+			if(controller.canMove(directionTowards, distance-Constants.EPSILON)){
+				controller.setIndicatorDot(controller.getLocation(), 0, 255, 0);
+				controller.move(directionTowards, distance-Constants.EPSILON);
 			}else{
 				if(distance>Constants.EPSILON){
+					controller.setIndicatorDot(controller.getLocation(), 255, 0, 0);
 					direction = Util.tryRandomMove(direction);
+					directionTowards = controller.getLocation().directionTo(bestRobot.getLocation());
 				}
+			}
+			distance = controller.getLocation().distanceTo(bestRobot.getLocation())-2; //Recalculate distance after moving
+			if(distance<=RobotType.SCOUT.bulletSpeed){
+				shoot(distance, directionTowards);
 			}
 		}else{
 			if(distance>maxDistance){
+				controller.setIndicatorDot(controller.getLocation(), 0, 255, 0);
 				if(controller.canMove(directionTowards, distance-maxDistance)){
 					controller.move(directionTowards, distance);
 				}else{
 					direction = Util.tryRandomMove(direction);
+					directionTowards = controller.getLocation().directionTo(bestRobot.getLocation());
 				}
 			}else if(distance<minDistance){
+				controller.setIndicatorDot(controller.getLocation(), 255, 0, 0);
 				Direction opposite = directionTowards.opposite();
 				if(controller.canMove(opposite, minDistance-distance)){
 					controller.move(opposite, minDistance-distance);
 				}else{
 					direction = Util.tryRandomMove(direction);
+					directionTowards = controller.getLocation().directionTo(bestRobot.getLocation());
 				}
 			}else{
+				controller.setIndicatorDot(controller.getLocation(), 255, 255, 0);
 				Direction clockwise = directionTowards.rotateLeftDegrees(45);
 				if(controller.canMove(clockwise)){
 					controller.move(clockwise);
 				}else{
-					direction = Util.tryRandomMove(direction);
+					Direction counterclockwise = directionTowards.rotateRightDegrees(45);
+					if(controller.canMove(counterclockwise)){
+						controller.move(counterclockwise);
+					}
 				}
+				
 				directionTowards = controller.getLocation().directionTo(bestRobot.getLocation());
 			}
+			distance = controller.getLocation().distanceTo(bestRobot.getLocation())-2; //Recalculate distance after moving
+			shoot(distance, directionTowards);
 		}
-		//shoot
-		if(!Util.inFiringRange(controller.senseNearbyRobots(distance, controller.getTeam()), directionTowards, 15)){
+	}
+	public static void shoot(float distance, Direction direction) throws GameActionException{
+		if(!Util.inFiringRange(controller.senseNearbyRobots(distance, controller.getTeam()), direction, 15)){
 			if(controller.canFireSingleShot()){
-				controller.fireSingleShot(directionTowards);
+				controller.fireSingleShot(direction);
 			}
 		}
 	}
