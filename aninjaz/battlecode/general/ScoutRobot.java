@@ -22,27 +22,18 @@ public class ScoutRobot {
 			switch(currentState){
 			case TO_INITIAL_ARCHON_STATE:
 				if(!moveTowardsTarget(controller, targetInitialArchon)){
-					while(!controller.canMove(direction)){
-						direction = Util.randomDirection();
-					}
-					controller.move(direction);
+					direction = Util.tryRandomMove(direction);
 				}
 				if(controller.getLocation().equals(targetInitialArchon)){
 					currentState = RANDOM_DIRECTION_STATE;
 				}
 				break;
 			case RANDOM_DIRECTION_STATE:
-				while(!controller.canMove(direction)){
-					direction = Util.randomDirection();
-				}
-				controller.move(direction);
+				direction = Util.tryRandomMove(direction);
 				break;
 			case TARGET_DIRECTION_STATE:
 				if(!moveTowardsRobot(controller, targetRobot)){
-					while(!controller.canMove(direction)){
-						direction = Util.randomDirection();
-					}
-					controller.move(direction);
+					direction = Util.tryRandomMove(direction);
 				}
 				break;
 			}

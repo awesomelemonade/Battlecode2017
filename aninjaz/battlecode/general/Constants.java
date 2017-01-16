@@ -16,6 +16,8 @@ public class Constants {
 	
 	public static final float LOW_HEALTH = 0.15f;
 	
+	public static final int RANDOM_TRIES = 10;
+	
 	//Broadcast Communication
 	public static final int BROADCAST_RESERVED_BULLETS = 0;
 	public static final int BROADCAST_GARDENER_COUNT = 1;

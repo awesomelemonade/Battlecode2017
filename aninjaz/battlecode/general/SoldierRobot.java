@@ -4,6 +4,7 @@ import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
+import battlecode.common.RobotType;
 
 public class SoldierRobot {
 	private static RobotController controller;
@@ -41,10 +42,7 @@ public class SoldierRobot {
 		return null;
 	}
 	public static void doRandomState() throws GameActionException{
-		while(!controller.canMove(direction)){
-			direction = Util.randomDirection();
-		}
-		controller.move(direction);
+		direction = Util.tryRandomMove(direction);
 	}
 	public static void doGuardState(RobotInfo info) throws GameActionException{
 		/*controller.setIndicatorDot(info.getLocation(), 255, 128, 128);
@@ -66,23 +64,32 @@ public class SoldierRobot {
 		}*/
 	}
 	public static void doAttackState(RobotInfo robot) throws GameActionException{
-		if(controller.canMove(robot.getLocation())){
-			controller.move(robot.getLocation());
-		}
-		Direction directionToShoot = controller.getLocation().directionTo(robot.getLocation());
 		float distance = controller.getLocation().distanceTo(robot.getLocation());
-		if(!inFiringRange(controller.senseNearbyRobots(distance, controller.getTeam()), directionToShoot, 50)){
-			if(controller.canFireSingleShot()){
-				controller.fireSingleShot(directionToShoot);
+		Direction directionToShoot = controller.getLocation().directionTo(robot.getLocation());
+		if(robot.getType()==RobotType.LUMBERJACK&&distance<5f){
+			Direction opposite = directionToShoot.opposite();
+			if(controller.canMove(opposite)){
+				controller.move(opposite);
+			}else{
+				direction = Util.tryRandomMove(direction);
 			}
-			/*if(controller.canFireTriadShot()){
-				controller.fireTriadShot(direction);
-			}*/
 		}else{
-			while(!controller.canMove(direction)){
-				direction = Util.randomDirection();
+			if(controller.canMove(robot.getLocation())){
+				controller.move(robot.getLocation());
+			}else{
+				direction = Util.tryRandomMove(direction);
 			}
-			controller.move(direction);
+		}
+		if(!inFiringRange(controller.senseNearbyRobots(distance, controller.getTeam()), directionToShoot, 50)){
+			if(distance<RobotType.SOLDIER.bulletSpeed*1.6f){
+				if(controller.canFireTriadShot()){
+					controller.fireTriadShot(directionToShoot);
+				}
+			}else{
+				if(controller.canFireSingleShot()){
+					controller.fireSingleShot(directionToShoot);
+				}
+			}
 		}
 	}
 	public static boolean inFiringRange(RobotInfo[] robots, Direction direction, float angle){

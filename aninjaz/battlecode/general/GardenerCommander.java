@@ -13,14 +13,7 @@ public class GardenerCommander {
 		Direction direction = Util.randomDirection();
 		while(true){
 			//Follows Archons
-			int tries = 10;
-			while((!controller.canMove(direction))&&tries>0){
-				direction = Util.randomDirection();
-				tries--;
-			}
-			if(tries>0){
-				controller.move(direction);
-			}
+			direction = Util.tryRandomMove(direction);
 			hireSoldiers(controller);
 			hireScout(controller);
 			Util.yieldByteCodes();

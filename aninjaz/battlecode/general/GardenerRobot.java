@@ -49,14 +49,7 @@ public class GardenerRobot {
 					break;
 				}
 			}
-			int tries = 10;
-			while((!controller.canMove(randDirection))&&tries>0){
-				randDirection = Util.randomDirection();
-				tries--;
-			}
-			if(tries>0){
-				controller.move(randDirection);
-			}
+			randDirection = Util.tryRandomMove(randDirection);
 			Util.yieldByteCodes();
 		}
 		while(!controller.getLocation().equals(origin)){
