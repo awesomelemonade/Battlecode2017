@@ -123,13 +123,13 @@ public class SoldierRobot {
 				controller.move(directionToShoot, distance-Constants.EPSILON);
 			}else{
 				Direction clockwise = directionToShoot.rotateLeftDegrees(45);
-				if(controller.canMove(clockwise)){
+				int tries = 10;
+				while(!controller.canMove(clockwise)&&tries>0){
+					clockwise = clockwise.rotateLeftDegrees(5);
+					tries--;
+				}
+				if(tries>0){
 					controller.move(clockwise);
-				}else{
-					Direction counterclockwise = directionToShoot.rotateRightDegrees(45);
-					if(controller.canMove(counterclockwise)){
-						controller.move(counterclockwise);
-					}
 				}
 				directionToShoot = controller.getLocation().directionTo(robot.getLocation());
 			}
