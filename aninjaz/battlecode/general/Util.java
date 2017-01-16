@@ -6,6 +6,7 @@ import battlecode.common.GameActionException;
 import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
+import battlecode.common.RobotInfo;
 
 public class Util {
 	public static RobotController controller;
@@ -91,5 +92,14 @@ public class Util {
 			controller.move(direction);
 		}
 		return direction;
+	}
+	public static boolean inFiringRange(RobotInfo[] robots, Direction direction, float angle){
+		for(RobotInfo robot: robots){
+			Direction dir = controller.getLocation().directionTo(robot.getLocation());
+			if(Math.abs(dir.degreesBetween(direction))<=angle){
+				return true;
+			}
+		}
+		return false;
 	}
 }

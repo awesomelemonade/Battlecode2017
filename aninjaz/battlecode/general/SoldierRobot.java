@@ -64,9 +64,9 @@ public class SoldierRobot {
 		}*/
 	}
 	public static void doAttackState(RobotInfo robot) throws GameActionException{
-		float distance = controller.getLocation().distanceTo(robot.getLocation());
+		float distance = controller.getLocation().distanceTo(robot.getLocation())-2;
 		Direction directionToShoot = controller.getLocation().directionTo(robot.getLocation());
-		if(robot.getType()==RobotType.LUMBERJACK&&distance<5f){
+		if(robot.getType()==RobotType.LUMBERJACK&&distance<3f){
 			Direction opposite = directionToShoot.opposite();
 			if(controller.canMove(opposite)){
 				controller.move(opposite);
@@ -74,13 +74,13 @@ public class SoldierRobot {
 				direction = Util.tryRandomMove(direction);
 			}
 		}else{
-			if(controller.canMove(robot.getLocation())){
-				controller.move(robot.getLocation());
+			if(controller.canMove(directionToShoot, distance)){
+				controller.move(directionToShoot, distance);
 			}else{
 				direction = Util.tryRandomMove(direction);
 			}
 		}
-		if(!inFiringRange(controller.senseNearbyRobots(distance, controller.getTeam()), directionToShoot, 50)){
+		if(!Util.inFiringRange(controller.senseNearbyRobots(distance, controller.getTeam()), directionToShoot, 50)){
 			if(distance<RobotType.SOLDIER.bulletSpeed*1.6f){
 				if(controller.canFireTriadShot()){
 					controller.fireTriadShot(directionToShoot);
@@ -91,14 +91,5 @@ public class SoldierRobot {
 				}
 			}
 		}
-	}
-	public static boolean inFiringRange(RobotInfo[] robots, Direction direction, float angle){
-		for(RobotInfo robot: robots){
-			Direction dir = controller.getLocation().directionTo(robot.getLocation());
-			if(Math.abs(dir.degreesBetween(direction))<=angle){
-				return true;
-			}
-		}
-		return false;
 	}
 }
