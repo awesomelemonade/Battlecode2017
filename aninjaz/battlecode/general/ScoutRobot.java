@@ -56,11 +56,11 @@ public class ScoutRobot {
 				}else{
 					Direction direction = controller.getLocation().directionTo(robot.getLocation());
 					float distance = controller.getLocation().distanceTo(robot.getLocation())-2f;
-					if(distance-5<RobotType.SCOUT.bulletSpeed){
+					//if(distance-7<RobotType.SCOUT.bulletSpeed){
 						if(controller.canFireSingleShot()){
 							controller.fireSingleShot(direction);
 						}
-					}
+				//	}
 					targetRobot = robot;
 					currentState = TARGET_DIRECTION_STATE;
 				}
@@ -90,14 +90,15 @@ public class ScoutRobot {
 	public static boolean moveTowardsRobot(RobotController controller, RobotInfo robotman) throws GameActionException{
 		float distance = controller.getLocation().distanceTo(robotman.getLocation())-2f;//2 because 1 radius for each robot. Distance is between the centers, so you have to subtract 2 to the radius
 		if(robotman.getType()==RobotType.LUMBERJACK){
-			distance-=4;
+			distance-=5;
 		}
 		if(distance<=RobotType.SCOUT.strideRadius){
 			Direction direction = controller.getLocation().directionTo(robotman.getLocation());
 			if(robotman.getType()==RobotType.LUMBERJACK){
-				if(controller.getLocation().distanceTo(robotman.getLocation())<6){
-					controller.move(direction.opposite(), 2-controller.getLocation().distanceTo(robotman.getLocation()));
+				if(controller.getLocation().distanceTo(robotman.getLocation())<7){
+					controller.move(direction.opposite(), 7-controller.getLocation().distanceTo(robotman.getLocation()));
 				}
+				return true;
 			}
 			else if(controller.canMove(direction, distance)){
 				controller.move(direction, distance);
