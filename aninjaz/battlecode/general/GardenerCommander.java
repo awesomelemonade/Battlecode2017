@@ -7,7 +7,6 @@ import battlecode.common.RobotType;
 
 public class GardenerCommander {
 	private static int scoutSpawnRate = 1000;
-	private static int soldierSpawnRate = 500;
 	public static void run(RobotController controller) throws GameActionException{
 		Util.broadcastCount = Constants.BROADCAST_GARDENER_COMMANDER_COUNT;
 		Direction direction = Util.randomDirection();
@@ -24,7 +23,7 @@ public class GardenerCommander {
 			return;
 		}
 		int soldierCount = controller.readBroadcast(Constants.BROADCAST_SOLDIER_COUNT);
-		if(soldierCount*soldierSpawnRate<controller.getTeamBullets()){
+		if(soldierCount<controller.readBroadcast(Constants.BROADCAST_GARDENER_COUNT)){
 			if(Util.getAvailableBullets()>=RobotType.SOLDIER.bulletCost){
 				int tries = 10;
 				Direction direction = Util.randomDirection();
