@@ -66,7 +66,7 @@ public class SoldierRobot {
 	public static void doAttackState(RobotInfo robot) throws GameActionException{
 		float distance = controller.getLocation().distanceTo(robot.getLocation())-2;
 		Direction directionToShoot = controller.getLocation().directionTo(robot.getLocation());
-		if(robot.getType()==RobotType.LUMBERJACK&&distance<3f){
+		if(robot.getType()==RobotType.LUMBERJACK){
 			if(distance<3f){
 				Direction opposite = directionToShoot.opposite();
 				if(controller.canMove(opposite, 3f-distance)){
