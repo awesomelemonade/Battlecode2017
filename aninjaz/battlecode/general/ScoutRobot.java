@@ -46,12 +46,11 @@ public class ScoutRobot {
 					}
 				}else{
 					Direction direction = controller.getLocation().directionTo(robot.getLocation());
-					float distance = controller.getLocation().distanceTo(robot.getLocation())-2f;
-					//if(distance-7<RobotType.SCOUT.bulletSpeed){
-						if(controller.canFireSingleShot()){
-							controller.fireSingleShot(direction);
-						}
-				//	}
+					//float distance = controller.getLocation().distanceTo(robot.getLocation())-2f;
+					if(controller.canFireSingleShot()){
+						controller.fireSingleShot(direction);
+					}
+					
 					targetRobot = robot;
 					currentState = TARGET_DIRECTION_STATE;
 				}
@@ -62,6 +61,12 @@ public class ScoutRobot {
 			}
 			Util.yieldByteCodes();
 		}
+	}
+	public static RobotInfo getNearestTree(RobotInfo[] nearbyTrees){
+		for(RobotInfo tree: nearbyTrees){
+			return tree;
+		}
+		return null;
 	}
 	public static RobotInfo getNearestNonArchon(RobotInfo[] nearbyRobots){
 		for(RobotInfo robot: nearbyRobots){
@@ -83,11 +88,24 @@ public class ScoutRobot {
 		if(robotman.getType()==RobotType.LUMBERJACK){
 			distance-=5;
 		}
+		
 		if(distance<=RobotType.SCOUT.strideRadius){
 			Direction direction = controller.getLocation().directionTo(robotman.getLocation());
 			if(robotman.getType()==RobotType.LUMBERJACK){
 				if(controller.getLocation().distanceTo(robotman.getLocation())<7){
-					controller.move(direction.opposite(), 7-controller.getLocation().distanceTo(robotman.getLocation()));
+					if(controller.canMove(direction.opposite())){
+						controller.move(direction.opposite(), 7-controller.getLocation().distanceTo(robotman.getLocation()));						
+					}
+					else{
+						if(controller.canMove(direction.rotateLeftDegrees(90f))){
+							controller.move(direction.rotateLeftDegrees(90f), 7-controller.getLocation().distanceTo(robotman.getLocation()));	
+						}
+						else {
+							if(controller.canMove(direction.rotateRightDegrees(90f))){
+								controller.move(direction.rotateRightDegrees(90f), 7-controller.getLocation().distanceTo(robotman.getLocation()));	
+							}
+						}
+					}
 				}
 				return true;
 			}
