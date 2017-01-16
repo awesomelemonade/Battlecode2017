@@ -37,11 +37,7 @@ public class ScoutRobot {
 						}
 					}
 				}
-				if(bestRobot==null){
-					direction = Util.tryRandomMove(direction);
-				}else{
-					targetRobot(bestRobot);
-				}
+				targetRobot(bestRobot);
 			}
 			Util.yieldByteCodes();
 		}
@@ -104,6 +100,6 @@ public class ScoutRobot {
 				return robot;
 			}
 		}
-		return null;
+		return robots[0];
 	}
 }
