@@ -2,6 +2,7 @@ package aninjaz.battlecode.general;
 
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
+import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
@@ -9,6 +10,9 @@ import battlecode.common.RobotType;
 public class SoldierRobot {
 	private static RobotController controller;
 	private static Direction direction;
+	private static MapLocation origin;
+	private static final float MOVEMENT_RADIUS = 15f;
+	private static final float RELAXED_MOVEMENT_SPEED = RobotType.SOLDIER.strideRadius*0.4f;
 	public static void run(RobotController controller) throws GameActionException{
 		Util.broadcastCount = Constants.BROADCAST_SOLDIER_COUNT;
 		SoldierRobot.controller = controller;
@@ -18,10 +22,30 @@ public class SoldierRobot {
 			if(nearbyRobots.length>0){
 				doAttackState(nearbyRobots[0]);
 			}else{
-				nearbyRobots = controller.senseNearbyRobots(-1, controller.getTeam());
-				RobotInfo robot = findNearestValidRobot(nearbyRobots);
-				if(robot==null){
-					doRandomState();
+				if(controller.getTeamBullets()<400){
+					if(origin==null){
+						nearbyRobots = controller.senseNearbyRobots(-1, controller.getTeam());
+						RobotInfo robot = findNearestValidRobot(nearbyRobots);
+						if(robot==null){
+							doRandomState();
+						}else{
+							origin = robot.getLocation();
+							doGuardState();
+						}
+					}else{
+						//checks if the origin still has a robot and is still valid
+						if(controller.canSenseLocation(origin)){
+							RobotInfo robot = controller.senseRobotAtLocation(origin);
+							if(robot==null){
+								origin = null;
+								doRandomState();
+							}else{
+								doGuardState();
+							}
+						}else{
+							doGuardState();
+						}
+					}
 				}else{
 					doRandomState();
 				}
@@ -33,7 +57,6 @@ public class SoldierRobot {
 		for(RobotInfo info: robots){
 			switch(info.getType()){
 			case GARDENER:
-			case ARCHON:
 				return info;
 			default:
 				break;
@@ -42,26 +65,28 @@ public class SoldierRobot {
 		return null;
 	}
 	public static void doRandomState() throws GameActionException{
-		direction = Util.tryRandomMove(direction, RobotType.SOLDIER.strideRadius*0.4f);
+		direction = Util.tryRandomMove(direction, RELAXED_MOVEMENT_SPEED);
 	}
-	public static void doGuardState(RobotInfo info) throws GameActionException{
-		/*controller.setIndicatorDot(info.getLocation(), 255, 128, 128);
-		Direction towards = controller.getLocation().directionTo(info.getLocation());
-		float distance = controller.getLocation().distanceTo(info.getLocation());
+	public static void doGuardState() throws GameActionException{
+		controller.setIndicatorDot(origin, 255, 128, 128);
+		Direction towards = controller.getLocation().directionTo(origin);
+		float distance = controller.getLocation().distanceTo(origin);
 		int tries = 10;
 		if(distance>MOVEMENT_RADIUS){
-			while(((!controller.canMove(direction))||(!(Math.abs(towards.degreesBetween(direction))<45)))&&tries>0){
+			while(((!controller.canMove(direction, RELAXED_MOVEMENT_SPEED))||
+					(!(Math.abs(towards.degreesBetween(direction))<45)))&&tries>0){
 				direction = Util.randomDirection();
 				tries--;
 			}
 		}else{
-			while(((!controller.canMove(direction))||(!(Math.abs(towards.degreesBetween(direction))>90)))&&tries>0){
+			while(((!controller.canMove(direction, RELAXED_MOVEMENT_SPEED))||
+					(controller.getLocation().add(direction, RELAXED_MOVEMENT_SPEED).distanceTo(origin)>MOVEMENT_RADIUS))&&tries>0){
 				direction = Util.randomDirection();
 			}
 		}
 		if(tries>0){
-			controller.move(direction);
-		}*/
+			controller.move(direction, RELAXED_MOVEMENT_SPEED);
+		}
 	}
 	public static void doAttackState(RobotInfo robot) throws GameActionException{
 		float distance = controller.getLocation().distanceTo(robot.getLocation())-2;
