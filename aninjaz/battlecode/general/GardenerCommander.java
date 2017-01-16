@@ -15,7 +15,28 @@ public class GardenerCommander {
 			direction = Util.tryRandomMove(direction);
 			hireSoldiers(controller);
 			hireScout(controller);
+			hireTank(controller);
 			Util.yieldByteCodes();
+		}
+	}
+	public static void hireTank(RobotController controller) throws GameActionException{
+		if(!controller.isBuildReady()){
+			return;
+		}
+		int tankCount = controller.readBroadcast(Constants.BROADCAST_TANK_COUNT);
+		if(Util.getAvailableBullets() > 3000 && tankCount < 2){
+			if(Util.getAvailableBullets()>=RobotType.TANK.bulletCost){
+				int tries = 10;
+				Direction direction = Util.randomDirection();
+				while((!controller.canBuildRobot(RobotType.TANK, direction))&&tries>0){
+					direction = Util.randomDirection();
+					tries--;
+				}
+				if(tries>0){
+					controller.broadcast(Constants.BROADCAST_TANK_COUNT, tankCount+1);
+					controller.buildRobot(RobotType.TANK, direction);
+				}
+			}
 		}
 	}
 	public static void hireSoldiers(RobotController controller) throws GameActionException{

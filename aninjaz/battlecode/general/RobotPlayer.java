@@ -26,6 +26,7 @@ public class RobotPlayer {
 					ScoutRobot.run(controller);
 					break;
 				case TANK:
+					TankRobot.run(controller);
 					break;
 				}
 			}catch(GameActionException ex){
