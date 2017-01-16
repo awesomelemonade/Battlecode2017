@@ -6,6 +6,7 @@ import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
+import battlecode.common.RobotType;
 import battlecode.common.TreeInfo;
 
 public class GardenerRobot {
@@ -23,6 +24,14 @@ public class GardenerRobot {
 	private static MapLocation origin;
 	private static float checkRadius = Constants.ROOT_2*3f;
 	private static RobotController controller;
+	public static boolean validRobots(RobotInfo[] robots){
+		for(RobotInfo robot: robots){
+			if(robot.getType()==RobotType.GARDENER){
+				return false;
+			}
+		}
+		return true;
+	}
 	public static void run(RobotController controller) throws GameActionException {
 		Util.broadcastCount = Constants.BROADCAST_GARDENER_COUNT;
 		GardenerRobot.controller = controller;
@@ -32,9 +41,9 @@ public class GardenerRobot {
 			MapLocation target = Util.floor(current);
 			RobotInfo[] robots = controller.senseNearbyRobots(target, checkRadius, null);
 			TreeInfo[] trees = controller.senseNearbyTrees(target, checkRadius, null);
-			if(robots.length==0&&trees.length==0){
+			if(validRobots(robots)&&trees.length==0){
 				if(onTheMap(target)){
-					controller.move(target); //If this throws an exception, WHY
+					Util.waitForMove(target);
 					origin = target;
 					Util.yieldByteCodes();
 					break;

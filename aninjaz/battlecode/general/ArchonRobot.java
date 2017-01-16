@@ -10,7 +10,6 @@ import battlecode.common.TreeInfo;
 public class ArchonRobot {
 	private static Direction direction = Util.randomDirection();
 	public static void run(RobotController controller) throws GameActionException{
-		hireGardenerCommander(controller);
 		while(true){
 			Util.checkWin();
 			

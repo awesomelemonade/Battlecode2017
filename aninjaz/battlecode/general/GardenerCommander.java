@@ -7,6 +7,7 @@ import battlecode.common.RobotType;
 
 public class GardenerCommander {
 	private static int scoutSpawnRate = 1000;
+	private static int soldierSpawnRate = 500;
 	public static void run(RobotController controller) throws GameActionException{
 		Util.broadcastCount = Constants.BROADCAST_GARDENER_COMMANDER_COUNT;
 		Direction direction = Util.randomDirection();
@@ -20,8 +21,29 @@ public class GardenerCommander {
 			if(tries>0){
 				controller.move(direction);
 			}
+			hireSoldiers(controller);
 			hireScout(controller);
 			Util.yieldByteCodes();
+		}
+	}
+	public static void hireSoldiers(RobotController controller) throws GameActionException{
+		if(!controller.isBuildReady()){
+			return;
+		}
+		int soldierCount = controller.readBroadcast(Constants.BROADCAST_SOLDIER_COUNT);
+		if(soldierCount*soldierSpawnRate<controller.getTeamBullets()){
+			if(Util.getAvailableBullets()>=RobotType.SOLDIER.bulletCost){
+				int tries = 10;
+				Direction direction = Util.randomDirection();
+				while((!controller.canBuildRobot(RobotType.SOLDIER, direction))&&tries>0){
+					direction = Util.randomDirection();
+					tries--;
+				}
+				if(tries>0){
+					controller.broadcast(Constants.BROADCAST_SOLDIER_COUNT, soldierCount+1);
+					controller.buildRobot(RobotType.SOLDIER, direction);
+				}
+			}
 		}
 	}
 	public static void hireScout(RobotController controller) throws GameActionException{
