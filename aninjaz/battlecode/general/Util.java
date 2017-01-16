@@ -80,6 +80,19 @@ public class Util {
 			}
 		}
 	}
+	public static Direction tryRandomMove(Direction direction, float distance) throws GameActionException{
+		return tryRandomMove(direction, distance, Constants.RANDOM_TRIES);
+	}
+	public static Direction tryRandomMove(Direction direction, float distance, int tries) throws GameActionException{
+		while((!controller.canMove(direction, distance))&&tries>0){
+			direction = Util.randomDirection();
+			tries--;
+		}
+		if(tries>0){
+			controller.move(direction, distance);
+		}
+		return direction;
+	}
 	public static Direction tryRandomMove(Direction direction) throws GameActionException{
 		return tryRandomMove(direction, Constants.RANDOM_TRIES);
 	}

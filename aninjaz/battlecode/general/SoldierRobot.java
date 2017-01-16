@@ -42,7 +42,7 @@ public class SoldierRobot {
 		return null;
 	}
 	public static void doRandomState() throws GameActionException{
-		direction = Util.tryRandomMove(direction);
+		direction = Util.tryRandomMove(direction, RobotType.SOLDIER.strideRadius*0.4f);
 	}
 	public static void doGuardState(RobotInfo info) throws GameActionException{
 		/*controller.setIndicatorDot(info.getLocation(), 255, 128, 128);
@@ -67,27 +67,65 @@ public class SoldierRobot {
 		float distance = controller.getLocation().distanceTo(robot.getLocation())-2;
 		Direction directionToShoot = controller.getLocation().directionTo(robot.getLocation());
 		if(robot.getType()==RobotType.LUMBERJACK&&distance<3f){
-			Direction opposite = directionToShoot.opposite();
-			if(controller.canMove(opposite)){
-				controller.move(opposite);
+			if(distance<3f){
+				Direction opposite = directionToShoot.opposite();
+				if(controller.canMove(opposite, 3f-distance)){
+					controller.move(opposite, 3f-distance);
+				}else{
+					Direction clockwise = directionToShoot.rotateLeftDegrees(45);
+					if(controller.canMove(clockwise)){
+						controller.move(clockwise);
+					}else{
+						direction = Util.tryRandomMove(direction);
+					}
+					directionToShoot = controller.getLocation().directionTo(robot.getLocation());
+				}
 			}else{
-				direction = Util.tryRandomMove(direction);
+				if(controller.canMove(directionToShoot, distance-3f)){
+					controller.move(directionToShoot, distance-3f);
+				}else{
+					Direction clockwise = directionToShoot.rotateLeftDegrees(45);
+					if(controller.canMove(clockwise)){
+						controller.move(clockwise);
+					}else{
+						direction = Util.tryRandomMove(direction);
+					}
+					directionToShoot = controller.getLocation().directionTo(robot.getLocation());
+				}
 			}
 		}else{
 			if(controller.canMove(directionToShoot, distance)){
 				controller.move(directionToShoot, distance);
 			}else{
-				direction = Util.tryRandomMove(direction);
+				Direction clockwise = directionToShoot.rotateLeftDegrees(45);
+				if(controller.canMove(clockwise)){
+					controller.move(clockwise);
+				}else{
+					direction = Util.tryRandomMove(direction);
+				}
+				directionToShoot = controller.getLocation().directionTo(robot.getLocation());
 			}
 		}
 		if(!Util.inFiringRange(controller.senseNearbyRobots(distance, controller.getTeam()), directionToShoot, 50)){
 			if(distance<RobotType.SOLDIER.bulletSpeed*1.6f){
-				if(controller.canFireTriadShot()){
-					controller.fireTriadShot(directionToShoot);
+				if(robot.getType()==RobotType.SOLDIER||robot.getType()==RobotType.TANK){
+					if(controller.canFirePentadShot()){
+						controller.firePentadShot(directionToShoot);
+					}
+				}else{
+					if(controller.canFireTriadShot()){
+						controller.fireTriadShot(directionToShoot);
+					}
 				}
 			}else{
-				if(controller.canFireSingleShot()){
-					controller.fireSingleShot(directionToShoot);
+				if(robot.getType()==RobotType.SOLDIER||robot.getType()==RobotType.TANK){
+					if(controller.canFireTriadShot()){
+						controller.fireTriadShot(directionToShoot);
+					}
+				}else{
+					if(controller.canFireSingleShot()){
+						controller.fireSingleShot(directionToShoot);
+					}
 				}
 			}
 		}

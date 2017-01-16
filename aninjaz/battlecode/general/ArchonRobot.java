@@ -3,6 +3,7 @@ package aninjaz.battlecode.general;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
+import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
 import battlecode.common.TreeInfo;
@@ -45,8 +46,18 @@ public class ArchonRobot {
 			}
 			
 			//Moves in random direction
-			
-			direction = Util.tryRandomMove(direction);
+			RobotInfo[] nearbyRobots = controller.senseNearbyRobots(-1, Constants.OTHER_TEAM);
+			if(nearbyRobots.length>0){
+				direction = controller.getLocation().directionTo(nearbyRobots[0].getLocation()).opposite();
+				if(controller.canMove(direction)){
+					controller.move(direction);
+				}else{
+					direction = Util.tryRandomMove(direction);
+				}
+			}else{
+				direction = Util.tryRandomMove(direction, RobotType.ARCHON.strideRadius*0.4f);
+			}
+			//Maybe move in random direction faster if it sees an enemy?
 			
 			//Shakes Trees
 			

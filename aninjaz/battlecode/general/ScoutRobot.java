@@ -26,19 +26,17 @@ public class ScoutRobot {
 					controller.shake(tree.getID());
 				}
 			}
-			if(neutralTrees.length>0){
-				targetNeutralTrees:{
-					for(TreeInfo tree: neutralTrees){
-						if(tree.getContainedBullets()>0){
-							if(controller.canMove(tree.getLocation())){
-								controller.move(tree.getLocation());
-								break targetNeutralTrees;
-							}
+			targetNeutralTrees:{
+				for(TreeInfo tree: neutralTrees){
+					if(tree.getContainedBullets()>0){
+						if(controller.canMove(tree.getLocation())){
+							controller.setIndicatorLine(controller.getLocation(), tree.getLocation(), 255, 128, 0);
+							controller.setIndicatorDot(tree.getLocation(), 255, 128, 0);
+							controller.move(tree.getLocation());
+							break targetNeutralTrees;
 						}
 					}
-					direction = Util.tryRandomMove(direction);
 				}
-			}else{
 				if(bestRobot==null){
 					direction = Util.tryRandomMove(direction);
 				}else{
@@ -49,11 +47,11 @@ public class ScoutRobot {
 		}
 	}
 	public static void targetRobot(RobotInfo bestRobot) throws GameActionException{
-		controller.setIndicatorLine(controller.getLocation(), bestRobot.getLocation(), 1, 0, 0);
-		controller.setIndicatorDot(bestRobot.getLocation(), 1, 0, 0);
+		controller.setIndicatorLine(controller.getLocation(), bestRobot.getLocation(), 255, 0, 0);
+		controller.setIndicatorDot(bestRobot.getLocation(), 255, 0, 0);
 		float distance = controller.getLocation().distanceTo(bestRobot.getLocation())-2;
 		Direction directionTowards = controller.getLocation().directionTo(bestRobot.getLocation());
-		if(bestRobot.getType()==RobotType.GARDENER){
+		if(bestRobot.getType()==RobotType.GARDENER||bestRobot.getType()==RobotType.SCOUT){
 			if(controller.canMove(directionTowards, distance)){
 				controller.move(directionTowards, distance);
 			}else{
