@@ -115,4 +115,30 @@ public class Util {
 		}
 		return false;
 	}
+	private static int[] mapLocations = new int[4];
+	public static int broadcastNew(CompressedMapLocation data) throws GameActionException{
+		for(int i=0;i<mapLocations.length;++i){
+			int channel = GameConstants.BROADCAST_MAX_CHANNELS-i-1;
+			int n = controller.readBroadcast(channel);
+			if(n!=-1){
+				int bit = 0;
+				while(((n>>>bit)&1)==1){
+					bit++;
+				}
+				if(bit<32){
+					controller.broadcast(channel, n|(1<<bit));
+					channel = GameConstants.BROADCAST_MAX_CHANNELS-mapLocations.length-1-i*32-bit;
+					controller.broadcast(channel, data.getCompressedData());
+					return channel;
+				}
+			}
+		}
+		return -1; //Couldn't broadcast :(
+	}
+	public static void unsetBroadcastLocation(int channel) throws GameActionException{
+		int x = GameConstants.BROADCAST_MAX_CHANNELS-channel-mapLocations.length-1;
+		int y = GameConstants.BROADCAST_MAX_CHANNELS-(x/32)-1;
+		int n = controller.readBroadcast(y);
+		controller.broadcast(y, n & (~(1<<(x%32))));
+	}
 }
