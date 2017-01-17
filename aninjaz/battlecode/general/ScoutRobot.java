@@ -13,6 +13,7 @@ public class ScoutRobot {
 	private static Direction direction;
 	private static float minDistance = 3f;
 	private static float maxDistance = 5f;
+	private static float overShoot = 1.5f;
 	public static void run(RobotController controller) throws GameActionException{
 		ScoutRobot.controller = controller;
 		Util.broadcastCount = Constants.BROADCAST_SCOUT_COUNT;
@@ -55,12 +56,6 @@ public class ScoutRobot {
 			if(controller.canMove(directionTowards, distance-Constants.EPSILON)){
 				controller.setIndicatorDot(controller.getLocation(), 0, 255, 0);
 				controller.move(directionTowards, distance-Constants.EPSILON);
-			}else{
-				if(distance>Constants.EPSILON){
-					controller.setIndicatorDot(controller.getLocation(), 255, 0, 0);
-					direction = Util.tryRandomMove(direction);
-					directionTowards = controller.getLocation().directionTo(bestRobot.getLocation());
-				}
 			}
 			distance = controller.getLocation().distanceTo(bestRobot.getLocation())-2; //Recalculate distance after moving
 			if(distance<=RobotType.SCOUT.bulletSpeed){
@@ -69,8 +64,8 @@ public class ScoutRobot {
 		}else{
 			if(distance>maxDistance){
 				controller.setIndicatorDot(controller.getLocation(), 0, 255, 0);
-				if(controller.canMove(directionTowards, distance-maxDistance)){
-					controller.move(directionTowards, distance);
+				if(controller.canMove(directionTowards, distance-maxDistance+overShoot)){
+					controller.move(directionTowards, distance-maxDistance+overShoot);
 				}else{
 					direction = Util.tryRandomMove(direction);
 					directionTowards = controller.getLocation().directionTo(bestRobot.getLocation());
@@ -78,8 +73,8 @@ public class ScoutRobot {
 			}else if(distance<minDistance){
 				controller.setIndicatorDot(controller.getLocation(), 255, 0, 0);
 				Direction opposite = directionTowards.opposite();
-				if(controller.canMove(opposite, minDistance-distance)){
-					controller.move(opposite, minDistance-distance);
+				if(controller.canMove(opposite, minDistance-distance+overShoot)){
+					controller.move(opposite, minDistance-distance+overShoot);
 				}else{
 					direction = Util.tryRandomMove(direction);
 					directionTowards = controller.getLocation().directionTo(bestRobot.getLocation());
