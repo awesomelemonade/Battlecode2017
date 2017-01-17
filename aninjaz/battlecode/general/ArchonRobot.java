@@ -9,37 +9,32 @@ import battlecode.common.Team;
 import battlecode.common.TreeInfo;
 
 public class ArchonRobot {
+	private static RobotController controller;
 	private static Direction direction = Util.randomDirection();
 	public static void run(RobotController controller) throws GameActionException{
+		ArchonRobot.controller = controller;
 		while(true){
 			Util.checkWin();
 			
-			int gardenerCommanders = controller.readBroadcast(Constants.BROADCAST_GARDENER_COMMANDER_COUNT);
-			int treeCount = controller.getTreeCount();
-			int gardenerCount = controller.readBroadcast(Constants.BROADCAST_GARDENER_COUNT);
-			if(gardenerCount<1){
-				if(treeCount>=(gardenerCount-1)*8+4){
-					if(Util.getAvailableBullets()>=RobotType.GARDENER.bulletCost){
-						Direction direction = Util.randomDirection();
-						if(controller.canHireGardener(direction)){
-							controller.hireGardener(direction);
-							controller.broadcast(Constants.BROADCAST_GARDENER_COUNT, gardenerCount+1);
+			if(controller.isBuildReady()){
+				int gardenerCommanderCount = controller.readBroadcast(Constants.BROADCAST_GARDENER_COMMANDER_COUNT);
+				int treeCount = controller.getTreeCount();
+				int gardenerCount = controller.readBroadcast(Constants.BROADCAST_GARDENER_COUNT);
+				if(gardenerCount<1){
+					if(treeCount>=(gardenerCount-1)*8+4){
+						if(Util.getAvailableBullets()>=RobotType.GARDENER.bulletCost){
+							hireGardener(gardenerCount);
 						}
 					}
-				}
-			}else{
-				if(gardenerCommanders<1){
-					if(Util.getAvailableBullets()>=RobotType.GARDENER.bulletCost){
-						controller.broadcast(Constants.BROADCAST_GARDENER_COMMANDER_COUNT, gardenerCommanders+1);
-						hireGardenerCommander(controller);
+				}else{
+					if(gardenerCommanderCount<1){
+						if(Util.getAvailableBullets()>=RobotType.GARDENER.bulletCost){
+							hireGardenerCommander(gardenerCommanderCount);
+						}
 					}
-				}
-				if(treeCount>=(gardenerCount-1)*8+4){
-					if(Util.getAvailableBullets()>=RobotType.GARDENER.bulletCost){
-						Direction direction = Util.randomDirection();
-						if(controller.canHireGardener(direction)){
-							controller.hireGardener(direction);
-							controller.broadcast(Constants.BROADCAST_GARDENER_COUNT, gardenerCount+1);
+					if(treeCount>=(gardenerCount-1)*8+4){
+						if(Util.getAvailableBullets()>=RobotType.GARDENER.bulletCost){
+							hireGardener(gardenerCount);
 						}
 					}
 				}
@@ -70,12 +65,25 @@ public class ArchonRobot {
 			Util.yieldByteCodes();
 		}
 	}
-	public static void hireGardenerCommander(RobotController controller) throws GameActionException{
+	public static void hireGardenerCommander(int gardenerCommanderCount) throws GameActionException{
 		Direction randomDirection = Util.randomDirection();
-		while(!controller.canHireGardener(randomDirection)){
+		int tries = 10;
+		while(!controller.canHireGardener(randomDirection)&&tries>0){
 			randomDirection = Util.randomDirection();
+			tries--;
 		}
-		controller.broadcast(Constants.BROADCAST_REQUEST_GARDENER_COMMANDERS, 1);
-		controller.hireGardener(randomDirection);
+		if(tries>0){
+			controller.broadcast(Constants.BROADCAST_GARDENER_COMMANDER_COUNT, gardenerCommanderCount+1);
+			controller.broadcast(Constants.BROADCAST_REQUEST_GARDENER_COMMANDERS,
+					controller.readBroadcast(Constants.BROADCAST_REQUEST_GARDENER_COMMANDERS)+1);
+			controller.hireGardener(randomDirection);
+		}
+	}
+	public static void hireGardener(int gardenerCount) throws GameActionException{
+		Direction direction = Util.randomDirection();
+		if(controller.canHireGardener(direction)){
+			controller.hireGardener(direction);
+			controller.broadcast(Constants.BROADCAST_GARDENER_COUNT, gardenerCount+1);
+		}
 	}
 }

@@ -37,6 +37,7 @@ public class GardenerRobot {
 		GardenerRobot.controller = controller;
 		Direction randDirection = Util.randomDirection();
 		while(origin==null){
+			controller.setIndicatorDot(controller.getLocation(), 0, 255, 255);
 			MapLocation current = controller.getLocation();
 			MapLocation target = Util.floor(current);
 			RobotInfo[] robots = controller.senseNearbyRobots(target, checkRadius, null);

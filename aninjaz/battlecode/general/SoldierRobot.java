@@ -125,8 +125,10 @@ public class SoldierRobot {
 			}
 		}else{
 			if(controller.canMove(directionToShoot, distance-Constants.EPSILON)){
+				controller.setIndicatorDot(controller.getLocation(), 0, 255, 0);
 				controller.move(directionToShoot, distance-Constants.EPSILON);
 			}else{
+				controller.setIndicatorDot(controller.getLocation(), 255, 0, 0);
 				Direction clockwise = directionToShoot.rotateLeftDegrees(45);
 				int tries = 10;
 				while(!controller.canMove(clockwise)&&tries>0){

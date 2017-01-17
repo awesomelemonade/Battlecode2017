@@ -40,8 +40,8 @@ public class RobotPlayer {
 	}
 	public static void addGardener(RobotController controller) throws GameActionException{
 		int n = controller.readBroadcast(Constants.BROADCAST_REQUEST_GARDENER_COMMANDERS);
-		controller.broadcast(Constants.BROADCAST_REQUEST_GARDENER_COMMANDERS, n-1);
 		if(n>0){
+			controller.broadcast(Constants.BROADCAST_REQUEST_GARDENER_COMMANDERS, n-1);
 			GardenerCommander.run(controller);
 		}else{
 			GardenerRobot.run(controller);

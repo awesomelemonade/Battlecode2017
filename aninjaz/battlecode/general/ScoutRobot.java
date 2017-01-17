@@ -52,7 +52,7 @@ public class ScoutRobot {
 		controller.setIndicatorDot(bestRobot.getLocation(), 255, 0, 0);
 		float distance = controller.getLocation().distanceTo(bestRobot.getLocation())-2;
 		Direction directionTowards = controller.getLocation().directionTo(bestRobot.getLocation());
-		if(bestRobot.getType()==RobotType.GARDENER||bestRobot.getType()==RobotType.SCOUT){
+		if(bestRobot.getType()==RobotType.GARDENER||bestRobot.getType()==RobotType.SCOUT||bestRobot.getType()==RobotType.ARCHON){
 			if(controller.canMove(directionTowards, distance-Constants.EPSILON)){
 				controller.setIndicatorDot(controller.getLocation(), 0, 255, 0);
 				controller.move(directionTowards, distance-Constants.EPSILON);
