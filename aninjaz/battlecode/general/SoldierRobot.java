@@ -11,7 +11,7 @@ public class SoldierRobot {
 	private static RobotController controller;
 	private static Direction direction;
 	private static MapLocation origin;
-	private static final float MOVEMENT_RADIUS = 15f;
+	private static final float MOVEMENT_RADIUS = RobotType.SOLDIER.sensorRadius+3f;
 	private static final float RELAXED_MOVEMENT_SPEED = RobotType.SOLDIER.strideRadius*0.4f;
 	public static void run(RobotController controller) throws GameActionException{
 		Util.broadcastCount = Constants.BROADCAST_SOLDIER_COUNT;
@@ -40,7 +40,12 @@ public class SoldierRobot {
 								origin = null;
 								doRandomState();
 							}else{
-								doGuardState();
+								if(robot.getType()==RobotType.GARDENER){
+									doGuardState();
+								}else{
+									origin = null;
+									doRandomState();
+								}
 							}
 						}else{
 							doGuardState();
@@ -135,9 +140,9 @@ public class SoldierRobot {
 			}
 		}
 		distance = controller.getLocation().distanceTo(robot.getLocation())-2; //Recalculate distance after moving
-		if(!Util.inFiringRange(controller.senseNearbyRobots(distance, controller.getTeam()), directionToShoot, 50)){
-			if(distance<RobotType.SOLDIER.bulletSpeed*1.6f){
-				if(robot.getType()==RobotType.SOLDIER||robot.getType()==RobotType.TANK){
+		if(!Util.inFiringRange(controller.senseNearbyRobots(distance, controller.getTeam()), directionToShoot, 20)){
+			if(distance<RobotType.SOLDIER.bulletSpeed*1.4f){
+				if(robot.getType()==RobotType.TANK){
 					if(controller.canFirePentadShot()){
 						controller.firePentadShot(directionToShoot);
 					}
@@ -147,7 +152,7 @@ public class SoldierRobot {
 					}
 				}
 			}else{
-				if(robot.getType()==RobotType.SOLDIER||robot.getType()==RobotType.TANK){
+				if(robot.getType()==RobotType.TANK){
 					if(controller.canFireTriadShot()){
 						controller.fireTriadShot(directionToShoot);
 					}

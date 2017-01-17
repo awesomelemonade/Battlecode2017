@@ -59,7 +59,8 @@ public class GardenerRobot {
 		while(true){
 			controller.setIndicatorDot(origin, 255, 0, 255);
 			controller.setIndicatorDot(controller.getLocation(), 128, 0, 128);
-			if(controller.isBuildReady()){
+			int soldierCount = controller.readBroadcast(Constants.BROADCAST_SOLDIER_COUNT);
+			if(controller.isBuildReady()&&soldierCount>=1){
 				int i = nextPlantIndex();
 				if(i!=-1){ //Invalid plant index
 					float currentBullets = controller.getTeamBullets();

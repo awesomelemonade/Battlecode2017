@@ -108,7 +108,7 @@ public class ScoutRobot {
 		}
 	}
 	public static void shoot(float distance, Direction direction) throws GameActionException{
-		if(!Util.inFiringRange(controller.senseNearbyRobots(distance, controller.getTeam()), direction, 15)){
+		if(!Util.inFiringRange(controller.senseNearbyRobots(distance, controller.getTeam()), direction, 5)){
 			if(controller.canFireSingleShot()){
 				controller.fireSingleShot(direction);
 			}
