@@ -6,6 +6,8 @@ import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
+import battlecode.common.Team;
+import battlecode.common.TreeInfo;
 
 public class SoldierRobot {
 	private static RobotController controller;
@@ -25,23 +27,53 @@ public class SoldierRobot {
 			if(nearbyRobots.length>0){
 				doAttackState(nearbyRobots[0]);
 			}else{
-				if(controller.getTeamBullets()<400){
-					findOrigin();
-					if(origin==null){
-						controller.setIndicatorDot(controller.getLocation(), 0, 255, 255);
-						doRandomState();
-					}else{
-						doGuardState();
-						if(controller.readBroadcast(originChannel)!=originCompressedData){
-							origin = null;
-						}
+				TreeInfo[] nearbyTrees = controller.senseNearbyTrees(-1, Team.NEUTRAL);
+				for(TreeInfo tree: nearbyTrees){
+					if(controller.canShake(tree.getID())){
+						controller.shake(tree.getID());
 					}
-				}else{
-					doRandomState();
+				}
+				/*TreeInfo tree = findNearestTreeWithRobot(nearbyTrees);
+				if(tree!=null){
+					attackTree(tree);
+				}else{*/
+					if(controller.getTeamBullets()<4000){
+						findOrigin();
+						if(origin==null){
+							controller.setIndicatorDot(controller.getLocation(), 0, 255, 255);
+							doRandomState();
+						}else{
+							doGuardState();
+							if(controller.readBroadcast(originChannel)!=originCompressedData){
+								origin = null;
+							}
+						}
+					}else{
+						doRandomState();
+					}
+				//}
+			}
+			if(!lowHealth){
+				if(origin!=null){
+					if((controller.getHealth()/controller.getType().maxHealth)<Constants.LOW_HEALTH){ //If scout is about to die :(
+						CompressedMapLocation mapLocation = new CompressedMapLocation(originCompressedData);
+						mapLocation = new CompressedMapLocation(mapLocation.getIdentifier(), mapLocation.getData()-1, mapLocation.getLocation());
+						controller.broadcast(originChannel, mapLocation.getCompressedData());
+						lowHealth = true;
+					}
 				}
 			}
 			Util.yieldByteCodes();
 		}
+	}
+	private static boolean lowHealth = false;
+	public static TreeInfo findNearestTreeWithRobot(TreeInfo[] nearbyTrees){
+		for(TreeInfo tree: nearbyTrees){
+			if(tree.getContainedRobot()!=null){
+				return tree;
+			}
+		}
+		return null;
 	}
 	public static void findOrigin() throws GameActionException{
 		if(origin!=null){
@@ -110,6 +142,27 @@ public class SoldierRobot {
 			}
 			if(tries>0){
 				controller.move(direction, RELAXED_MOVEMENT_SPEED);
+			}
+		}
+	}
+	public static void attackTree(TreeInfo tree) throws GameActionException{
+		float distance = controller.getLocation().distanceTo(tree.getLocation())-RobotType.SOLDIER.bodyRadius-tree.getRadius();
+		Direction dir = controller.getLocation().directionTo(tree.getLocation());
+		if(controller.canMove(dir, distance-Constants.EPSILON)){
+			controller.move(dir, distance-Constants.EPSILON);
+		}else{
+			direction = Util.tryRandomMove(direction);
+			dir = controller.getLocation().directionTo(tree.getLocation());
+		}
+		if(distance<RobotType.SOLDIER.bulletSpeed*0.1f){
+			if(tree.getHealth()>=RobotType.SOLDIER.attackPower*5&&tree.getRadius()>=1.2f){ //check radius of tree?
+				if(controller.canFirePentadShot()){
+					controller.firePentadShot(dir);
+				}
+			}else{
+				if(controller.canFireSingleShot()){
+					controller.fireSingleShot(dir);
+				}
 			}
 		}
 	}
