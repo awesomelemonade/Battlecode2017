@@ -15,7 +15,7 @@ public class GardenerCommander {
 			direction = Util.tryRandomMove(direction);
 			hireSoldiers(controller);
 			hireScout(controller);
-			hireTank(controller);
+			//hireTank(controller);
 			Util.yieldByteCodes();
 		}
 	}
