@@ -12,34 +12,30 @@ public class TankRobot {
 		Tri,
 		Penta
 	}
+	
 	private static RobotController controller;
-	private static Direction enemyTerritory;
 	private static Direction targetDirection;
-	private static float randomRatio = 0.7f;
-	private static boolean hasMoved = false;
 	
 	public static void run(RobotController controller) throws GameActionException {
 		TankRobot.controller = controller;
-		enemyTerritory = getEnemyTerritoryVector();
-		targetDirection = randomDirectionTowardsEnemy();
+		targetDirection = randomDirectionTowards(getEnemyTerritoryVector(), 1/4);
 		
 		while (true) {
-			RobotInfo[] enemyRobots = controller.senseNearbyRobots(-1, Constants.OTHER_TEAM);
+			RobotInfo[] enemyRobots = controller.senseNearbyRobots(-1, controller.getTeam().opponent());
 			
 			if (enemyRobots.length > 0) {
 				Direction shootDirection = controller.getLocation().directionTo(enemyRobots[0].location);
+				
 				if (controller.getLocation().isWithinDistance(enemyRobots[0].getLocation(), 2)) {
-					shoot(ShootingModes.Mono, shootDirection);
-				}
-				else if (controller.getLocation().isWithinDistance(enemyRobots[0].getLocation(), 5)) {
 					shoot(ShootingModes.Tri, shootDirection);
 				}
-				else {
+				else if (controller.getLocation().isWithinDistance(enemyRobots[0].getLocation(), 5)) {
 					shoot(ShootingModes.Penta, shootDirection);
 				}
-				
-				hasMoved = false;
-				Util.yieldByteCodes();
+				else {
+					moveRandomlyTowardsTarget(shootDirection, 60);		
+					shoot(ShootingModes.Mono, shootDirection);
+				}
 			}
 			
 			/*RobotInfo[] teamRobots = controller.senseNearbyRobots(-1, controller.getTeam());
@@ -48,35 +44,25 @@ public class TankRobot {
 			}*/
 			
 			else {
-				if (!controller.canMove(targetDirection)) {
-					for (int tries = 10; tries > 0; --tries) {
-						if (controller.canMove(targetDirection)) break;
-						else targetDirection = randomDirectionTowardsEnemy();
-					}
-					
-					hasMoved = false;
+				if (controller.isCircleOccupiedExceptByThisRobot(controller.getLocation().add(targetDirection), 2)) {
+					targetDirection = Util.randomDirection();
 				}
 				
-				else {
-					hasMoved = true;
-					controller.move(targetDirection);
-				}
-				
-				Util.yieldByteCodes();
+				moveRandomlyTowardsTarget(targetDirection, 180);
 			}
 			
-			if (!hasMoved && randomRatio < 3f) {
-				randomRatio += 0.1f;
-			}
-			
-			if (hasMoved && randomRatio > 0.7f) {
-				randomRatio -= 0.2f;
-				if (randomRatio < 0.7f) randomRatio = 0.7f;
-			}
-			
-			System.out.println(controller.getID() + " random: " + randomRatio);
+			Util.yieldByteCodes();
 		}
 		
+	}
+	
+	private static Direction getBounce(Direction incoming) {
+		return new Direction((float) ((incoming.radians > 0 ? 1 : -1) * (Math.PI - Math.abs(incoming.radians))));
+	}
+	
+	//Change functionality later to run over enemy trees
+	private static boolean doesTreeExist(Direction target) throws GameActionException {
+		return controller.isLocationOccupiedByTree(controller.getLocation().add(target, 1));
 	}
 	
 	private static void shoot(ShootingModes mode, Direction direction) throws GameActionException {
@@ -106,15 +92,29 @@ public class TankRobot {
 		}
 	}
 	
-	private static Direction randomDirectionTowardsEnemy() {
+	private static void moveRandomlyTowardsTarget(Direction target, int degreesOfVariance) throws GameActionException {
+		targetDirection = Util.tryRandomMove(target);
+	}
+	
+	private static Direction randomDirectionTowards(Direction target, int degreesOfVariance) {
+		degreesOfVariance /= 2;
+		if (degreesOfVariance == 180) degreesOfVariance = 179;
+		
 		Direction random = new Direction((float) (Math.random()*2*Math.PI));
-		return new Direction((float) ((enemyTerritory.radians + random.radians*randomRatio)/(1+randomRatio)));
+		float randomness = degreesOfVariance / (180-degreesOfVariance);
+		
+		return new Direction((float) ((target.radians + random.radians*randomness)/(1+randomness)));
 	}
 	
 	private static Direction getEnemyTerritoryVector() {
 		MapLocation[] enemyArchonLocations = controller.getInitialArchonLocations(Constants.OTHER_TEAM);
-		Direction a = enemyArchonLocations[0].directionTo(controller.getLocation());
-		Direction b = enemyArchonLocations[1].directionTo(controller.getLocation());
-		return new Direction((a.radians + b.radians)/2);
+		int numberOfArchons = enemyArchonLocations.length;
+		float totalRadians = 0;
+		
+		for (MapLocation archon: enemyArchonLocations) {
+			totalRadians += archon.directionTo(controller.getLocation()).radians;
+		}
+		
+		return new Direction(totalRadians/numberOfArchons);
 	}
 }
