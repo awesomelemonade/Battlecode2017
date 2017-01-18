@@ -58,6 +58,7 @@ public class Util {
 	}
 	public static int broadcastCount = -1;
 	public static void yieldByteCodes() throws GameActionException{
+		Util.checkWin();
 		if(broadcastCount!=-1){
 			checkLowHealth(broadcastCount);
 		}
@@ -115,9 +116,15 @@ public class Util {
 		}
 		return false;
 	}
-	private static int[] mapLocations = new int[4];
+	private static final int mapLocations = 4;
+	public static int getMapLocations(){
+		return mapLocations;
+	}
+	public static int getMapLocationChannel(int mapLocation){
+		return GameConstants.BROADCAST_MAX_CHANNELS-mapLocation-1;
+	}
 	public static int broadcastNew(CompressedMapLocation data) throws GameActionException{
-		for(int i=0;i<mapLocations.length;++i){
+		for(int i=0;i<mapLocations;++i){
 			int channel = GameConstants.BROADCAST_MAX_CHANNELS-i-1;
 			int n = controller.readBroadcast(channel);
 			if(n!=-1){
@@ -127,7 +134,7 @@ public class Util {
 				}
 				if(bit<32){
 					controller.broadcast(channel, n|(1<<bit));
-					channel = GameConstants.BROADCAST_MAX_CHANNELS-mapLocations.length-1-i*32-bit;
+					channel = GameConstants.BROADCAST_MAX_CHANNELS-mapLocations-1-i*32-bit;
 					controller.broadcast(channel, data.getCompressedData());
 					return channel;
 				}
@@ -135,14 +142,11 @@ public class Util {
 		}
 		return -1; //Couldn't broadcast :(
 	}
-	public static int[] getMapLocations(){
-		return mapLocations;
-	}
 	public static int getChannelLocation(int i, int bit){
-		return GameConstants.BROADCAST_MAX_CHANNELS-mapLocations.length-1-i*32-bit;
+		return GameConstants.BROADCAST_MAX_CHANNELS-mapLocations-1-i*32-bit;
 	}
 	public static void unsetBroadcastLocation(int channel) throws GameActionException{
-		int x = GameConstants.BROADCAST_MAX_CHANNELS-channel-mapLocations.length-1;
+		int x = GameConstants.BROADCAST_MAX_CHANNELS-channel-mapLocations-1;
 		int y = GameConstants.BROADCAST_MAX_CHANNELS-(x/32)-1;
 		int n = controller.readBroadcast(y);
 		controller.broadcast(y, n & (~(1<<(x%32))));

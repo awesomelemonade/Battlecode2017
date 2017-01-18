@@ -25,32 +25,11 @@ public class SoldierRobot {
 				doAttackState(nearbyRobots[0]);
 			}else{
 				if(controller.getTeamBullets()<400){
-					findOrigin:{
-						if(origin==null){
-							for(int i=0;i<Util.getMapLocations().length;++i){
-								int n = Util.getMapLocations()[i];
-								int bit = 0;
-								while(((n>>>bit)&1)==0&&bit<32){
-									bit++;
-								}
-								if(bit<32){
-									int channel = Util.getChannelLocation(i, bit);
-									CompressedMapLocation mapLocation = new CompressedMapLocation(controller.readBroadcast(channel));
-									if(mapLocation.getIdentifier()==Constants.BROADCAST_IDENTIFIER_GARDENER&&
-											mapLocation.getData()==0){
-										origin = mapLocation.getLocation();
-										originChannel = channel;
-										originCompressedData = new CompressedMapLocation(mapLocation.getIdentifier(), mapLocation.getData()+1, mapLocation.getLocation()).getCompressedData();
-										controller.broadcast(channel, originCompressedData);
-										break;
-									}
-								}
-							}
-							if(origin==null){
-								doRandomState();
-								break findOrigin;
-							}
-						}
+					findOrigin();
+					if(origin==null){
+						controller.setIndicatorDot(controller.getLocation(), 0, 255, 255);
+						doRandomState();
+					}else{
 						doGuardState();
 						if(controller.readBroadcast(originChannel)!=originCompressedData){
 							origin = null;
@@ -63,6 +42,30 @@ public class SoldierRobot {
 			Util.yieldByteCodes();
 		}
 	}
+	public static void findOrigin() throws GameActionException{
+		if(origin!=null){
+			return;
+		}
+		for(int i=0;i<Util.getMapLocations();++i){
+			int n = controller.readBroadcast(Util.getMapLocationChannel(i));
+			int bit = 0;
+			while(bit<32){
+				if(((n>>>bit)&1)==1){
+					int channel = Util.getChannelLocation(i, bit);
+					CompressedMapLocation mapLocation = new CompressedMapLocation(controller.readBroadcast(channel));
+					if(mapLocation.getIdentifier()==Constants.BROADCAST_IDENTIFIER_GARDENER&&
+							mapLocation.getData()==0){
+						origin = mapLocation.getLocation();
+						originChannel = channel;
+						originCompressedData = new CompressedMapLocation(mapLocation.getIdentifier(), mapLocation.getData()+1, mapLocation.getLocation()).getCompressedData();
+						controller.broadcast(channel, originCompressedData);
+						return;
+					}
+				}
+				bit++;
+			}
+		}
+	}
 	public static void doRandomState() throws GameActionException{
 		direction = Util.tryRandomMove(direction, RELAXED_MOVEMENT_SPEED);
 	}
@@ -72,19 +75,28 @@ public class SoldierRobot {
 		float distance = controller.getLocation().distanceTo(origin);
 		int tries = 10;
 		if(distance>MOVEMENT_RADIUS){
-			while(((!controller.canMove(direction, RELAXED_MOVEMENT_SPEED))||
+			while(((!controller.canMove(direction))||
 					(!(Math.abs(towards.degreesBetween(direction))<45)))&&tries>0){
 				direction = Util.randomDirection();
 				tries--;
+			}
+			if(tries<=0){
+				direction = Util.tryRandomMove(direction);
+			}
+			if(tries>0){
+				controller.move(direction);
 			}
 		}else{
 			while(((!controller.canMove(direction, RELAXED_MOVEMENT_SPEED))||
 					(controller.getLocation().add(direction, RELAXED_MOVEMENT_SPEED).distanceTo(origin)>MOVEMENT_RADIUS))&&tries>0){
 				direction = Util.randomDirection();
 			}
-		}
-		if(tries>0){
-			controller.move(direction, RELAXED_MOVEMENT_SPEED);
+			if(tries<=0){
+				direction = Util.tryRandomMove(direction);
+			}
+			if(tries>0){
+				controller.move(direction, RELAXED_MOVEMENT_SPEED);
+			}
 		}
 	}
 	public static void doAttackState(RobotInfo robot) throws GameActionException{
@@ -129,7 +141,7 @@ public class SoldierRobot {
 		}
 		distance = controller.getLocation().distanceTo(robot.getLocation())-2; //Recalculate distance after moving
 		if(!Util.inFiringRange(controller.senseNearbyRobots(distance, controller.getTeam()), directionToShoot, 20)){
-			if(distance<RobotType.SOLDIER.bulletSpeed*1.4f){
+			if(distance<RobotType.SOLDIER.bulletSpeed*1.4f&&controller.getTeamBullets()>=400||distance<RobotType.SOLDIER.bulletSpeed*0.4f){
 				if(robot.getType()==RobotType.TANK){
 					if(controller.canFirePentadShot()){
 						controller.firePentadShot(directionToShoot);

@@ -27,7 +27,7 @@ public class GardenerRobot {
 	private static RobotController controller;
 	public static boolean validRobots(RobotInfo[] robots){
 		for(RobotInfo robot: robots){
-			if(robot.getType()==RobotType.GARDENER||robot.getType()==RobotType.ARCHON){
+			if(robot.getType()==RobotType.GARDENER||robot.getType()==RobotType.ARCHON||robot.getType()==RobotType.SOLDIER){
 				return false;
 			}
 		}
