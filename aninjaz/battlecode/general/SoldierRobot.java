@@ -11,6 +11,8 @@ public class SoldierRobot {
 	private static RobotController controller;
 	private static Direction direction;
 	private static MapLocation origin;
+	private static int originChannel;
+	private static int originCompressedData;
 	private static final float MOVEMENT_RADIUS = RobotType.SOLDIER.sensorRadius+3f;
 	private static final float RELAXED_MOVEMENT_SPEED = RobotType.SOLDIER.strideRadius*0.4f;
 	public static void run(RobotController controller) throws GameActionException{
@@ -23,32 +25,35 @@ public class SoldierRobot {
 				doAttackState(nearbyRobots[0]);
 			}else{
 				if(controller.getTeamBullets()<400){
-					if(origin==null){
-						nearbyRobots = controller.senseNearbyRobots(-1, controller.getTeam());
-						RobotInfo robot = findNearestValidRobot(nearbyRobots);
-						if(robot==null){
-							doRandomState();
-						}else{
-							origin = robot.getLocation();
-							doGuardState();
-						}
-					}else{
-						//checks if the origin still has a robot and is still valid
-						if(controller.canSenseLocation(origin)){
-							RobotInfo robot = controller.senseRobotAtLocation(origin);
-							if(robot==null){
-								origin = null;
-								doRandomState();
-							}else{
-								if(robot.getType()==RobotType.GARDENER){
-									doGuardState();
-								}else{
-									origin = null;
-									doRandomState();
+					findOrigin:{
+						if(origin==null){
+							for(int i=0;i<Util.getMapLocations().length;++i){
+								int n = Util.getMapLocations()[i];
+								int bit = 0;
+								while(((n>>>bit)&1)==0&&bit<32){
+									bit++;
+								}
+								if(bit<32){
+									int channel = Util.getChannelLocation(i, bit);
+									CompressedMapLocation mapLocation = new CompressedMapLocation(controller.readBroadcast(channel));
+									if(mapLocation.getIdentifier()==Constants.BROADCAST_IDENTIFIER_GARDENER&&
+											mapLocation.getData()==0){
+										origin = mapLocation.getLocation();
+										originChannel = channel;
+										originCompressedData = new CompressedMapLocation(mapLocation.getIdentifier(), mapLocation.getData()+1, mapLocation.getLocation()).getCompressedData();
+										controller.broadcast(channel, originCompressedData);
+										break;
+									}
 								}
 							}
-						}else{
-							doGuardState();
+							if(origin==null){
+								doRandomState();
+								break findOrigin;
+							}
+						}
+						doGuardState();
+						if(controller.readBroadcast(originChannel)!=originCompressedData){
+							origin = null;
 						}
 					}
 				}else{
@@ -57,17 +62,6 @@ public class SoldierRobot {
 			}
 			Util.yieldByteCodes();
 		}
-	}
-	public static RobotInfo findNearestValidRobot(RobotInfo[] robots){
-		for(RobotInfo info: robots){
-			switch(info.getType()){
-			case GARDENER:
-				return info;
-			default:
-				break;
-			}
-		}
-		return null;
 	}
 	public static void doRandomState() throws GameActionException{
 		direction = Util.tryRandomMove(direction, RELAXED_MOVEMENT_SPEED);
@@ -129,15 +123,7 @@ public class SoldierRobot {
 				controller.move(directionToShoot, distance-Constants.EPSILON);
 			}else{
 				controller.setIndicatorDot(controller.getLocation(), 255, 0, 0);
-				Direction clockwise = directionToShoot.rotateLeftDegrees(45);
-				int tries = 10;
-				while(!controller.canMove(clockwise)&&tries>0){
-					clockwise = clockwise.rotateLeftDegrees(5);
-					tries--;
-				}
-				if(tries>0){
-					controller.move(clockwise);
-				}
+				direction = Util.tryRandomMove(direction);
 				directionToShoot = controller.getLocation().directionTo(robot.getLocation());
 			}
 		}

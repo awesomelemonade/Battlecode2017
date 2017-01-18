@@ -135,10 +135,17 @@ public class Util {
 		}
 		return -1; //Couldn't broadcast :(
 	}
+	public static int[] getMapLocations(){
+		return mapLocations;
+	}
+	public static int getChannelLocation(int i, int bit){
+		return GameConstants.BROADCAST_MAX_CHANNELS-mapLocations.length-1-i*32-bit;
+	}
 	public static void unsetBroadcastLocation(int channel) throws GameActionException{
 		int x = GameConstants.BROADCAST_MAX_CHANNELS-channel-mapLocations.length-1;
 		int y = GameConstants.BROADCAST_MAX_CHANNELS-(x/32)-1;
 		int n = controller.readBroadcast(y);
 		controller.broadcast(y, n & (~(1<<(x%32))));
+		controller.broadcast(channel, 0);
 	}
 }

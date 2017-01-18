@@ -1,5 +1,9 @@
 package aninjaz.battlecode.general;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
@@ -15,6 +19,13 @@ public class ArchonRobot {
 		ArchonRobot.controller = controller;
 		while(true){
 			Util.checkWin();
+			
+			List<Integer> broadcasterinos = new ArrayList<Integer>();
+			for(int i=999;i>=970;--i){
+				broadcasterinos.add(controller.readBroadcast(i));
+			}
+			System.out.println(Arrays.toString(broadcasterinos.toArray()));
+			
 			
 			if(controller.isBuildReady()){
 				int gardenerCommanderCount = controller.readBroadcast(Constants.BROADCAST_GARDENER_COMMANDER_COUNT);

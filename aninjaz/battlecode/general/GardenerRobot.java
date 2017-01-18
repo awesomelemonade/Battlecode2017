@@ -22,6 +22,7 @@ public class GardenerRobot {
 	private static Direction[] plantMovement = new Direction[]
 			{Direction.getSouth(), Direction.getNorth(), Direction.getSouth(), Direction.getNorth(), null, null, null, null};
 	private static MapLocation origin;
+	private static int originChannel;
 	private static float checkRadius = Constants.ROOT_2*3f;
 	private static RobotController controller;
 	public static boolean validRobots(RobotInfo[] robots){
@@ -53,6 +54,7 @@ public class GardenerRobot {
 			randDirection = Util.tryRandomMove(randDirection);
 			Util.yieldByteCodes();
 		}
+		originChannel = Util.broadcastNew(new CompressedMapLocation(Constants.BROADCAST_IDENTIFIER_GARDENER, 0, origin));
 		while(!controller.getLocation().equals(origin)){
 			Util.waitForMove(origin);
 			Util.yieldByteCodes();
@@ -107,9 +109,16 @@ public class GardenerRobot {
 				}
 			}
 			waterTrees();
+			if(!lowHealth){
+				if((controller.getHealth()/controller.getType().maxHealth)<Constants.LOW_HEALTH){ //If scout is about to die :(
+					Util.unsetBroadcastLocation(originChannel);
+					lowHealth = true;
+				}
+			}
 			Util.yieldByteCodes();
 		}
 	}
+	private static boolean lowHealth = false;
 	public static int nextPlantIndex(){
 		for(int i=0;i<planted.length;++i){
 			if(!planted[i]){

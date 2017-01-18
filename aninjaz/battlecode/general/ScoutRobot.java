@@ -57,15 +57,8 @@ public class ScoutRobot {
 				controller.setIndicatorDot(controller.getLocation(), 0, 255, 0);
 				controller.move(directionTowards, distance-Constants.EPSILON);
 			}else{
-				Direction clockwise = directionTowards.rotateLeftDegrees(45);
-				int tries = 10;
-				while(!controller.canMove(clockwise)&&tries>0){
-					clockwise = directionTowards.rotateLeftDegrees(5);
-					tries--;
-				}
-				if(tries>0){
-					controller.move(clockwise);
-				}
+				direction = Util.tryRandomMove(direction);
+				directionTowards = controller.getLocation().directionTo(bestRobot.getLocation());
 			}
 			distance = controller.getLocation().distanceTo(bestRobot.getLocation())-2; //Recalculate distance after moving
 			if(distance<=RobotType.SCOUT.bulletSpeed){
