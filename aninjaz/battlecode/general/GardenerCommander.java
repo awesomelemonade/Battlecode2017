@@ -34,7 +34,7 @@ public class GardenerCommander {
 
 		int LJCount = controller.readBroadcast(Constants.BROADCAST_LJ_COUNT) + 1;
 		if (LJCount*LJCount*LJCount*treeCount*.5 / controller.getRoundNum() > 1) {
-			System.out.println("Trying to build LJ");
+			//System.out.println("Trying to build LJ");
 			int tries = 50;
 			Direction direction = Util.randomDirection();
 			while((!controller.canBuildRobot(RobotType.LUMBERJACK, direction))&&tries>0){
