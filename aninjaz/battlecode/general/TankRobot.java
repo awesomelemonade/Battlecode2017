@@ -24,7 +24,6 @@ public class TankRobot {
 			RobotInfo[] enemyRobots = controller.senseNearbyRobots(-1, controller.getTeam().opponent());
 			
 			if (enemyRobots.length > 0) {
-				System.out.println("Enemy robots");
 				Direction shootDirection = controller.getLocation().directionTo(enemyRobots[0].location);
 				
 				if (controller.getLocation().isWithinDistance(enemyRobots[0].getLocation(), 2)) {
