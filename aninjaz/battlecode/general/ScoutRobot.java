@@ -14,6 +14,7 @@ public class ScoutRobot {
 	private static float minDistance = 3f;
 	private static float maxDistance = 5f;
 	private static float overShoot = 1.5f;
+	private static int targetGardener = -1;
 	public static void run(RobotController controller) throws GameActionException{
 		ScoutRobot.controller = controller;
 		Util.broadcastCount = Constants.BROADCAST_SCOUT_COUNT;
@@ -41,18 +42,51 @@ public class ScoutRobot {
 				if(bestRobot==null){
 					direction = Util.tryRandomMove(direction);
 				}else{
-					targetRobot(bestRobot);
+					if(bestRobot.getType()==RobotType.GARDENER){
+						targetGardener = bestRobot.getID();
+					}else{
+						targetGardener = -1;
+					}
+					targetRobot(bestRobot, nearbyRobots);
 				}
 			}
 			Util.yieldByteCodes();
 		}
 	}
-	public static void targetRobot(RobotInfo bestRobot) throws GameActionException{
+	public static void targetRobot(RobotInfo bestRobot, RobotInfo[] nearbyRobots) throws GameActionException{
 		controller.setIndicatorLine(controller.getLocation(), bestRobot.getLocation(), 255, 0, 0);
 		controller.setIndicatorDot(bestRobot.getLocation(), 255, 0, 0);
 		float distance = controller.getLocation().distanceTo(bestRobot.getLocation())-2;
 		Direction directionTowards = controller.getLocation().directionTo(bestRobot.getLocation());
-		if(bestRobot.getType()==RobotType.GARDENER||bestRobot.getType()==RobotType.SCOUT||bestRobot.getType()==RobotType.ARCHON){
+		if(bestRobot.getType()==RobotType.GARDENER||bestRobot.getType()==RobotType.ARCHON){
+			/*RobotInfo attacker = getNearestAttackingRobot(nearbyRobots);
+			float attackerDistance = controller.getLocation().distanceTo(attacker.getLocation());
+			Direction attackerDirection = controller.getLocation().directionTo(attacker.getLocation());
+			Direction attackerDirectionOpposite = attackerDirection.opposite();
+			if(attackerDistance<RobotType.SCOUT.strideRadius*2f){
+				if(controller.canMove(attackerDirectionOpposite)){
+					controller.move(attackerDirectionOpposite);
+					attackerDistance = controller.getLocation().distanceTo(attacker.getLocation());
+				}else{
+					direction = Util.tryRandomMove(direction);
+					attackerDistance = controller.getLocation().distanceTo(attacker.getLocation());
+					attackerDirection = controller.getLocation().directionTo(attacker.getLocation());
+				}
+				shoot(attackerDistance, attackerDirection);
+			}else{*/
+				if(controller.canMove(directionTowards, distance-Constants.EPSILON)){
+					controller.setIndicatorDot(controller.getLocation(), 0, 255, 0);
+					controller.move(directionTowards, distance-Constants.EPSILON);
+				}else{
+					direction = Util.tryRandomMove(direction);
+					directionTowards = controller.getLocation().directionTo(bestRobot.getLocation());
+				}
+				distance = controller.getLocation().distanceTo(bestRobot.getLocation())-2; //Recalculate distance after moving
+				if(distance<=RobotType.SCOUT.bulletSpeed){
+					shoot(distance, directionTowards);
+				}
+			//}
+		}else if(bestRobot.getType()==RobotType.SCOUT){
 			if(controller.canMove(directionTowards, distance-Constants.EPSILON)){
 				controller.setIndicatorDot(controller.getLocation(), 0, 255, 0);
 				controller.move(directionTowards, distance-Constants.EPSILON);
@@ -111,6 +145,13 @@ public class ScoutRobot {
 		if(robots.length==0){
 			return null;
 		}
+		if(targetGardener!=-1){
+			for(RobotInfo robot: robots){
+				if(robot.getID()==targetGardener){
+					return robot;
+				}
+			}
+		}
 		for(RobotInfo robot: robots){
 			if(robot.getType()==RobotType.GARDENER){
 				return robot;
@@ -122,5 +163,13 @@ public class ScoutRobot {
 			}
 		}
 		return robots[0];
+	}
+	public static RobotInfo getNearestAttackingRobot(RobotInfo[] robots){
+		for(RobotInfo robot: robots){
+			if(robot.getType().canAttack()){
+				return robot;
+			}
+		}
+		return null;
 	}
 }

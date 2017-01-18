@@ -204,7 +204,7 @@ public class SoldierRobot {
 				controller.move(directionToShoot, distance-Constants.EPSILON);
 			}else{
 				controller.setIndicatorDot(controller.getLocation(), 255, 0, 0);
-				direction = Util.tryRandomMove(direction);
+				direction = Util.tryRandomMove(direction, RobotType.SOLDIER.strideRadius*0.4f);
 				directionToShoot = controller.getLocation().directionTo(robot.getLocation());
 			}
 		}
