@@ -71,6 +71,9 @@ public class Util {
 		if(controller.getTeamBullets()>GameConstants.VICTORY_POINTS_TO_WIN*10){
 			controller.donate(GameConstants.VICTORY_POINTS_TO_WIN*10);
 		}
+		if(controller.getRoundLimit()-controller.getRoundNum()<=2){
+			controller.donate(controller.getTeamBullets());
+		}
 	}
 	private static boolean lowHealth = false;
 	public static void checkLowHealth(int broadcast) throws GameActionException{
@@ -151,5 +154,17 @@ public class Util {
 		int n = controller.readBroadcast(y);
 		controller.broadcast(y, n & (~(1<<(x%32))));
 		controller.broadcast(channel, 0);
+	}
+	public static MapLocation getNearest(MapLocation origin, MapLocation[] locations){
+		float bestDistance = Float.MAX_VALUE;
+		MapLocation bestLocation = null;
+		for(MapLocation location: locations){
+			float distance = origin.distanceTo(location);
+			if(distance<bestDistance){
+				bestDistance = distance;
+				bestLocation = location;
+			}
+		}
+		return bestLocation;
 	}
 }

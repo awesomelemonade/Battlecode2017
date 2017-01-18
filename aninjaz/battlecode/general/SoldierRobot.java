@@ -13,6 +13,7 @@ public class SoldierRobot {
 	private static MapLocation origin;
 	private static int originChannel;
 	private static int originCompressedData;
+	private static MapLocation nearestArchon;
 	private static final float MOVEMENT_RADIUS = RobotType.SOLDIER.sensorRadius+3f;
 	private static final float RELAXED_MOVEMENT_SPEED = RobotType.SOLDIER.strideRadius*0.4f;
 	public static void run(RobotController controller) throws GameActionException{
@@ -58,6 +59,11 @@ public class SoldierRobot {
 						origin = mapLocation.getLocation();
 						originChannel = channel;
 						originCompressedData = new CompressedMapLocation(mapLocation.getIdentifier(), mapLocation.getData()+1, mapLocation.getLocation()).getCompressedData();
+						MapLocation[] archons = controller.getInitialArchonLocations(Constants.OTHER_TEAM);
+						nearestArchon = Util.getNearest(origin, archons);
+						if(origin.distanceTo(nearestArchon)>MOVEMENT_RADIUS){
+							nearestArchon = origin.add(origin.directionTo(nearestArchon), MOVEMENT_RADIUS);
+						}
 						controller.broadcast(channel, originCompressedData);
 						return;
 					}
@@ -70,7 +76,15 @@ public class SoldierRobot {
 		direction = Util.tryRandomMove(direction, RELAXED_MOVEMENT_SPEED);
 	}
 	public static void doGuardState() throws GameActionException{
-		controller.setIndicatorDot(origin, 255, 128, 128);
+		if(controller.getRoundNum()-lastAttackedRound>15){
+			controller.setIndicatorDot(nearestArchon, 128, 128, 128);
+			goTowards(nearestArchon);
+		}else{
+			controller.setIndicatorDot(origin, 255, 128, 128);
+			goTowards(origin);
+		}
+	}
+	public static void goTowards(MapLocation origin) throws GameActionException{
 		Direction towards = controller.getLocation().directionTo(origin);
 		float distance = controller.getLocation().distanceTo(origin);
 		int tries = 10;
@@ -99,7 +113,9 @@ public class SoldierRobot {
 			}
 		}
 	}
+	private static int lastAttackedRound = 0;
 	public static void doAttackState(RobotInfo robot) throws GameActionException{
+		lastAttackedRound = controller.getRoundNum();
 		float distance = controller.getLocation().distanceTo(robot.getLocation())-2;
 		Direction directionToShoot = controller.getLocation().directionTo(robot.getLocation());
 		if(robot.getType()==RobotType.LUMBERJACK){
