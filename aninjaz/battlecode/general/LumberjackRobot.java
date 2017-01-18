@@ -3,6 +3,7 @@ package aninjaz.battlecode.general;
 
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
+import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
@@ -19,7 +20,8 @@ public class LumberjackRobot {
 	
 	private static RobotController controller;
 	private static Direction direction;
-	private static MapLocation tree;
+	private static MapLocation treeLoc;
+	private static TreeInfo currentTree;
 	private static LJState state;
 	
 	public static void run(RobotController controller) throws GameActionException{
@@ -42,9 +44,12 @@ public class LumberjackRobot {
 			
 				TreeInfo[] trees = controller.senseNearbyTrees(1.5f, Team.NEUTRAL);
 				if (trees.length > 0) {
-					controller.chop(trees[0].location);
-					if (trees.length == 1) {
+					currentTree = trees[0];
+					controller.chop(currentTree.location);
+					
+					if (currentTree.getHealth() < GameConstants.LUMBERJACK_CHOP_DAMAGE) {
 						state = LJState.NONE;
+						currentTree = null;
 						Util.tryRandomMove(direction);
 						Util.yieldByteCodes();
 					}
@@ -66,7 +71,7 @@ public class LumberjackRobot {
 					else if (state == LJState.MOVING) {
 						if (!controller.canMove(direction)) {
 							Util.tryRandomMove(direction);
-							direction = controller.getLocation().directionTo(tree);
+							direction = controller.getLocation().directionTo(treeLoc);
 						}
 					}
 					
@@ -83,8 +88,8 @@ public class LumberjackRobot {
 	}
 	
 	public static void targetTree(MapLocation loc) {
-		tree = loc;
-		direction = controller.getLocation().directionTo(tree);
+		treeLoc = loc;
+		direction = controller.getLocation().directionTo(treeLoc);
 		state = LJState.MOVING;
 	}
 }
