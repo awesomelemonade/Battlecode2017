@@ -15,7 +15,7 @@ public class GardenerCommander {
 			direction = Util.tryRandomMove(direction);
 			hireSoldiers(controller);
 			hireScout(controller);
-			//hireTank(controller);
+			hireTank(controller);
 			Util.yieldByteCodes();
 		}
 	}
@@ -24,8 +24,8 @@ public class GardenerCommander {
 			return;
 		}
 		int tankCount = controller.readBroadcast(Constants.BROADCAST_TANK_COUNT);
-		if(Util.getAvailableBullets() > 3000 && tankCount < 2){
-			if(Util.getAvailableBullets()>=RobotType.TANK.bulletCost){
+		if(tankCount < 3){ //if being invaded or
+			if(Util.getAvailableBullets() > 2500*(tankCount+1)){ //if at checkpoints 3000 - 6000 - 9000
 				int tries = 10;
 				Direction direction = Util.randomDirection();
 				while((!controller.canBuildRobot(RobotType.TANK, direction))&&tries>0){
