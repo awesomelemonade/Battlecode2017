@@ -26,6 +26,7 @@ public class Constants {
 	public static final int BROADCAST_SCOUT_COUNT = 4;
 	public static final int BROADCAST_SOLDIER_COUNT = 5;
 	public static final int BROADCAST_TANK_COUNT = 6;
+	public static final int BROADCAST_LJ_COUNT = 7;
 	
 	public static final int BROADCAST_IDENTIFIER_GARDENER = 0;
 	public static final int BROADCAST_IDENTIFIER_SOLDIER = 1;

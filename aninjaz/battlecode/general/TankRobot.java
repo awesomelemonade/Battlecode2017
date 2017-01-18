@@ -67,7 +67,7 @@ public class TankRobot {
 	
 	private static void shoot(ShootingModes mode, Direction direction) throws GameActionException {
 		for (int i = mode.ordinal()+1; i > 0; --i) {
-			mode = ShootingModes.values()[mode.ordinal() - 1];
+			mode = ShootingModes.values()[i - 1];
 			
 			switch (mode) {
 				case Mono:
