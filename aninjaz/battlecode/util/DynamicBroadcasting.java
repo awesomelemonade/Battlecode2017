@@ -57,4 +57,21 @@ public class DynamicBroadcasting {
 		int mapper = controller.readBroadcast(mapperChannel);
 		controller.broadcast(mapperChannel, mapper&(~(1<<mapperBit)));
 	}
+	//Utility Functions
+	public static int find(int identifierFind, int dataFind) throws GameActionException{
+		for(int mapper=0;mapper<DynamicBroadcasting.MAPPERS;++mapper){
+			for(int bit=0;bit<Integer.SIZE;++bit){
+				int compressedDataChannel = DynamicBroadcasting.getDataChannel(mapper, bit);
+				int compressedData = controller.readBroadcast(compressedDataChannel);
+				int identifier = CompressedData.getIdentifier(compressedData);
+				if(identifier==identifierFind){
+					int data = CompressedData.getData(compressedData);
+					if(data==dataFind){
+						return compressedDataChannel;
+					}
+				}
+			}
+		}
+		return -1;
+	}
 }

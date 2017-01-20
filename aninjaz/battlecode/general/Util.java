@@ -1,6 +1,5 @@
 package aninjaz.battlecode.general;
 
-import aninjaz.battlecode.util.CompressedMapLocation;
 import battlecode.common.Clock;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
