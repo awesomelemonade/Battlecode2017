@@ -1,5 +1,6 @@
 package aninjaz.battlecode.general;
 
+import aninjaz.battlecode.util.CompressedMapLocation;
 import battlecode.common.Clock;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
@@ -12,10 +13,6 @@ public class Util {
 	public static RobotController controller;
 	public static Direction randomDirection(){
 		return new Direction((float) (Math.random()*2*Math.PI));
-	}
-	public static Direction[] cardinalDirections = new Direction[]{Direction.getNorth(), Direction.getSouth(), Direction.getEast(), Direction.getWest()};
-	public static Direction randomCardinalDirection(){
-		return cardinalDirections[(int)Math.random()*4];
 	}
 	public static Direction toDirection(float x, float y){
 		return new Direction((float)Math.atan2(y, x));
@@ -41,47 +38,17 @@ public class Util {
 		}
 		controller.move(target);
 	}
-	public static void addReservedBullets(int bullets) throws GameActionException{
-		setReservedBullets(getReservedBullets()+bullets);
-	}
-	public static void subtractReservedBullets(int bullets) throws GameActionException{
-		setReservedBullets(getReservedBullets()-bullets);
-	}
-	public static void setReservedBullets(int bullets) throws GameActionException{
-		controller.broadcast(Constants.BROADCAST_RESERVED_BULLETS, bullets);
-	}
-	public static float getAvailableBullets() throws GameActionException{
-		return controller.getTeamBullets()-getReservedBullets();
-	}
-	public static int getReservedBullets() throws GameActionException{
-		return controller.readBroadcast(Constants.BROADCAST_RESERVED_BULLETS);
-	}
-	public static int broadcastCount = -1;
 	public static void yieldByteCodes() throws GameActionException{
 		Util.checkWin();
-		if(broadcastCount!=-1){
-			checkLowHealth(broadcastCount);
-		}
+		//Tally up robots
 		Clock.yield();
-	}
-	public static MapLocation floor(MapLocation location){
-		return new MapLocation((int)location.x, (int)location.y);
 	}
 	public static void checkWin() throws GameActionException{
 		if(controller.getTeamBullets()>GameConstants.VICTORY_POINTS_TO_WIN*10){
 			controller.donate(GameConstants.VICTORY_POINTS_TO_WIN*10);
 		}
 		if(controller.getRoundLimit()-controller.getRoundNum()<=2){
-			controller.donate(controller.getTeamBullets());
-		}
-	}
-	private static boolean lowHealth = false;
-	public static void checkLowHealth(int broadcast) throws GameActionException{
-		if(!lowHealth){
-			if((controller.getHealth()/controller.getType().maxHealth)<Constants.LOW_HEALTH){ //If scout is about to die :(
-				controller.broadcast(broadcast, controller.readBroadcast(broadcast)-1);
-				lowHealth = true;
-			}
+			controller.donate((float) (Math.floor(controller.getTeamBullets()/10)*10));
 		}
 	}
 	public static Direction tryRandomMove(Direction direction, float distance) throws GameActionException{
@@ -118,53 +85,5 @@ public class Util {
 			}
 		}
 		return false;
-	}
-	private static final int mapLocations = 4;
-	public static int getMapLocations(){
-		return mapLocations;
-	}
-	public static int getMapLocationChannel(int mapLocation){
-		return GameConstants.BROADCAST_MAX_CHANNELS-mapLocation-1;
-	}
-	public static int broadcastNew(CompressedMapLocation data) throws GameActionException{
-		for(int i=0;i<mapLocations;++i){
-			int channel = GameConstants.BROADCAST_MAX_CHANNELS-i-1;
-			int n = controller.readBroadcast(channel);
-			if(n!=-1){
-				int bit = 0;
-				while(((n>>>bit)&1)==1){
-					bit++;
-				}
-				if(bit<32){
-					controller.broadcast(channel, n|(1<<bit));
-					channel = GameConstants.BROADCAST_MAX_CHANNELS-mapLocations-1-i*32-bit;
-					controller.broadcast(channel, data.getCompressedData());
-					return channel;
-				}
-			}
-		}
-		return -1; //Couldn't broadcast :(
-	}
-	public static int getChannelLocation(int i, int bit){
-		return GameConstants.BROADCAST_MAX_CHANNELS-mapLocations-1-i*32-bit;
-	}
-	public static void unsetBroadcastLocation(int channel) throws GameActionException{
-		int x = GameConstants.BROADCAST_MAX_CHANNELS-channel-mapLocations-1;
-		int y = GameConstants.BROADCAST_MAX_CHANNELS-(x/32)-1;
-		int n = controller.readBroadcast(y);
-		controller.broadcast(y, n & (~(1<<(x%32))));
-		controller.broadcast(channel, 0);
-	}
-	public static MapLocation getNearest(MapLocation origin, MapLocation[] locations){
-		float bestDistance = Float.MAX_VALUE;
-		MapLocation bestLocation = null;
-		for(MapLocation location: locations){
-			float distance = origin.distanceTo(location);
-			if(distance<bestDistance){
-				bestDistance = distance;
-				bestLocation = location;
-			}
-		}
-		return bestLocation;
 	}
 }
