@@ -18,20 +18,28 @@ public class GardenerRobot {
 	public static void run(RobotController controller) throws GameActionException{
 		GardenerRobot.controller = controller;
 		
-		while(origin==null){
+		findOrigin();
+		
+		while(true){
 			
+			waterTrees();
+			Util.yieldByteCodes();
+		}
+	}
+	public static void setupTrees(){
+		MapLocation location = origin.translate(0, 1+Constants.EPSILON);
+		
+		
+	}
+	public static void findOrigin() throws GameActionException{
+		while(origin==null){
 			int candidateChannel = DynamicBroadcasting.find(Identifier.GARDENER_ORIGIN, UNUSED_GARDENER_ORIGIN);
 			if(candidateChannel!=-1){
 				controller.broadcast(candidateChannel, CompressedData.compressData(Identifier.GARDENER_ORIGIN, USED_GARDENER_ORIGIN));
 				origin = CompressedData.uncompressMapLocation(controller.readBroadcast(candidateChannel-1));
 			}
-			
+			//Explore and find candidates?
 			waterTrees(); //why not :P
-			Util.yieldByteCodes();
-		}
-		while(true){
-			
-			waterTrees();
 			Util.yieldByteCodes();
 		}
 	}
