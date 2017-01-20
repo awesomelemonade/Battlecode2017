@@ -16,7 +16,7 @@ public class RobotPlayer {
 					ArchonRobot.run(controller);
 					break;
 				case GARDENER:
-					addGardener(controller);
+					GardenerRobot.run(controller);
 					break;
 				case SOLDIER:
 					SoldierRobot.run(controller);

@@ -11,7 +11,7 @@ import battlecode.common.RobotInfo;
 public class Util {
 	public static RobotController controller;
 	public static Direction randomDirection(){
-		return new Direction((float) (Math.random()*2*Math.PI));
+		return new Direction((float) (Math.random()*Constants.TWO_PI));
 	}
 	public static Direction toDirection(float x, float y){
 		return new Direction((float)Math.atan2(y, x));

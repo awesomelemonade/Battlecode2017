@@ -6,6 +6,8 @@ import battlecode.common.Team;
 public class Constants {
 	public static Team OTHER_TEAM;
 	
+	public static final float TWO_PI = (float) (Math.PI*2);
+	
 	public static final float ROOT_2 = 1.41421356237f;
 	public static final float EPSILON = 0.00001f;
 

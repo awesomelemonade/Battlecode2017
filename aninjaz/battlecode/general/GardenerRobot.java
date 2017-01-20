@@ -3,6 +3,7 @@ package aninjaz.battlecode.general;
 import aninjaz.battlecode.util.CompressedData;
 import aninjaz.battlecode.util.DynamicBroadcasting;
 import aninjaz.battlecode.util.Identifier;
+import aninjaz.battlecode.util.Pathfinding;
 import battlecode.common.GameActionException;
 import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
@@ -19,6 +20,8 @@ public class GardenerRobot {
 		GardenerRobot.controller = controller;
 		
 		findOrigin();
+		
+		Pathfinding.goTowards(origin);
 		
 		while(true){
 			
