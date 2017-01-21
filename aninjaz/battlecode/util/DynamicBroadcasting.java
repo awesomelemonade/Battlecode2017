@@ -1,5 +1,7 @@
 package aninjaz.battlecode.util;
 
+import java.util.function.IntConsumer;
+
 import battlecode.common.GameActionException;
 import battlecode.common.GameConstants;
 import battlecode.common.RobotController;
@@ -73,5 +75,32 @@ public class DynamicBroadcasting {
 			}
 		}
 		return -1;
+	}
+	public static void findAll(int identifierFind, IntConsumer consumer) throws GameActionException{
+		for(int mapper=0;mapper<DynamicBroadcasting.MAPPERS;++mapper){
+			for(int bit=0;bit<Integer.SIZE;++bit){
+				int compressedDataChannel = DynamicBroadcasting.getDataChannel(mapper, bit);
+				int compressedData = controller.readBroadcast(compressedDataChannel);
+				int identifier = CompressedData.getIdentifier(compressedData);
+				if(identifier==identifierFind){
+					consumer.accept(compressedDataChannel);
+				}
+			}
+		}
+	}
+	public static void findAll(int identifierFind, int dataFind, IntConsumer consumer) throws GameActionException{
+		for(int mapper=0;mapper<DynamicBroadcasting.MAPPERS;++mapper){
+			for(int bit=0;bit<Integer.SIZE;++bit){
+				int compressedDataChannel = DynamicBroadcasting.getDataChannel(mapper, bit);
+				int compressedData = controller.readBroadcast(compressedDataChannel);
+				int identifier = CompressedData.getIdentifier(compressedData);
+				if(identifier==identifierFind){
+					int data = CompressedData.getData(compressedData);
+					if(data==dataFind){
+						consumer.accept(compressedDataChannel);
+					}
+				}
+			}
+		}
 	}
 }
