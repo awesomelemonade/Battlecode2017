@@ -21,7 +21,7 @@ public class RobotPlayer {
 					GardenerRobot.run(controller);
 					break;
 				case SOLDIER:
-					SoldierRobot.run(controller);
+					AggroSoldier.run(controller);
 					break;
 				case LUMBERJACK:
 					LumberjackRobot.run(controller);
