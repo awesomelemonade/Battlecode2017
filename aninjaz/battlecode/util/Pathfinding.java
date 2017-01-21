@@ -2,7 +2,6 @@ package aninjaz.battlecode.util;
 
 import aninjaz.battlecode.general.Constants;
 import aninjaz.battlecode.general.Util;
-import battlecode.common.BodyInfo;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
@@ -24,9 +23,7 @@ public class Pathfinding {
 			if(controller.canMove(bugPathing)){
 				controller.move(bugPathing);
 			}else{
-				System.out.println("Can't move there :(");
-				controller.setIndicatorLine(controller.getLocation(), bugPathing, 1, 0, 0);
-				//controller.setIndicatorDot(controller.getLocation(), 255, 0, 0); //It's surrounded? ;o
+				controller.setIndicatorLine(controller.getLocation(), bugPathing, 0, 0, 0);
 			}
 			distance = controller.getLocation().distanceTo(target);
 			direction = controller.getLocation().directionTo(target);
@@ -40,29 +37,47 @@ public class Pathfinding {
 			controller.setIndicatorDot(controller.getLocation(), 128, 128, 128);
 			return endpoint;
 		}
-		//RobotInfo[] nearbyRobots = controller.senseNearbyRobots(targetDistance);
+		RobotInfo[] nearbyRobots = controller.senseNearbyRobots(targetDistance);
 		TreeInfo[] nearbyTrees = controller.senseNearbyTrees(targetDistance);
 		controller.setIndicatorLine(startpoint, endpoint, 255, 128, 0);
 		for(TreeInfo tree: nearbyTrees){
 			MapLocation t = findNearest(tree.getLocation(), startpoint, endpoint);
-			System.out.println(tree.getLocation()+" - "+startpoint+" - "+endpoint);
 			float fatness = controller.getType().bodyRadius+tree.getRadius();
 			float distance = t.distanceTo(tree.getLocation());
 			controller.setIndicatorDot(t, 255, 0, 128);
 			controller.setIndicatorDot(tree.getLocation(), 128, 0, 128);
-			System.out.println(distance+"<="+fatness+"|"+t);
-			if(distance<=fatness){ //distance<=fatness w/ EPSILON
+			if(distance<=fatness){
 				distance = controller.getLocation().distanceTo(tree.getLocation());
-				System.out.println(fatness+"/"+distance+"="+(fatness/distance));
 				Direction direction = controller.getLocation().directionTo(tree.getLocation());
-				
-				Direction newDirection = direction.rotateLeftRads((float)Math.asin(fatness/distance));
-				if(newDirection.radians!=targetDirection.radians){
-					return bugPathfinding(newDirection, target, targetDistance, tries-1);
+				float angle = (float)Math.asin(fatness/distance);
+				Direction leftDirection = direction.rotateLeftRads(angle);
+				Direction rightDirection = direction.rotateRightRads(angle);
+				Direction finalDirection = startpoint.directionTo(target);
+				if(Math.abs(leftDirection.radiansBetween(finalDirection))<Math.abs(rightDirection.radiansBetween(finalDirection))){
+					return bugPathfinding(leftDirection, target, targetDistance, tries-1);
+				}else{
+					return bugPathfinding(rightDirection, target, targetDistance, tries-1);
 				}
-				/*if(Math.abs(newDirection.radiansBetween(targetDirection))>=Constants.EPSILON){
-					return bugPathfinding(newDirection, targetDistance, tries-1);
-				}*/
+			}
+		}
+		for(RobotInfo robot: nearbyRobots){
+			MapLocation t = findNearest(robot.getLocation(), startpoint, endpoint);
+			float fatness = controller.getType().bodyRadius+robot.getType().bodyRadius;
+			float distance = t.distanceTo(robot.getLocation());
+			controller.setIndicatorDot(t, 255, 0, 128);
+			controller.setIndicatorDot(robot.getLocation(), 128, 0, 128);
+			if(distance<=fatness){
+				distance = controller.getLocation().distanceTo(robot.getLocation());
+				Direction direction = controller.getLocation().directionTo(robot.getLocation());
+				float angle = (float)Math.asin(fatness/distance);
+				Direction leftDirection = direction.rotateLeftRads(angle);
+				Direction rightDirection = direction.rotateRightRads(angle);
+				Direction finalDirection = startpoint.directionTo(target);
+				if(Math.abs(leftDirection.radiansBetween(finalDirection))<Math.abs(rightDirection.radiansBetween(finalDirection))){
+					return bugPathfinding(leftDirection, target, targetDistance, tries-1);
+				}else{
+					return bugPathfinding(rightDirection, target, targetDistance, tries-1);
+				}
 			}
 		}
 		return endpoint; //No Collisions!
