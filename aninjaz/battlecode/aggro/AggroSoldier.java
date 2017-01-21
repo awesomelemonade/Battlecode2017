@@ -1,5 +1,6 @@
-package aninjaz.battlecode.general;
+package aninjaz.battlecode.aggro;
 
+import aninjaz.battlecode.general.Util;
 import aninjaz.battlecode.util.CompressedData;
 import aninjaz.battlecode.util.DynamicBroadcasting;
 import aninjaz.battlecode.util.Identifier;
