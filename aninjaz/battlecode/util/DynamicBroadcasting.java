@@ -59,6 +59,7 @@ public class DynamicBroadcasting {
 		int mapper = controller.readBroadcast(mapperChannel);
 		controller.broadcast(mapperChannel, mapper&(~(1<<mapperBit)));
 	}
+	/*
 	//Utility Functions
 	public static int find(int identifierFind, int dataFind) throws GameActionException{
 		for(int mapper=0;mapper<DynamicBroadcasting.MAPPERS;++mapper){
@@ -103,4 +104,5 @@ public class DynamicBroadcasting {
 			}
 		}
 	}
+	*/
 }
