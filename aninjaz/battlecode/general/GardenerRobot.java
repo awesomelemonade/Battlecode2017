@@ -27,7 +27,7 @@ public class GardenerRobot {
 		Direction direction = Util.randomDirection();
 		
 		while(true){
-			direction = Util.tryRandomMove(direction);
+			//direction = Util.tryRandomMove(direction);
 			waterTrees();
 			Util.yieldByteCodes();
 		}

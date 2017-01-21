@@ -14,10 +14,8 @@ public class Pathfinding {
 	public static void goTowards(MapLocation target) throws GameActionException{
 		float distance = controller.getLocation().distanceTo(target);
 		Direction direction = controller.getLocation().directionTo(target);
-		System.out.println(target);
 		float senseDistance = controller.getType().strideRadius+controller.getType().bodyRadius;
 		while(distance>Constants.EPSILON){
-			System.out.println("Yield: New Turn");
 			controller.setIndicatorDot(target, 0, 255, 0);
 			MapLocation bugPathing = bugPathfinding(direction, target, Math.min(distance, senseDistance), 10);
 			if(controller.canMove(bugPathing)){
@@ -49,26 +47,6 @@ public class Pathfinding {
 			if(distance<=fatness){
 				distance = controller.getLocation().distanceTo(tree.getLocation());
 				Direction direction = controller.getLocation().directionTo(tree.getLocation());
-				float angle = (float)Math.asin(fatness/distance);
-				Direction leftDirection = direction.rotateLeftRads(angle);
-				Direction rightDirection = direction.rotateRightRads(angle);
-				Direction finalDirection = startpoint.directionTo(target);
-				if(Math.abs(leftDirection.radiansBetween(finalDirection))<Math.abs(rightDirection.radiansBetween(finalDirection))){
-					return bugPathfinding(leftDirection, target, targetDistance, tries-1);
-				}else{
-					return bugPathfinding(rightDirection, target, targetDistance, tries-1);
-				}
-			}
-		}
-		for(RobotInfo robot: nearbyRobots){
-			MapLocation t = findNearest(robot.getLocation(), startpoint, endpoint);
-			float fatness = controller.getType().bodyRadius+robot.getType().bodyRadius;
-			float distance = t.distanceTo(robot.getLocation());
-			controller.setIndicatorDot(t, 255, 0, 128);
-			controller.setIndicatorDot(robot.getLocation(), 128, 0, 128);
-			if(distance<=fatness){
-				distance = controller.getLocation().distanceTo(robot.getLocation());
-				Direction direction = controller.getLocation().directionTo(robot.getLocation());
 				float angle = (float)Math.asin(fatness/distance);
 				Direction leftDirection = direction.rotateLeftRads(angle);
 				Direction rightDirection = direction.rotateRightRads(angle);
