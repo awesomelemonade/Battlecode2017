@@ -26,7 +26,7 @@ public class DynamicBroadcasting {
 	 * @return channel to be used in controller.broadcast(); Ranges from [channel-DATA_STRIDE+1, channel]
 	 */
 	public static int getDataChannel(int mapperNumber, int bit){
-		return START_DATA_CONSTANT-mapperNumber*INTERNAL_STRIDE-bit;
+		return START_DATA_CONSTANT-mapperNumber*INTERNAL_STRIDE-bit*DATA_STRIDE;
 	}
 	public static int markNextAvailableMapper() throws GameActionException{
 		for(int mapperNumber=0;mapperNumber<MAPPERS;++mapperNumber){

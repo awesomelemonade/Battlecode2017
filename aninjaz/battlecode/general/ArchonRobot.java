@@ -13,13 +13,16 @@ public class ArchonRobot {
 		ArchonRobot.controller = controller;
 		for(int i=0;i<10;++i){
 			int channel = DynamicBroadcasting.markNextAvailableMapper();
-			controller.broadcast(channel, CompressedData.compressData(Identifier.GARDENER_ORIGIN, 0));
+			System.out.println("Mapped: "+controller.getLocation()+"("+CompressedData.compressMapLocation(controller.getLocation())+") to Channel "+channel);
+			controller.broadcast(channel, CompressedData.compressData(Identifier.GARDENER_ORIGIN, GardenerRobot.UNUSED_GARDENER_ORIGIN));
 			controller.broadcast(channel-1, CompressedData.compressMapLocation(controller.getLocation()));
 		}
+		Direction direction = Util.randomDirection();
 		while(true){
 			if(controller.isBuildReady()){
 				hireGardener();
 			}
+			direction = Util.tryRandomMove(direction);
 			Util.yieldByteCodes();
 		}
 	}
