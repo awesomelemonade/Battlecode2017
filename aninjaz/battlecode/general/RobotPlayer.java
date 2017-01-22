@@ -19,19 +19,19 @@ public class RobotPlayer {
 			try{
 				switch (controller.getType()) {
 				case ARCHON:
-					AggroArchon.run(controller);
+					ArchonRobot.run(controller);
 					break;
 				case GARDENER:
-					AggroGardener.run(controller);
+					GardenerRobot.run(controller);
 					break;
 				case SOLDIER:
-					AggroSoldier.run(controller);
+					SoldierRobot.run(controller);
 					break;
 				case LUMBERJACK:
 					LumberjackRobot.run(controller);
 					break;
 				case SCOUT:
-					AggroScout.run(controller);
+					ScoutRobot.run(controller);
 					break;
 				case TANK:
 					TankRobot.run(controller);

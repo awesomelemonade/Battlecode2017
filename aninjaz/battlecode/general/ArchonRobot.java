@@ -13,8 +13,9 @@ import battlecode.common.TreeInfo;
 
 public class ArchonRobot {
 	private static RobotController controller;
-	private static final float CHECK_TREE_RADIUS = RobotType.GARDENER.bodyRadius+GameConstants.BULLET_TREE_RADIUS*2;
-	private static final float CHECK_ROBOT_RADIUS = CHECK_TREE_RADIUS*2;
+	private static final float CHECK_TREE_RADIUS = RobotType.GARDENER.bodyRadius+GameConstants.BULLET_TREE_RADIUS*3.01f;
+	private static final float CHECK_ROBOT_RADIUS = CHECK_TREE_RADIUS*3.01f;
+	private static final float[] offmapCheck = new float[]{-2.01f, 2.01f};
 	public static void run(RobotController controller) throws GameActionException{
 		ArchonRobot.controller = controller;
 		Direction direction = Util.randomDirection();
@@ -27,6 +28,13 @@ public class ArchonRobot {
 			TreeInfo[] trees = controller.senseNearbyTrees(CHECK_TREE_RADIUS);
 			if(trees.length==0){
 				setOrigin:{
+					for(int i=0;i<offmapCheck.length;++i){
+						for(int j=0;j<offmapCheck.length;++j){
+							if(!controller.onTheMap(controller.getLocation().translate(offmapCheck[i], offmapCheck[j]), GameConstants.BULLET_TREE_RADIUS)){
+								break setOrigin;
+							}
+						}
+					}
 					for(int mapper=0;mapper<DynamicBroadcasting.MAPPERS;++mapper){
 						for(int bit=0;bit<Integer.SIZE;++bit){
 							int compressedDataChannel = DynamicBroadcasting.getDataChannel(mapper, bit);
@@ -60,6 +68,7 @@ public class ArchonRobot {
 		}
 		if(tries>0){
 			controller.hireGardener(direction);
+			controller.broadcast(Constants.CHANNEL_AVAILABLE_GARDENER_ORIGINS, controller.readBroadcast(Constants.CHANNEL_AVAILABLE_GARDENER_ORIGINS)-1);
 		}
 	}
 }
