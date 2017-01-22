@@ -22,7 +22,13 @@ public class RobotPlayer {
 					ArchonRobot.run(controller);
 					break;
 				case GARDENER:
-					GardenerRobot.run(controller);
+					if(controller.readBroadcast(Constants.CHANNEL_SPAWN_GARDENER_COMMANDER)==1){
+						controller.broadcast(Constants.CHANNEL_SPAWN_GARDENER_COMMANDER, 0);
+						GardenerCommander.run(controller);
+					}else{
+						controller.broadcast(Constants.CHANNEL_SPAWN_GARDENER_COMMANDER, 1);
+						GardenerRobot.run(controller);
+					}
 					break;
 				case SOLDIER:
 					SoldierRobot.run(controller);

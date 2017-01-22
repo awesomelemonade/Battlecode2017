@@ -19,4 +19,5 @@ public class Constants {
 	public static final int RANDOM_TRIES = 10;
 	
 	public static final int CHANNEL_AVAILABLE_GARDENER_ORIGINS = 0;
+	public static final int CHANNEL_SPAWN_GARDENER_COMMANDER = 1;
 }

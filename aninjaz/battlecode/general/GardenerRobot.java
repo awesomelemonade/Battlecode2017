@@ -25,27 +25,39 @@ public class GardenerRobot {
 	private static Direction[] plantMovement = new Direction[]
 			{Direction.getSouth(), Direction.getNorth(), Direction.getSouth(), Direction.getNorth(), null, null, null, null};
 	private static final float offsetDistance = 0.001f;
+	private static int useNonBidirectional = 0;
+	public static int goTowards(MapLocation location) throws GameActionException{
+		int status = 0;
+		if(useNonBidirectional>0){
+			status = Pathfinding.goTowardsRight(location);
+			if(status==Pathfinding.HAS_NOT_MOVED){
+				useNonBidirectional = -10;
+			}else{
+				useNonBidirectional--;
+			}
+		}else if(useNonBidirectional<0){
+			status = Pathfinding.goTowardsLeft(location);
+			if(status==Pathfinding.HAS_NOT_MOVED){
+				useNonBidirectional = 10;
+			}else{
+				useNonBidirectional++;
+			}
+		}else{
+			status = Pathfinding.goTowardsBidirectional(location);
+			if(status==Pathfinding.HAS_NOT_MOVED){
+				useNonBidirectional = 10;
+			}
+		}
+		return status;
+	}
 	public static void run(RobotController controller) throws GameActionException{
 		GardenerRobot.controller = controller;
 		
 		findOrigin();
 		
-		Direction direction = Util.randomDirection();
-		int randomMoves = 0;
-		
 		while(true){
-			if(randomMoves>0){
-				direction = Util.tryRandomMove(direction);
-				randomMoves--;
-			}else{
-				int status = Pathfinding.goTowardsRight(origin);
-				if(status==Pathfinding.HAS_NOT_MOVED){
-					direction = Util.randomDirection();
-					randomMoves = 20;
-				}
-				if(status==Pathfinding.REACHED_GOAL){
-					break;
-				}
+			if(goTowards(origin)==Pathfinding.REACHED_GOAL){
+				break;
 			}
 			Util.yieldByteCodes();
 		}
