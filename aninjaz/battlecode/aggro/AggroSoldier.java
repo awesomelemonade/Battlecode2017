@@ -5,6 +5,7 @@ import aninjaz.battlecode.util.CompressedData;
 import aninjaz.battlecode.util.DynamicBroadcasting;
 import aninjaz.battlecode.util.Identifier;
 import aninjaz.battlecode.util.Pathfinding;
+import aninjaz.battlecode.general.Constants;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.GameConstants;
