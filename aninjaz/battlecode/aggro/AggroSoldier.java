@@ -96,7 +96,20 @@ public class AggroSoldier {
 		}
 		for(RobotInfo robot: robots){
 			if(robot.getType()!=RobotType.ARCHON){
-				currentTarget = robot.getID();
+				if(robot.getType()==RobotType.GARDENER){
+					TreeInfo[] nearbyTrees = controller.senseNearbyTrees(robot.getLocation(), RobotType.GARDENER.bodyRadius+1, Constants.OTHER_TEAM);
+					if(nearbyTrees.length==0){
+						currentTarget = robot.getID();
+						return robot;
+					}
+				}else{
+					currentTarget = robot.getID();
+					return robot;
+				}
+			}
+		}
+		for(RobotInfo robot: robots){
+			if(robot.getType()==RobotType.ARCHON){
 				return robot;
 			}
 		}
