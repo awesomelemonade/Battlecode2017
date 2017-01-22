@@ -30,13 +30,9 @@ public class AggroArchon {
 	
 	public static void hireGardener() throws GameActionException{
 		Direction direction = Util.randomDirection();
-		int tries = 10;
-		while((!controller.canHireGardener(direction))&&tries>0){
+		while((!controller.canHireGardener(direction))){
 			direction = Util.randomDirection();
-			tries--;
 		}
-		if(tries>0){
-			controller.hireGardener(direction);
-		}
+		controller.hireGardener(direction);
 	}
 }
