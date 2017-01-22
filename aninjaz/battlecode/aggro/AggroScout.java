@@ -18,7 +18,7 @@ public class AggroScout {
 			if(nearestGardener!=null){
 				Pathfinding.goTowardsScout(nearestGardener.getLocation());
 				if(controller.canFireSingleShot()){
-					controller.fireSingleShot(direction);
+					controller.fireSingleShot(controller.getLocation().directionTo(nearestGardener.getLocation()));
 				}
 			}else{
 				direction = Util.tryRandomMove(direction);
