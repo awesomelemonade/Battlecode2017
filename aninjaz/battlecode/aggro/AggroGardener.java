@@ -9,9 +9,8 @@ public class AggroGardener {
 		Direction move = Util.randomDirection();
 		while(true){
 			Direction direction = Util.randomDirection();
-			RobotType rand = new RobotType[]{RobotType.SOLDIER, RobotType.SCOUT}[(int)(Math.random()*2)];
-			if(controller.canBuildRobot(rand, direction)){
-				controller.buildRobot(rand, direction);
+			if(controller.canBuildRobot(RobotType.SOLDIER, direction)){
+				controller.buildRobot(RobotType.SOLDIER, direction);
 			}
 			move = Util.tryRandomMove(move);
 			Util.yieldByteCodes();
