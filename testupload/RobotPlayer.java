@@ -4,6 +4,6 @@ import battlecode.common.RobotController;
 
 public class RobotPlayer {
 	public static void run(RobotController controller){
-		RobotPlayer.run(controller);
+		aninjaz.battlecode.general.RobotPlayer.run(controller);
 	}
 }
