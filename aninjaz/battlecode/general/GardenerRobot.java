@@ -40,11 +40,34 @@ public class GardenerRobot {
 	public static void findOrigin() throws GameActionException{
 		while(origin==null){
 			controller.setIndicatorDot(controller.getLocation(), 0, 255, 255);
-			int candidateChannel = DynamicBroadcasting.find(Identifier.GARDENER_ORIGIN, UNUSED_GARDENER_ORIGIN);
-			if(candidateChannel!=-1){
-				System.out.println("Found origin: "+candidateChannel+" - "+controller.readBroadcast(candidateChannel));
+			int candidateChannel = 0;
+			float candidateDistance = Float.MAX_VALUE;
+			MapLocation candidateLocation = null;
+			for(int mapper=0;mapper<DynamicBroadcasting.MAPPERS;++mapper){
+				for(int bit=0;bit<Integer.SIZE;++bit){
+					int compressedDataChannel = DynamicBroadcasting.getDataChannel(mapper, bit);
+					int compressedData = controller.readBroadcast(compressedDataChannel);
+					int identifier = CompressedData.getIdentifier(compressedData);
+					if(identifier==Identifier.GARDENER_ORIGIN){
+						int data = CompressedData.getData(compressedData);
+						if(data==UNUSED_GARDENER_ORIGIN){
+							MapLocation location = CompressedData.uncompressMapLocation(controller.readBroadcast(compressedDataChannel-1));
+							controller.setIndicatorDot(location, 128, 128, 128);
+							controller.setIndicatorLine(controller.getLocation(), location, 255, 128, 0);
+							float distance = controller.getLocation().distanceTo(location);
+							if(distance<candidateDistance){
+								candidateChannel = compressedDataChannel;
+								candidateDistance = distance;
+								candidateLocation = location;
+							}
+						}
+					}
+				}
+			}
+			if(candidateLocation!=null){
+				origin = candidateLocation;
 				controller.broadcast(candidateChannel, CompressedData.compressData(Identifier.GARDENER_ORIGIN, USED_GARDENER_ORIGIN));
-				origin = CompressedData.uncompressMapLocation(controller.readBroadcast(candidateChannel-1));
+				controller.broadcast(Constants.CHANNEL_AVAILABLE_GARDENER_ORIGINS, controller.readBroadcast(Constants.CHANNEL_AVAILABLE_GARDENER_ORIGINS)-1);
 			}
 			//Explore and find candidates?
 			waterTrees(); //why not :P

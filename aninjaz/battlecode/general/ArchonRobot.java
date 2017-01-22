@@ -19,8 +19,10 @@ public class ArchonRobot {
 		ArchonRobot.controller = controller;
 		Direction direction = Util.randomDirection();
 		while(true){
-			if(controller.isBuildReady()){
-				hireGardener();
+			if(controller.readBroadcast(Constants.CHANNEL_AVAILABLE_GARDENER_ORIGINS)>=1){
+				if(controller.isBuildReady()){
+					hireGardener();
+				}
 			}
 			TreeInfo[] trees = controller.senseNearbyTrees(CHECK_TREE_RADIUS);
 			if(trees.length==0){
@@ -42,6 +44,7 @@ public class ArchonRobot {
 					System.out.println("Mapped: "+controller.getLocation()+"("+CompressedData.compressMapLocation(controller.getLocation())+") to Channel "+channel);
 					controller.broadcast(channel, CompressedData.compressData(Identifier.GARDENER_ORIGIN, GardenerRobot.UNUSED_GARDENER_ORIGIN));
 					controller.broadcast(channel-1, CompressedData.compressMapLocation(controller.getLocation()));
+					controller.broadcast(Constants.CHANNEL_AVAILABLE_GARDENER_ORIGINS, controller.readBroadcast(Constants.CHANNEL_AVAILABLE_GARDENER_ORIGINS)+1);
 				}
 			}
 			direction = Util.tryRandomMove(direction);
