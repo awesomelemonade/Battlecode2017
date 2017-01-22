@@ -38,7 +38,7 @@ public class AggroSoldier {
 							useNonBidirectional = -10;
 						}else{
 							if(controller.getLocation().distanceTo(initialArchon)>controller.getType().sensorRadius){
-								shoot(controller.getLocation().directionTo(initialArchon));
+								shootSingle(controller.getLocation().directionTo(initialArchon));
 							}
 						}
 						useNonBidirectional--;
@@ -49,7 +49,7 @@ public class AggroSoldier {
 							useNonBidirectional = 10;
 						}else{
 							if(controller.getLocation().distanceTo(initialArchon)>controller.getType().sensorRadius){
-								shoot(controller.getLocation().directionTo(initialArchon));
+								shootSingle(controller.getLocation().directionTo(initialArchon));
 							}
 						}
 						useNonBidirectional++;
@@ -61,7 +61,7 @@ public class AggroSoldier {
 							useNonBidirectional = 10;
 						}
 						if(controller.getLocation().distanceTo(initialArchon)>controller.getType().sensorRadius){
-							shoot(controller.getLocation().directionTo(initialArchon));
+							shootSingle(controller.getLocation().directionTo(initialArchon));
 						}
 					}
 				}
@@ -72,11 +72,14 @@ public class AggroSoldier {
 	public static void shoot(Direction direction) throws GameActionException{
 		if(controller.canFirePentadShot()){
 			controller.firePentadShot(direction);
-		}
-		else if(controller.canFireTriadShot()){
+		}else if(controller.canFireTriadShot()){
 			controller.fireTriadShot(direction);
+		}else if(controller.canFireSingleShot()){
+			controller.fireSingleShot(direction);
 		}
-		else if(controller.canFireSingleShot()){
+	}
+	public static void shootSingle(Direction direction) throws GameActionException{
+		if(controller.canFireSingleShot()){
 			controller.fireSingleShot(direction);
 		}
 	}
