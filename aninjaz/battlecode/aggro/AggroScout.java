@@ -23,6 +23,7 @@ public class AggroScout {
 			}else{
 				direction = Util.tryRandomMove(direction);
 			}
+			Util.yieldByteCodes();
 		}
 	}
 	public static RobotInfo getGardener(RobotInfo[] robots){
