@@ -9,11 +9,13 @@ import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
+import battlecode.common.TreeInfo;
 
 public class AggroSoldier {
 	private static MapLocation initialArchon;
 	private static int currentTarget = -1;
 	private static boolean reachedInitialArchon = false;
+	private static int useNonBidirectional = 0;
 	public static void run(RobotController controller) throws GameActionException{
 		Direction direction = Util.randomDirection();
 		initialArchon = controller.getInitialArchonLocations(Constants.OTHER_TEAM)[0];
@@ -29,12 +31,47 @@ public class AggroSoldier {
 				if(reachedInitialArchon){
 					direction = Util.tryRandomMove(direction);
 				}else{
-					if(Pathfinding.goTowardsBidirectional(initialArchon)==Pathfinding.REACHED_GOAL){
-						reachedInitialArchon = true;
-					}
-					if(controller.getLocation().distanceTo(initialArchon)>controller.getType().sensorRadius){
-						if(controller.canFireSingleShot()){
-							controller.fireSingleShot(controller.getLocation().directionTo(initialArchon));
+					if(useNonBidirectional>0){
+						if(Pathfinding.goTowardsRight(initialArchon)==Pathfinding.HAS_NOT_MOVED){
+							TreeInfo[] nearbyTrees = controller.senseNearbyTrees();
+							if(controller.canFireSingleShot()){
+								controller.fireSingleShot(controller.getLocation().directionTo(nearbyTrees[0].getLocation()));
+							}
+							useNonBidirectional = -10;
+						}else{
+							if(controller.getLocation().distanceTo(initialArchon)>controller.getType().sensorRadius){
+								if(controller.canFireSingleShot()){
+									controller.fireSingleShot(controller.getLocation().directionTo(initialArchon));
+								}
+							}
+						}
+						useNonBidirectional--;
+					}else if(useNonBidirectional<0){
+						if(Pathfinding.goTowardsLeft(initialArchon)==Pathfinding.HAS_NOT_MOVED){
+							TreeInfo[] nearbyTrees = controller.senseNearbyTrees();
+							if(controller.canFireSingleShot()){
+								controller.fireSingleShot(controller.getLocation().directionTo(nearbyTrees[0].getLocation()));
+							}
+							useNonBidirectional = 10;
+						}else{
+							if(controller.getLocation().distanceTo(initialArchon)>controller.getType().sensorRadius){
+								if(controller.canFireSingleShot()){
+									controller.fireSingleShot(controller.getLocation().directionTo(initialArchon));
+								}
+							}
+						}
+						useNonBidirectional++;
+					}else{
+						int status = Pathfinding.goTowardsBidirectional(initialArchon);
+						if(status==Pathfinding.REACHED_GOAL){
+							reachedInitialArchon = true;
+						}else if(status==Pathfinding.HAS_NOT_MOVED){
+							useNonBidirectional = 10;
+						}
+						if(controller.getLocation().distanceTo(initialArchon)>controller.getType().sensorRadius){
+							if(controller.canFireSingleShot()){
+								controller.fireSingleShot(controller.getLocation().directionTo(initialArchon));
+							}
 						}
 					}
 				}

@@ -32,7 +32,7 @@ public class GardenerRobot {
 				direction = Util.tryRandomMove(direction);
 				randomMoves--;
 			}else{
-				int status = Pathfinding.goTowards(startOrigin);
+				int status = Pathfinding.goTowardsRight(startOrigin);
 				if(status==Pathfinding.HAS_NOT_MOVED){
 					direction = Util.randomDirection();
 					randomMoves = 20;
