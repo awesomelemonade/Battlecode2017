@@ -14,7 +14,7 @@ import battlecode.common.TreeInfo;
 public class GardenerRobot {
 	public static final int UNUSED_GARDENER_ORIGIN = 0;
 	public static final int USED_GARDENER_ORIGIN = 1;
-	private static final float WATER_RADIUS = 1;
+	private static final float WATER_RADIUS = 3f;
 	private static RobotController controller;
 	private static MapLocation origin;
 	private static MapLocation startOrigin;

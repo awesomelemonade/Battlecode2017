@@ -9,6 +9,7 @@ import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
+import battlecode.common.Team;
 import battlecode.common.TreeInfo;
 
 public class AggroSoldier {
@@ -25,43 +26,21 @@ public class AggroSoldier {
 			RobotInfo[] nearbyRobots = controller.senseNearbyRobots(-1, Constants.OTHER_TEAM);
 			RobotInfo bestRobot = getBestRobot(nearbyRobots);
 			if(bestRobot!=null){
-				Pathfinding.goTowardsBidirectional(bestRobot.getLocation());
-				shoot(controller.getLocation().directionTo(bestRobot.getLocation()));
+				goTowards(bestRobot.getLocation());
+				shootRobot(bestRobot);
 			}else{
 				if(reachedInitialArchon){
 					direction = Util.tryRandomMove(direction);
 				}else{
-					if(useNonBidirectional>0){
-						if(Pathfinding.goTowardsRight(initialArchon)==Pathfinding.HAS_NOT_MOVED){
-							TreeInfo[] nearbyTrees = controller.senseNearbyTrees();
-							shoot(controller.getLocation().directionTo(nearbyTrees[0].getLocation()));
-							useNonBidirectional = -10;
-						}else{
-							if(controller.getLocation().distanceTo(initialArchon)>controller.getType().sensorRadius){
-								shootSingle(controller.getLocation().directionTo(initialArchon));
-							}
-						}
-						useNonBidirectional--;
-					}else if(useNonBidirectional<0){
-						if(Pathfinding.goTowardsLeft(initialArchon)==Pathfinding.HAS_NOT_MOVED){
-							TreeInfo[] nearbyTrees = controller.senseNearbyTrees();
-							shoot(controller.getLocation().directionTo(nearbyTrees[0].getLocation()));
-							useNonBidirectional = 10;
-						}else{
-							if(controller.getLocation().distanceTo(initialArchon)>controller.getType().sensorRadius){
-								shootSingle(controller.getLocation().directionTo(initialArchon));
-							}
-						}
-						useNonBidirectional++;
+					int status = goTowards(initialArchon);
+					if(status==Pathfinding.REACHED_GOAL){
+						reachedInitialArchon = true;
+					}else if(status==Pathfinding.HAS_NOT_MOVED){
+						TreeInfo[] nearbyTrees = controller.senseNearbyTrees(-1, Team.NEUTRAL);
+						shootSingle(nearbyTrees[0].getLocation());
 					}else{
-						int status = Pathfinding.goTowardsBidirectional(initialArchon);
-						if(status==Pathfinding.REACHED_GOAL){
-							reachedInitialArchon = true;
-						}else if(status==Pathfinding.HAS_NOT_MOVED){
-							useNonBidirectional = 10;
-						}
 						if(controller.getLocation().distanceTo(initialArchon)>controller.getType().sensorRadius){
-							shootSingle(controller.getLocation().directionTo(initialArchon));
+							shootSingle(initialArchon);
 						}
 					}
 				}
@@ -69,7 +48,37 @@ public class AggroSoldier {
 			Util.yieldByteCodes();
 		}
 	}
-	public static void shoot(Direction direction) throws GameActionException{
+	public static int goTowards(MapLocation location) throws GameActionException{
+		int status = 0;
+		if(useNonBidirectional>0){
+			status = Pathfinding.goTowardsRight(location);
+			if(status==Pathfinding.HAS_NOT_MOVED){
+				useNonBidirectional = -10;
+			}else{
+				useNonBidirectional--;
+			}
+		}else if(useNonBidirectional<0){
+			status = Pathfinding.goTowardsLeft(location);
+			if(status==Pathfinding.HAS_NOT_MOVED){
+				useNonBidirectional = 10;
+			}else{
+				useNonBidirectional++;
+			}
+		}else{
+			status = Pathfinding.goTowardsBidirectional(location);
+			if(status==Pathfinding.HAS_NOT_MOVED){
+				useNonBidirectional = 10;
+			}
+		}
+		return status;
+	}
+	public static void shootRobot(RobotInfo robot) throws GameActionException{
+		if(robot.getType()==RobotType.GARDENER||robot.getType()==RobotType.ARCHON){
+			if(controller.getRoundNum()>600&&controller.getTeamBullets()<120){
+				return;
+			}
+		}
+		Direction direction = controller.getLocation().directionTo(robot.getLocation());
 		if(controller.canFirePentadShot()){
 			controller.firePentadShot(direction);
 		}else if(controller.canFireTriadShot()){
@@ -78,7 +87,11 @@ public class AggroSoldier {
 			controller.fireSingleShot(direction);
 		}
 	}
-	public static void shootSingle(Direction direction) throws GameActionException{
+	public static void shootSingle(MapLocation location) throws GameActionException{
+		if(controller.getRoundNum()>600&&controller.getTeamBullets()<120){
+			return;
+		}
+		Direction direction = controller.getLocation().directionTo(location);
 		if(controller.canFireSingleShot()){
 			controller.fireSingleShot(direction);
 		}
@@ -101,6 +114,17 @@ public class AggroSoldier {
 					if(nearbyTrees.length==0){
 						currentTarget = robot.getID();
 						return robot;
+					}else{
+						checkTrees:{
+							float distance = controller.getLocation().distanceTo(robot.getLocation());
+							for(TreeInfo tree: nearbyTrees){
+								if(controller.getLocation().distanceTo(tree.getLocation())<distance){
+									break checkTrees;
+								}
+							}
+							currentTarget = robot.getID();
+							return robot;
+						}
 					}
 				}else{
 					currentTarget = robot.getID();
