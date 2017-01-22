@@ -1,5 +1,6 @@
 package aninjaz.battlecode.general;
 
+import aninjaz.battlecode.aggro.AggroArchon;
 import aninjaz.battlecode.aggro.AggroGardener;
 import aninjaz.battlecode.aggro.AggroSoldier;
 import aninjaz.battlecode.util.DynamicBroadcasting;
@@ -17,7 +18,7 @@ public class RobotPlayer {
 			try{
 				switch (controller.getType()) {
 				case ARCHON:
-					ArchonRobot.run(controller);
+					AggroArchon.run(controller);
 					break;
 				case GARDENER:
 					AggroGardener.run(controller);
