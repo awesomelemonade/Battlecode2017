@@ -1,7 +1,5 @@
 package aninjaz.battlecode.util;
 
-import java.util.function.IntConsumer;
-
 import battlecode.common.GameActionException;
 import battlecode.common.GameConstants;
 import battlecode.common.RobotController;

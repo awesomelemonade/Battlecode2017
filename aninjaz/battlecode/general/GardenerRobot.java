@@ -22,7 +22,9 @@ public class GardenerRobot {
 		
 		findOrigin();
 		
-		Pathfinding.goTowards(origin);
+		while(Pathfinding.goTowards(origin)!=Pathfinding.REACHED_GOAL){
+			Util.yieldByteCodes();
+		}
 		
 		Direction direction = Util.randomDirection();
 		
