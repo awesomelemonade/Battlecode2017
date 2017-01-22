@@ -70,7 +70,13 @@ public class AggroSoldier {
 		}
 	}
 	public static void shoot(Direction direction) throws GameActionException{
-		if(controller.canFireSingleShot()){
+		if(controller.canFirePentadShot()){
+			controller.firePentadShot(direction);
+		}
+		else if(controller.canFireTriadShot()){
+			controller.fireTriadShot(direction);
+		}
+		else if(controller.canFireSingleShot()){
 			controller.fireSingleShot(direction);
 		}
 	}
