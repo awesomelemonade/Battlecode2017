@@ -35,6 +35,6 @@ public class AggroScout {
 				return robot;
 			}
 		}
-		return null;
+		return robots[0];
 	}
 }

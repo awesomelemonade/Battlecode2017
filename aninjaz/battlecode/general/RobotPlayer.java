@@ -2,6 +2,7 @@ package aninjaz.battlecode.general;
 
 import aninjaz.battlecode.aggro.AggroArchon;
 import aninjaz.battlecode.aggro.AggroGardener;
+import aninjaz.battlecode.aggro.AggroScout;
 import aninjaz.battlecode.aggro.AggroSoldier;
 import aninjaz.battlecode.util.DynamicBroadcasting;
 import aninjaz.battlecode.util.Pathfinding;
@@ -30,7 +31,7 @@ public class RobotPlayer {
 					LumberjackRobot.run(controller);
 					break;
 				case SCOUT:
-					ScoutRobot.run(controller);
+					AggroScout.run(controller);
 					break;
 				case TANK:
 					TankRobot.run(controller);
