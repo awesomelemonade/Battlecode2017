@@ -17,25 +17,40 @@ public class GardenerRobot {
 	private static final float WATER_RADIUS = 1;
 	private static RobotController controller;
 	private static MapLocation origin;
+	private static MapLocation startOrigin;
 	public static void run(RobotController controller) throws GameActionException{
 		GardenerRobot.controller = controller;
 		
 		findOrigin();
-		
-		while(Pathfinding.goTowards(origin)!=Pathfinding.REACHED_GOAL){
-			Util.yieldByteCodes();
-		}
+		startOrigin = origin.translate(0, -1-Constants.EPSILON);
 		
 		Direction direction = Util.randomDirection();
+		int randomMoves = 0;
 		
 		while(true){
-			//direction = Util.tryRandomMove(direction);
+			if(randomMoves>0){
+				direction = Util.tryRandomMove(direction);
+				randomMoves--;
+			}else{
+				int status = Pathfinding.goTowards(startOrigin);
+				if(status==Pathfinding.HAS_NOT_MOVED){
+					direction = Util.randomDirection();
+					randomMoves = 20;
+				}
+				if(status==Pathfinding.REACHED_GOAL){
+					break;
+				}
+			}
+			Util.yieldByteCodes();
+		}
+		Util.yieldByteCodes();
+		
+		while(true){
 			waterTrees();
 			Util.yieldByteCodes();
 		}
 	}
 	public static void setupTrees(){
-		MapLocation location = origin.translate(0, 1+Constants.EPSILON);
 		
 		
 	}
