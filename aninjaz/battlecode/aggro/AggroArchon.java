@@ -5,6 +5,7 @@ import aninjaz.battlecode.general.Util;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
+import battlecode.common.RobotInfo;
 
 public class AggroArchon {
 	private static RobotController controller;
@@ -14,8 +15,12 @@ public class AggroArchon {
 		Direction direction = Util.randomDirection();
 		hireGardener();
 		while(true){
-			if(controller.senseNearbyRobots(-1,Constants.OTHER_TEAM).length>0){
-				controller.move(controller.getLocation().directionTo(controller.senseNearbyRobots(-1,Constants.OTHER_TEAM)[0].getLocation()).opposite());
+			RobotInfo[] nearbyRobots = controller.senseNearbyRobots(-1, Constants.OTHER_TEAM);
+			if(nearbyRobots.length>0){
+				Direction opposite = controller.getLocation().directionTo(nearbyRobots[0].getLocation()).opposite();
+				if(controller.canMove(opposite)){
+					controller.move(opposite);
+				}
 			}else{
 				direction = Util.tryRandomMove(direction);
 			}
