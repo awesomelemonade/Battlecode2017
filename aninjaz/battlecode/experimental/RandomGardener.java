@@ -2,6 +2,7 @@ package aninjaz.battlecode.experimental;
 
 import aninjaz.battlecode.general.Constants;
 import aninjaz.battlecode.general.Util;
+import aninjaz.battlecode.util.Pathfinding;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.GameConstants;
@@ -12,25 +13,52 @@ import battlecode.common.TreeInfo;
 public class RandomGardener {
 	private static final float WATER_RADIUS = 2f;
 	private static final float PLANT_RADIUS = 3.01f;
-	private static final float WANDER_RADIUS = 2.5f;
+	private static final float WANDERING_RADIUS = 4f;
 	private static RobotController controller;
 	public static void run(RobotController controller) throws GameActionException{
 		RandomGardener.controller = controller;
 		Direction direction = Util.randomDirection();
 		while(true){
 			tryPlantTreesOnBorder();
-			int tries = 10;
-			TreeInfo[] nearbyTrees = controller.senseNearbyTrees(WANDER_RADIUS, controller.getTeam());
-			while(((!controller.canMove(direction))||(!validDirection(direction, nearbyTrees)))&&tries>0){
-				direction = Util.randomDirection();
-				tries--;
-			}
-			if(tries>0){
-				controller.move(direction);
+			TreeInfo[] nearbyTrees = controller.senseNearbyTrees(-1, controller.getTeam());
+			TreeInfo bestTree = findTreeWithLeastHealth(nearbyTrees);
+			if(bestTree==null){
+				direction = Util.tryRandomMove(direction);
+			}else{
+				if(bestTree.getHealth()/bestTree.getMaxHealth()<0.9f){
+					Pathfinding.goTowardsBidirectional(bestTree.getLocation());
+					direction = Util.randomDirection();
+				}else{
+					if(controller.getLocation().distanceTo(bestTree.getLocation())>WANDERING_RADIUS){
+						Pathfinding.goTowardsBidirectional(bestTree.getLocation());
+						direction = Util.randomDirection();
+					}else{
+						direction = generalRandomMove(direction);
+					}
+				}
 			}
 			waterTrees();
 			Util.yieldByteCodes();
 		}
+	}
+	private static Direction generalRandomMove(Direction direction) throws GameActionException {
+		for(Direction dir: Constants.CARDINAL_DIRECTIONS){
+			if(!controller.onTheMap(controller.getLocation().add(dir, 3f))){
+				return dir.opposite();
+			}
+		}
+		return direction;
+	}
+	public static TreeInfo findTreeWithLeastHealth(TreeInfo[] trees){
+		float leastHealth = GameConstants.BULLET_TREE_MAX_HEALTH+1;
+		TreeInfo bestTree = null;
+		for(TreeInfo tree: trees){
+			if(tree.getHealth()<leastHealth){
+				bestTree = tree;
+				leastHealth = tree.getHealth();
+			}
+		}
+		return bestTree;
 	}
 	public static void tryPlantTreesOnBorder() throws GameActionException{
 		if(!controller.isBuildReady()){
@@ -95,21 +123,6 @@ public class RandomGardener {
 			controller.plantTree(bestRight);
 			return;
 		}
-	}
-	public static boolean validDirection(Direction direction, TreeInfo[] nearbyTrees) throws GameActionException{
-		if(!controller.onTheMap(controller.getLocation().add(direction), 2.5f)){
-			return false;
-		}
-		if(nearbyTrees.length==0){
-			return true;
-		}
-		MapLocation location = controller.getLocation().add(direction);
-		for(TreeInfo tree: nearbyTrees){
-			if(location.distanceTo(tree.getLocation())<WANDER_RADIUS){
-				return true;
-			}
-		}
-		return false;
 	}
 	public static void waterTrees() throws GameActionException{
 		TreeInfo[] nearbyTrees = controller.senseNearbyTrees(WATER_RADIUS, controller.getTeam());
