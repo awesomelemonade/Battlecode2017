@@ -17,6 +17,7 @@ public class GardenerRobot {
 	private static final float WATER_RADIUS = 2f;
 	private static RobotController controller;
 	private static MapLocation origin;
+	private static int originChannel; //TODO: Unset gardener origin after gardener dies
 	private static Direction[] plantOffset = new Direction[]
 			{Constants.SOUTH_WEST, Constants.NORTH_WEST, Constants.SOUTH_EAST, Constants.NORTH_EAST};
 	private static Direction[] plantDirection = new Direction[]
@@ -52,12 +53,20 @@ public class GardenerRobot {
 	}
 	public static void run(RobotController controller) throws GameActionException{
 		GardenerRobot.controller = controller;
+		ArchonRobot.controller = controller;
 		
 		findOrigin();
 		
 		while(true){
 			if(goTowards(origin)==Pathfinding.REACHED_GOAL){
 				break;
+			}
+			int channel = ArchonRobot.checkValidGardenerOrigin();
+			if(channel!=-1){
+				controller.broadcast(originChannel, CompressedData.compressData(Identifier.GARDENER_ORIGIN, UNUSED_GARDENER_ORIGIN));
+				origin = controller.getLocation();
+				originChannel = channel;
+				controller.broadcast(channel, CompressedData.compressData(Identifier.GARDENER_ORIGIN, USED_GARDENER_ORIGIN));
 			}
 			Util.yieldByteCodes();
 		}
@@ -174,6 +183,7 @@ public class GardenerRobot {
 			}
 			if(candidateLocation!=null){
 				origin = candidateLocation;
+				originChannel = candidateChannel;
 				controller.broadcast(candidateChannel, CompressedData.compressData(Identifier.GARDENER_ORIGIN, USED_GARDENER_ORIGIN));
 			}
 			//Explore and find candidates?

@@ -16,6 +16,10 @@ public class Constants {
 	public static final Direction SOUTH_WEST = new Direction(5f*ROOT_2/2f);
 	public static final Direction SOUTH_EAST = new Direction(7f*ROOT_2/2f);
 	
+	public static final Direction[] CARDINAL_DIRECTIONS = new Direction[]{
+			Direction.getNorth(), Direction.getSouth(), Direction.getWest(), Direction.getEast()
+	};
+	
 	public static final int RANDOM_TRIES = 10;
 	
 	public static final int CHANNEL_AVAILABLE_GARDENER_ORIGINS = 0;

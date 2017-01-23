@@ -4,6 +4,7 @@ import aninjaz.battlecode.aggro.AggroArchon;
 import aninjaz.battlecode.aggro.AggroGardener;
 import aninjaz.battlecode.aggro.AggroScout;
 import aninjaz.battlecode.aggro.AggroSoldier;
+import aninjaz.battlecode.experimental.RandomGardener;
 import aninjaz.battlecode.util.DynamicBroadcasting;
 import aninjaz.battlecode.util.Pathfinding;
 import battlecode.common.*;
@@ -22,13 +23,7 @@ public class RobotPlayer {
 					ArchonRobot.run(controller);
 					break;
 				case GARDENER:
-					if(controller.readBroadcast(Constants.CHANNEL_SPAWN_GARDENER_COMMANDER)==1){
-						controller.broadcast(Constants.CHANNEL_SPAWN_GARDENER_COMMANDER, 0);
-						GardenerCommander.run(controller);
-					}else{
-						controller.broadcast(Constants.CHANNEL_SPAWN_GARDENER_COMMANDER, 1);
-						GardenerRobot.run(controller);
-					}
+					RandomGardener.run(controller);
 					break;
 				case SOLDIER:
 					SoldierRobot.run(controller);
