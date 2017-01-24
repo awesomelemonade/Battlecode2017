@@ -1,6 +1,5 @@
 package aninjaz.battlecode.util;
 
-import aninjaz.battlecode.general.Constants;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
@@ -55,7 +54,6 @@ public class Pathfinding {
 		}
 		float angle1 = direction.radiansBetween(angles[0]);
 		float angle2 = angles[1].radiansBetween(direction);
-		System.out.println(angle1+" - "+angle2);
 		if(angle1<angle2){
 			return currentLocation.add(angles[0], targetDistance);
 		}else{
@@ -68,7 +66,6 @@ public class Pathfinding {
 	//Tangent Bug Pathfinding
 	public static MapLocation pathfind(Direction direction, float targetDistance) throws GameActionException{
 		currentLocation = controller.getLocation();
-		controller.setIndicatorLine(currentLocation, currentLocation.add(direction, 3f), 0, 255, 0);
 		MapLocation target = currentLocation.add(direction, targetDistance);
 		nearbyRobots = controller.senseNearbyRobots(targetDistance);
 		nearbyTrees = controller.senseNearbyTrees(targetDistance); //for scouts, we can just set nearbyTrees to an empty array
@@ -77,7 +74,6 @@ public class Pathfinding {
 		}
 		generateTangentAngles();
 		Direction[] angles = splitAngles(direction, direction, 0, 0, 10);
-		System.out.println("Splits: "+angles[0]+" - "+angles[1]);
 		if(angles[0]==null&&angles[1]==null){
 			return pathfind(direction, Math.max(0, targetDistance-1));
 		}
@@ -89,7 +85,6 @@ public class Pathfinding {
 		}
 		float angle1 = direction.radiansBetween(angles[0]);
 		float angle2 = angles[1].radiansBetween(direction);
-		System.out.println(angle1+" - "+angle2);
 		if(angle1<angle2){
 			return currentLocation.add(angles[0], targetDistance);
 		}else{
@@ -117,20 +112,8 @@ public class Pathfinding {
 			treeLeftAngles[i] = direction.rotateLeftRads(angle);
 			treeRightAngles[i] = direction.rotateRightRads(angle);
 		}
-		for(Direction direction: treeLeftAngles){
-			controller.setIndicatorLine(controller.getLocation(), controller.getLocation().add(direction, 7f), 0, 255, 255);
-		}
-		for(Direction direction: treeRightAngles){
-			controller.setIndicatorLine(controller.getLocation(), controller.getLocation().add(direction, 7f), 0, 0, 255);
-		}
 	}
 	public static Direction[] splitAngles(Direction leftDirection, Direction rightDirection, float left, float right, int tries) throws GameActionException{
-		if(leftDirection!=null){
-			controller.setIndicatorLine(controller.getLocation(), controller.getLocation().add(leftDirection, 1.5f), 255, 0, 0);
-		}
-		if(rightDirection!=null){
-			controller.setIndicatorLine(controller.getLocation(), controller.getLocation().add(rightDirection, 1.5f), 255, 128, 0);
-		}
 		if(tries<=0){
 			controller.setIndicatorDot(controller.getLocation(), 128, 128, 128);
 			return new Direction[]{leftDirection, rightDirection};
@@ -159,9 +142,7 @@ public class Pathfinding {
 			Direction leftAngle = treeLeftAngles[i];
 			Direction rightAngle = treeRightAngles[i];
 			if(inBetween(leftDirection, leftAngle, rightAngle)){
-				System.out.println("LEFT INTERSECTION: "+leftDirection+" - "+leftAngle+" - "+rightAngle+" - "+left);
 				left+=leftDirection.radiansBetween(leftAngle);
-				System.out.println("AFTER: "+left);
 				if(left>=Math.PI){
 					leftDirection = null;
 				}else{
@@ -169,9 +150,7 @@ public class Pathfinding {
 				}
 			}
 			if(inBetween(rightDirection, leftAngle, rightAngle)){
-				System.out.println("RIGHT INTERSECTION: "+rightDirection+" - "+leftAngle+" - "+rightAngle+" - "+right);
 				right+=rightDirection.radiansBetween(rightAngle);
-				System.out.println("AFTER: "+right);
 				if(right<=-Math.PI){
 					rightDirection = null;
 				}else{
@@ -191,9 +170,7 @@ public class Pathfinding {
 		float angle1 = Math.abs(x.radiansBetween(a));
 		float angle2 = Math.abs(x.radiansBetween(b));
 		float total = Math.abs(a.radiansBetween(b));
-		//return Math.abs((angle1+angle2)-total)<Constants.EPSILON;
 		return angle1+angle2==total;
-		//return (x.radiansBetween(a)*x.radiansBetween(b)<0); //radians between are opposites; one is positive, one is negative
 	}
 	public static float getTangentAngle(MapLocation location, float radius){
 		return (float) Math.asin((radius+bodyRadius)/controller.getLocation().distanceTo(location));

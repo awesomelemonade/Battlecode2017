@@ -37,10 +37,10 @@ public class AggroSoldier {
 				if(reachedInitialArchon){
 					direction = Util.tryRandomMove(direction);
 				}else{
+					controller.setIndicatorDot(initialArchon, 0, 255, 0);
 					MapLocation location = Pathfinding.pathfind(initialArchon);
 					if(controller.canMove(location)){
 						controller.move(location);
-						controller.setIndicatorLine(controller.getLocation(), location, 0, 255, 255);
 					}else{
 						controller.setIndicatorLine(controller.getLocation(), location, 0, 0, 0);
 					}
