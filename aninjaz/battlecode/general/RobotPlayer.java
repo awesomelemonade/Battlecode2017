@@ -52,7 +52,8 @@ public class RobotPlayer {
 				return AGGRO_STRAT;
 			}
 		}
-		return MIDRANGE_STRAT;
+		return AGGRO_STRAT;
+		//return MIDRANGE_STRAT;
 	}
 	public static void runAggroStrat() throws Exception{
 		switch (controller.getType()) {

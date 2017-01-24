@@ -35,7 +35,7 @@ public class AggroArchon {
 								continue;
 							}else{
 								controller.setIndicatorLine(controller.getLocation(), tree.getLocation(), 255, 255, 0);
-								MapLocation location = Pathfinding.pathfind(tree.getLocation());
+								MapLocation location = Pathfinding.pathfind(tree.getLocation(), tree.getRadius());
 								if(controller.canMove(location)){
 									controller.move(location);
 								}else{

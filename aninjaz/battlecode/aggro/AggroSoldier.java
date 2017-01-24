@@ -24,13 +24,11 @@ public class AggroSoldier {
 			RobotInfo[] nearbyRobots = controller.senseNearbyRobots(-1, Constants.OTHER_TEAM);
 			RobotInfo bestRobot = getBestRobot(nearbyRobots);
 			if(bestRobot!=null){
-				if(controller.getLocation().distanceTo(bestRobot.getLocation())>1){
-					MapLocation location = Pathfinding.pathfind(bestRobot.getLocation());
-					if(controller.canMove(location)){
+				MapLocation location = Pathfinding.pathfind(bestRobot.getLocation(), bestRobot.getRadius());
+				if(controller.canMove(location)){
 						controller.move(location);
-					}else{
-						controller.setIndicatorLine(controller.getLocation(), location, 0, 0, 0);
-					}
+				}else{
+					controller.setIndicatorLine(controller.getLocation(), location, 0, 0, 0);
 				}
 				shootRobot(bestRobot);
 			}else{
@@ -44,7 +42,7 @@ public class AggroSoldier {
 					}else{
 						controller.setIndicatorLine(controller.getLocation(), location, 0, 0, 0);
 					}
-					if(location.distanceTo(initialArchon)<2f){
+					if(location.distanceTo(initialArchon)<1f){
 						reachedInitialArchon = true;
 					}
 					if(controller.getLocation().distanceTo(initialArchon)>controller.getType().sensorRadius){

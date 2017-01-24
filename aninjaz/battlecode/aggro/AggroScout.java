@@ -18,7 +18,7 @@ public class AggroScout {
 			RobotInfo nearestGardener = getGardener(nearbyRobots);
 			if(nearestGardener!=null){
 				if(controller.getLocation().distanceTo(nearestGardener.getLocation())>1){
-					MapLocation location = Pathfinding.pathfindScout(nearestGardener.getLocation());
+					MapLocation location = Pathfinding.pathfindScout(nearestGardener.getLocation(), nearestGardener.getRadius());
 					if(controller.canMove(location)){
 						controller.move(location);
 					}else{
