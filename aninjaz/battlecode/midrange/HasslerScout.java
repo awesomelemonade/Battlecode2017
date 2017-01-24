@@ -5,6 +5,7 @@ import aninjaz.battlecode.util.Pathfinding;
 import aninjaz.battlecode.general.Constants;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
+import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
@@ -22,8 +23,11 @@ public class HasslerScout {
 						if(controller.canShake(tree.getID())){
 							controller.shake(tree.getID());
 						}else{
-							if(Pathfinding.goTowardsScout(tree.getLocation())==Pathfinding.HAS_NOT_MOVED){
-								direction = Util.tryRandomMove(direction);
+							MapLocation location = Pathfinding.pathfindScout(tree.getLocation());
+							if(controller.canMove(location)){
+								controller.move(location);
+							}else{
+								controller.setIndicatorLine(controller.getLocation(), location, 0, 0, 0);
 							}
 						}
 					}
@@ -33,7 +37,12 @@ public class HasslerScout {
 				RobotInfo[] nearbyRobots = controller.senseNearbyRobots(-1, Constants.OTHER_TEAM);
 				RobotInfo nearestGardener = getGardener(nearbyRobots);
 				if(nearestGardener!=null){
-					Pathfinding.goTowardsScout(nearestGardener.getLocation());
+					MapLocation location = Pathfinding.pathfindScout(nearestGardener.getLocation());
+					if(controller.canMove(location)){
+						controller.move(location);
+					}else{
+						controller.setIndicatorLine(controller.getLocation(), location, 0, 0, 0);
+					}
 					if(controller.canFireSingleShot()){
 						controller.fireSingleShot(controller.getLocation().directionTo(nearestGardener.getLocation()));
 					}
