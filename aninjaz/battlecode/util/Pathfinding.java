@@ -61,7 +61,8 @@ public class Pathfinding {
 		}
 	}
 	public static MapLocation pathfind(MapLocation goal) throws GameActionException{
-		return pathfind(controller.getLocation().directionTo(goal), Math.min(controller.getLocation().distanceTo(goal)-1.1f, sensorRadius));
+		//controller.setIndicatorLine(controller.getLocation(), goal, 0, 255, 255);
+		return pathfind(controller.getLocation().directionTo(goal), Math.min(controller.getLocation().distanceTo(goal), sensorRadius));
 	}
 	//Tangent Bug Pathfinding
 	public static MapLocation pathfind(Direction direction, float targetDistance) throws GameActionException{
@@ -112,9 +113,16 @@ public class Pathfinding {
 			treeLeftAngles[i] = direction.rotateLeftRads(angle);
 			treeRightAngles[i] = direction.rotateRightRads(angle);
 		}
+		for (Direction direction : treeLeftAngles) {
+			controller.setIndicatorLine(controller.getLocation(), controller.getLocation().add(direction, 7f), 0, 255, 255);
+		}
+		for (Direction direction : treeRightAngles) {
+			controller.setIndicatorLine(controller.getLocation(), controller.getLocation().add(direction, 7f), 0, 0, 255);
+		}
 	}
 	public static Direction[] splitAngles(Direction leftDirection, Direction rightDirection, float left, float right, int tries) throws GameActionException{
 		if(tries<=0){
+			System.out.println("MORE THAN 10 TRIES :(");
 			controller.setIndicatorDot(controller.getLocation(), 128, 128, 128);
 			return new Direction[]{leftDirection, rightDirection};
 		}
@@ -122,7 +130,9 @@ public class Pathfinding {
 			Direction leftAngle = robotLeftAngles[i];
 			Direction rightAngle = robotRightAngles[i];
 			if(inBetween(leftDirection, leftAngle, rightAngle)){
+				System.out.println("LEFT INTERSECTION: "+leftDirection+" - "+leftAngle+" - "+rightAngle+" - "+left);
 				left+=leftDirection.radiansBetween(leftAngle);
+				System.out.println("AFTER: "+left);
 				if(left>=Math.PI){
 					leftDirection = null;
 				}else{
@@ -130,7 +140,9 @@ public class Pathfinding {
 				}
 			}
 			if(inBetween(rightDirection, leftAngle, rightAngle)){
+				System.out.println("RIGHT INTERSECTION: "+rightDirection+" - "+leftAngle+" - "+rightAngle+" - "+right);
 				right+=rightDirection.radiansBetween(rightAngle);
+				System.out.println("AFTER: "+right);
 				if(right<=-Math.PI){
 					rightDirection = null;
 				}else{
@@ -142,7 +154,9 @@ public class Pathfinding {
 			Direction leftAngle = treeLeftAngles[i];
 			Direction rightAngle = treeRightAngles[i];
 			if(inBetween(leftDirection, leftAngle, rightAngle)){
+				System.out.println("LEFT INTERSECTION: "+leftDirection+" - "+leftAngle+" - "+rightAngle+" - "+left);
 				left+=leftDirection.radiansBetween(leftAngle);
+				System.out.println("AFTER: "+left);
 				if(left>=Math.PI){
 					leftDirection = null;
 				}else{
@@ -150,7 +164,9 @@ public class Pathfinding {
 				}
 			}
 			if(inBetween(rightDirection, leftAngle, rightAngle)){
+				System.out.println("RIGHT INTERSECTION: "+rightDirection+" - "+leftAngle+" - "+rightAngle+" - "+right);
 				right+=rightDirection.radiansBetween(rightAngle);
+				System.out.println("AFTER: "+right);
 				if(right<=-Math.PI){
 					rightDirection = null;
 				}else{
