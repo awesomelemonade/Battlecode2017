@@ -34,16 +34,14 @@ public class Pathfinding {
 	public static MapLocation pathfindScout(MapLocation target) throws GameActionException{
 		currentLocation = controller.getLocation();
 		Direction direction = controller.getLocation().directionTo(target);
-		float distance = currentLocation.distanceTo(target)+Constants.EPSILON;
+		float distance = bodyRadius+currentLocation.distanceTo(target)+Constants.EPSILON;
 		nearbyRobots = controller.senseNearbyRobots(distance);
 		nearbyTrees = new TreeInfo[]{}; //for scouts, we can just set nearbyTrees to an empty array
 		if(isClear(currentLocation, target)){
-			System.out.println("CLEAR");
 			return target;
 		}
 		generateTangentAngles();
 		Direction[] angles = splitAngles(direction, direction, 0, 0, 10);
-		System.out.println("Angles: "+angles[0]+" - "+angles[1]);
 		if(angles[0]==null&&angles[1]==null){
 			controller.setIndicatorDot(currentLocation, 128, 128, 128);
 			return currentLocation; //Completely surrounded :(
@@ -70,7 +68,7 @@ public class Pathfinding {
 	public static MapLocation pathfind(MapLocation target) throws GameActionException{
 		currentLocation = controller.getLocation();
 		Direction direction = controller.getLocation().directionTo(target);
-		float distance = currentLocation.distanceTo(target)+Constants.EPSILON;
+		float distance = bodyRadius+currentLocation.distanceTo(target)+Constants.EPSILON;
 		nearbyRobots = controller.senseNearbyRobots(distance);
 		nearbyTrees = controller.senseNearbyTrees(distance); //for scouts, we can just set nearbyTrees to an empty array
 		if(isClear(currentLocation, target)){
@@ -107,7 +105,7 @@ public class Pathfinding {
 			RobotInfo robot = nearbyRobots[i];
 			MapLocation location = robot.getLocation();
 			Direction direction = currentLocation.directionTo(location);
-			float angle = getTangentAngle(location, robot.getRadius());
+			float angle = getTangentAngle(location, robot.getRadius()+Constants.EPSILON);
 			robotLeftAngles[i] = direction.rotateLeftRads(angle);
 			robotRightAngles[i] = direction.rotateRightRads(angle);
 		}
@@ -115,14 +113,13 @@ public class Pathfinding {
 			TreeInfo tree = nearbyTrees[i];
 			MapLocation location = tree.getLocation();
 			Direction direction = currentLocation.directionTo(location);
-			float angle = getTangentAngle(location, tree.getRadius());
+			float angle = getTangentAngle(location, tree.getRadius()+Constants.EPSILON);
 			treeLeftAngles[i] = direction.rotateLeftRads(angle);
 			treeRightAngles[i] = direction.rotateRightRads(angle);
 		}
 	}
 	public static Direction[] splitAngles(Direction leftDirection, Direction rightDirection, float left, float right, int tries) throws GameActionException{
 		if(tries<=0){
-			System.out.println("MORE THAN 10 TRIES :(");
 			controller.setIndicatorDot(controller.getLocation(), 128, 128, 128);
 			return new Direction[]{leftDirection, rightDirection};
 		}
@@ -131,9 +128,7 @@ public class Pathfinding {
 			Direction rightAngle = robotRightAngles[i];
 			if(inBetween(leftDirection, leftAngle, rightAngle)){
 				controller.setIndicatorDot(nearbyRobots[i].getLocation(), 128, 0, 255);
-				System.out.println("LEFT ROBOT INTERSECTION: "+leftDirection+" - "+leftAngle+" - "+rightAngle+" - "+left);
 				left+=leftDirection.radiansBetween(leftAngle);
-				System.out.println("AFTER ROBOT: "+left);
 				if(left>=Math.PI){
 					leftDirection = null;
 				}else{
@@ -142,9 +137,7 @@ public class Pathfinding {
 			}
 			if(inBetween(rightDirection, leftAngle, rightAngle)){
 				controller.setIndicatorDot(nearbyRobots[i].getLocation(), 128, 0, 255);
-				System.out.println("RIGHT ROBOT INTERSECTION: "+rightDirection+" - "+leftAngle+" - "+rightAngle+" - "+right);
 				right+=rightDirection.radiansBetween(rightAngle);
-				System.out.println("AFTER ROBOT: "+right);
 				if(right<=-Math.PI){
 					rightDirection = null;
 				}else{
@@ -157,9 +150,7 @@ public class Pathfinding {
 			Direction rightAngle = treeRightAngles[i];
 			if(inBetween(leftDirection, leftAngle, rightAngle)){
 				controller.setIndicatorDot(nearbyTrees[i].getLocation(), 128, 0, 255);
-				System.out.println("LEFT TREE INTERSECTION: "+leftDirection+" - "+leftAngle+" - "+rightAngle+" - "+left);
 				left+=leftDirection.radiansBetween(leftAngle);
-				System.out.println("AFTER TREE: "+left);
 				if(left>=Math.PI){
 					leftDirection = null;
 				}else{
@@ -168,9 +159,7 @@ public class Pathfinding {
 			}
 			if(inBetween(rightDirection, leftAngle, rightAngle)){
 				controller.setIndicatorDot(nearbyTrees[i].getLocation(), 128, 0, 255);
-				System.out.println("RIGHT TREE INTERSECTION: "+rightDirection+" - "+leftAngle+" - "+rightAngle+" - "+right);
 				right+=rightDirection.radiansBetween(rightAngle);
-				System.out.println("AFTER TREE: "+right);
 				if(right<=-Math.PI){
 					rightDirection = null;
 				}else{

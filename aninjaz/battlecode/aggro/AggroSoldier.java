@@ -60,6 +60,9 @@ public class AggroSoldier {
 			}
 		}
 		Direction direction = controller.getLocation().directionTo(robot.getLocation());
+		if(!Util.isSafeToShoot(direction)){
+			return;
+		}
 		if(controller.canFirePentadShot()){
 			controller.firePentadShot(direction);
 		}else if(controller.canFireTriadShot()){
@@ -69,10 +72,13 @@ public class AggroSoldier {
 		}
 	}
 	public static void shootSingle(MapLocation location) throws GameActionException{
-		if(controller.getRoundNum()>600&&controller.getTeamBullets()<120){
+		if(controller.getRoundNum()>AggroArchon.SETTLE_ROUND&&controller.getTeamBullets()<120){
 			return;
 		}
 		Direction direction = controller.getLocation().directionTo(location);
+		if(!Util.isSafeToShoot(direction)){
+			return;
+		}
 		if(controller.canFireSingleShot()){
 			controller.fireSingleShot(direction);
 		}

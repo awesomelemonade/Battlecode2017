@@ -27,7 +27,7 @@ public class AggroGardener {
 				new Direction((float) (Math.PI*4/3+offset)),
 				new Direction((float) (Math.PI*5/3+offset))
 		};
-		while(controller.getRoundNum()<600){
+		while(controller.getRoundNum()<AggroArchon.SETTLE_ROUND){
 			Direction direction = Util.randomDirection();
 			if(controller.canBuildRobot(RobotType.SOLDIER, direction)){
 				controller.buildRobot(RobotType.SOLDIER, direction);
@@ -38,18 +38,26 @@ public class AggroGardener {
 		//find valid origin
 		findOrigin();
 		while(true){
-			tryPlant();
+			if(scoutsSpawned>1){
+				tryPlant();
+			}else{
+				if(getTreeCount()<2){
+					tryPlant();
+				}
+			}
 			waterTrees();
 			createUnits();
 			Util.yieldByteCodes();
 		}
 	}
+	private static int scoutsSpawned = 0;
 	public static void createUnits() throws GameActionException{
 		if(!controller.isBuildReady()){
 			return;
 		}
 		if(controller.canBuildRobot(RobotType.SCOUT, opening)){
 			controller.buildRobot(RobotType.SCOUT, opening);
+			scoutsSpawned++;
 		}
 	}
 	public static void tryPlant() throws GameActionException{
@@ -62,6 +70,16 @@ public class AggroGardener {
 				return;
 			}
 		}
+	}
+	public static int getTreeCount() throws GameActionException{
+		MapLocation location = controller.getLocation();
+		int count = 0;
+		for(Direction direction: plants){
+			if(controller.senseTreeAtLocation(location.add(direction, 2f))!=null){
+				count++;
+			}
+		}
+		return count;
 	}
 	public static void findOrigin() throws GameActionException{
 		while(origin==null){

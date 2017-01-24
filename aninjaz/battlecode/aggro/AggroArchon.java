@@ -8,10 +8,12 @@ import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
+import battlecode.common.RobotType;
 import battlecode.common.Team;
 import battlecode.common.TreeInfo;
 
 public class AggroArchon {
+	public static final int SETTLE_ROUND = 450;
 	private static RobotController controller;
 	
 	public static void run(RobotController controller) throws GameActionException{
@@ -22,8 +24,11 @@ public class AggroArchon {
 			RobotInfo[] nearbyRobots = controller.senseNearbyRobots(-1, Constants.OTHER_TEAM);
 			if(nearbyRobots.length>0){
 				Direction opposite = controller.getLocation().directionTo(nearbyRobots[0].getLocation()).opposite();
-				if(controller.canMove(opposite)){
-					controller.move(opposite);
+				MapLocation location = Pathfinding.pathfind(controller.getLocation().add(opposite, RobotType.ARCHON.strideRadius));
+				if(controller.canMove(location)){
+					controller.move(location);
+				}else{
+					controller.setIndicatorLine(controller.getLocation(), location, 0, 0, 0);
 				}
 			}else{
 				move:{
@@ -48,7 +53,7 @@ public class AggroArchon {
 					direction = Util.tryRandomMove(direction);
 				}
 			}
-			if(controller.getRoundNum()>600){
+			if(controller.getRoundNum()>AggroArchon.SETTLE_ROUND){
 				tryHireGardener();
 			}
 			Util.yieldByteCodes();

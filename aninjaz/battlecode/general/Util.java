@@ -1,5 +1,6 @@
 package aninjaz.battlecode.general;
 
+import aninjaz.battlecode.util.Pathfinding;
 import battlecode.common.Clock;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
@@ -84,5 +85,25 @@ public class Util {
 			}
 		}
 		return false;
+	}
+	public static boolean isSafeToShoot(Direction direction) throws GameActionException{
+		RobotInfo[] robots = controller.senseNearbyRobots();
+		float minDistance = Float.MAX_VALUE;
+		boolean safe = true;
+		for(RobotInfo robot: robots){
+			Direction towards = controller.getLocation().directionTo(robot.getLocation());
+			float angle = getTangentAngle(robot.getLocation(), robot.getRadius());
+			if(Pathfinding.inBetween(direction, towards.rotateLeftRads(angle), towards.rotateRightRads(angle))){
+				float distance = controller.getLocation().distanceTo(robot.getLocation());
+				if(distance<minDistance){
+					minDistance = distance;
+					safe = robot.team==Constants.OTHER_TEAM;
+				}
+			}
+		}
+		return safe;
+	}
+	public static float getTangentAngle(MapLocation location, float radius){
+		return (float) Math.asin(radius/controller.getLocation().distanceTo(location));
 	}
 }
