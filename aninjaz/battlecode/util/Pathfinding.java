@@ -1,7 +1,6 @@
 package aninjaz.battlecode.util;
 
 import aninjaz.battlecode.general.Constants;
-import aninjaz.battlecode.general.Util;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
@@ -10,287 +9,215 @@ import battlecode.common.RobotInfo;
 import battlecode.common.TreeInfo;
 
 public class Pathfinding {
-	public static final int REACHED_GOAL = 0;
-	public static final int HAS_MOVED = 1;
-	public static final int HAS_NOT_MOVED = 2;
-	public static RobotController controller;
-	public static int goTowardsBidirectional(MapLocation target) throws GameActionException{
-		float distance = controller.getLocation().distanceTo(target);
-		if(distance==0){
-			return REACHED_GOAL;
+	private static RobotController controller;
+	
+	private static MapLocation currentLocation;
+	private static RobotInfo[] nearbyRobots;
+	private static TreeInfo[] nearbyTrees;
+	private static Direction[] robotLeftAngles;
+	private static Direction[] robotRightAngles;
+	private static Direction[] treeLeftAngles;
+	private static Direction[] treeRightAngles;
+	
+	private static float bodyRadius;
+	private static float sensorRadius;
+	
+	public static void init(RobotController controller){
+		Pathfinding.controller = controller;
+		bodyRadius = controller.getType().bodyRadius;
+		sensorRadius = controller.getType().sensorRadius;
+	}
+	public static MapLocation pathfindScout(MapLocation goal) throws GameActionException{
+		return pathfindScout(controller.getLocation().directionTo(goal), Math.min(controller.getLocation().distanceTo(goal), sensorRadius));
+	}
+	public static MapLocation pathfindScout(Direction direction, float targetDistance) throws GameActionException{
+		currentLocation = controller.getLocation();
+		if(targetDistance==0){
+			controller.setIndicatorDot(currentLocation, 255, 0, 0);
+			return currentLocation;
 		}
-		Direction direction = controller.getLocation().directionTo(target);
-		controller.setIndicatorDot(target, 0, 255, 0);
-		MapLocation bugPathing = bugPathfindingBidirectional(direction, Math.min(distance, controller.getType().strideRadius), Constants.RANDOM_TRIES);
-		if(controller.canMove(bugPathing)){
-			controller.move(bugPathing);
-			return HAS_MOVED;
+		MapLocation target = currentLocation.add(direction, targetDistance);
+		nearbyRobots = controller.senseNearbyRobots(targetDistance);
+		nearbyTrees = new TreeInfo[0]; //for scouts, we can just set nearbyTrees to an empty array
+		if(isClear(currentLocation, target)){
+			return target;
+		}
+		generateTangentAngles();
+		Direction[] angles = splitAngles(direction, direction, 0, 0, 10);
+		if(angles[0]==null&&angles[1]==null){
+			return pathfind(direction, Math.max(0, targetDistance-1));
+		}
+		if(angles[0]==null){
+			return currentLocation.add(angles[1], targetDistance);
+		}
+		if(angles[1]==null){
+			return currentLocation.add(angles[0], targetDistance);
+		}
+		float angle1 = direction.radiansBetween(angles[0]);
+		float angle2 = angles[1].radiansBetween(direction);
+		System.out.println(angle1+" - "+angle2);
+		if(angle1<angle2){
+			return currentLocation.add(angles[0], targetDistance);
 		}else{
-			controller.setIndicatorLine(controller.getLocation(), controller.getLocation().add(controller.getLocation().directionTo(bugPathing), 5f), 0, 0, 0);
-			return HAS_NOT_MOVED;
+			return currentLocation.add(angles[1], targetDistance);
 		}
 	}
-	public static MapLocation bugPathfindingBidirectional(Direction targetDirection, float targetDistance, int tries) throws GameActionException{
-		MapLocation endpoint = controller.getLocation().add(targetDirection, targetDistance);
+	public static MapLocation pathfind(MapLocation goal) throws GameActionException{
+		return pathfind(controller.getLocation().directionTo(goal), Math.min(controller.getLocation().distanceTo(goal)-1.1f, sensorRadius));
+	}
+	//Tangent Bug Pathfinding
+	public static MapLocation pathfind(Direction direction, float targetDistance) throws GameActionException{
+		currentLocation = controller.getLocation();
+		controller.setIndicatorLine(currentLocation, currentLocation.add(direction, 3f), 0, 255, 0);
+		MapLocation target = currentLocation.add(direction, targetDistance);
+		nearbyRobots = controller.senseNearbyRobots(targetDistance);
+		nearbyTrees = controller.senseNearbyTrees(targetDistance); //for scouts, we can just set nearbyTrees to an empty array
+		if(isClear(currentLocation, target)){
+			return target;
+		}
+		generateTangentAngles();
+		Direction[] angles = splitAngles(direction, direction, 0, 0, 10);
+		System.out.println("Splits: "+angles[0]+" - "+angles[1]);
+		if(angles[0]==null&&angles[1]==null){
+			return pathfind(direction, Math.max(0, targetDistance-1));
+		}
+		if(angles[0]==null){
+			return currentLocation.add(angles[1], targetDistance);
+		}
+		if(angles[1]==null){
+			return currentLocation.add(angles[0], targetDistance);
+		}
+		float angle1 = direction.radiansBetween(angles[0]);
+		float angle2 = angles[1].radiansBetween(direction);
+		System.out.println(angle1+" - "+angle2);
+		if(angle1<angle2){
+			return currentLocation.add(angles[0], targetDistance);
+		}else{
+			return currentLocation.add(angles[1], targetDistance);
+		}
+	}
+	public static void generateTangentAngles() throws GameActionException{
+		robotLeftAngles = new Direction[nearbyRobots.length];
+		robotRightAngles = new Direction[nearbyRobots.length];
+		treeLeftAngles = new Direction[nearbyTrees.length];
+		treeRightAngles = new Direction[nearbyTrees.length];
+		for(int i=0;i<nearbyRobots.length;++i){
+			RobotInfo robot = nearbyRobots[i];
+			MapLocation location = robot.getLocation();
+			Direction direction = currentLocation.directionTo(location);
+			float angle = getTangentAngle(location, robot.getRadius());
+			robotLeftAngles[i] = direction.rotateLeftRads(angle);
+			robotRightAngles[i] = direction.rotateRightRads(angle);
+		}
+		for(int i=0;i<nearbyTrees.length;++i){
+			TreeInfo tree = nearbyTrees[i];
+			MapLocation location = tree.getLocation();
+			Direction direction = currentLocation.directionTo(location);
+			float angle = getTangentAngle(location, tree.getRadius());
+			treeLeftAngles[i] = direction.rotateLeftRads(angle);
+			treeRightAngles[i] = direction.rotateRightRads(angle);
+		}
+		for(Direction direction: treeLeftAngles){
+			controller.setIndicatorLine(controller.getLocation(), controller.getLocation().add(direction, 7f), 0, 255, 255);
+		}
+		for(Direction direction: treeRightAngles){
+			controller.setIndicatorLine(controller.getLocation(), controller.getLocation().add(direction, 7f), 0, 0, 255);
+		}
+	}
+	public static Direction[] splitAngles(Direction leftDirection, Direction rightDirection, float left, float right, int tries) throws GameActionException{
+		if(leftDirection!=null){
+			controller.setIndicatorLine(controller.getLocation(), controller.getLocation().add(leftDirection, 1.5f), 255, 0, 0);
+		}
+		if(rightDirection!=null){
+			controller.setIndicatorLine(controller.getLocation(), controller.getLocation().add(rightDirection, 1.5f), 255, 128, 0);
+		}
 		if(tries<=0){
 			controller.setIndicatorDot(controller.getLocation(), 128, 128, 128);
-			return endpoint;
+			return new Direction[]{leftDirection, rightDirection};
 		}
-		if(controller.canMove(targetDirection, targetDistance)){
-			return endpoint;
+		for(int i=0;i<nearbyRobots.length;++i){
+			Direction leftAngle = robotLeftAngles[i];
+			Direction rightAngle = robotRightAngles[i];
+			if(inBetween(leftDirection, leftAngle, rightAngle)){
+				left+=leftDirection.radiansBetween(leftAngle);
+				if(left>=Math.PI){
+					leftDirection = null;
+				}else{
+					return splitAngles(leftAngle, rightDirection, left, right, tries-1);
+				}
+			}
+			if(inBetween(rightDirection, leftAngle, rightAngle)){
+				right+=rightDirection.radiansBetween(rightAngle);
+				if(right<=-Math.PI){
+					rightDirection = null;
+				}else{
+					return splitAngles(leftDirection, rightAngle, left, right, tries-1);
+				}
+			}
 		}
-		MapLocation startpoint = controller.getLocation();
-		controller.setIndicatorLine(startpoint, endpoint, 255, 128, 0);
-		TreeInfo[] nearbyTrees = controller.senseNearbyTrees(targetDistance+controller.getType().bodyRadius);
+		for(int i=0;i<nearbyTrees.length;++i){
+			Direction leftAngle = treeLeftAngles[i];
+			Direction rightAngle = treeRightAngles[i];
+			if(inBetween(leftDirection, leftAngle, rightAngle)){
+				System.out.println("LEFT INTERSECTION: "+leftDirection+" - "+leftAngle+" - "+rightAngle+" - "+left);
+				left+=leftDirection.radiansBetween(leftAngle);
+				System.out.println("AFTER: "+left);
+				if(left>=Math.PI){
+					leftDirection = null;
+				}else{
+					return splitAngles(leftAngle, rightDirection, left, right, tries-1);
+				}
+			}
+			if(inBetween(rightDirection, leftAngle, rightAngle)){
+				System.out.println("RIGHT INTERSECTION: "+rightDirection+" - "+leftAngle+" - "+rightAngle+" - "+right);
+				right+=rightDirection.radiansBetween(rightAngle);
+				System.out.println("AFTER: "+right);
+				if(right<=-Math.PI){
+					rightDirection = null;
+				}else{
+					return splitAngles(leftDirection, rightAngle, left, right, tries-1);
+				}
+			}
+		}
+		return new Direction[]{leftDirection, rightDirection};
+	}
+	public static boolean inBetween(Direction x, Direction a, Direction b) throws GameActionException{
+		if(x==null){
+			return false;
+		}
+		if(x.radians==a.radians||x.radians==b.radians){
+			return false;
+		}
+		float angle1 = Math.abs(x.radiansBetween(a));
+		float angle2 = Math.abs(x.radiansBetween(b));
+		float total = Math.abs(a.radiansBetween(b));
+		//return Math.abs((angle1+angle2)-total)<Constants.EPSILON;
+		return angle1+angle2==total;
+		//return (x.radiansBetween(a)*x.radiansBetween(b)<0); //radians between are opposites; one is positive, one is negative
+	}
+	public static float getTangentAngle(MapLocation location, float radius){
+		return (float) Math.asin((radius+bodyRadius)/controller.getLocation().distanceTo(location));
+	}
+	public static boolean isClear(MapLocation from, MapLocation to){
+		for(RobotInfo robot: nearbyRobots){
+			MapLocation location = robot.getLocation();
+			if(findNearest(location, from, to).distanceTo(location)<=robot.getRadius()+bodyRadius){
+				return false;
+			}
+		}
 		for(TreeInfo tree: nearbyTrees){
-			MapLocation t = findNearest(tree.getLocation(), startpoint, endpoint);
-			float fatness = controller.getType().bodyRadius+tree.getRadius();
-			float distance = t.distanceTo(tree.getLocation());
-			controller.setIndicatorDot(t, 255, 0, 128);
-			controller.setIndicatorDot(tree.getLocation().add(Util.randomDirection(), (float)(Math.random()*tree.getRadius())), 128, 0, 128);
-			if(distance<fatness){
-				distance = controller.getLocation().distanceTo(tree.getLocation());
-				float angle = (float)Math.asin(fatness/distance);
-				Direction direction = controller.getLocation().directionTo(tree.getLocation());
-				Direction leftDirection = direction.rotateLeftRads(angle);
-				Direction rightDirection = direction.rotateRightRads(angle);
-				float leftBetween = Math.abs(targetDirection.radiansBetween(leftDirection));
-				float rightBetween = Math.abs(targetDirection.radiansBetween(rightDirection));
-				if(leftBetween<rightBetween){
-					if(leftBetween==0){
-						return bugPathfindingBidirectional(leftDirection.rotateLeftRads(Constants.EPSILON), targetDistance, tries-1);
-					}else{
-						return bugPathfindingBidirectional(leftDirection, targetDistance, tries-1);
-					}
-				}else{
-					if(rightBetween==0){
-						return bugPathfindingBidirectional(rightDirection.rotateRightRads(Constants.EPSILON), targetDistance, tries-1);
-					}else{
-						return bugPathfindingBidirectional(rightDirection, targetDistance, tries-1);
-					}
-				}
+			MapLocation location = tree.getLocation();
+			if(findNearest(location, from, to).distanceTo(location)<=tree.getRadius()+bodyRadius){
+				return false;
 			}
 		}
-		RobotInfo[] nearbyRobots = controller.senseNearbyRobots(targetDistance+controller.getType().bodyRadius);
-		for(RobotInfo robot: nearbyRobots){
-			MapLocation t = findNearest(robot.getLocation(), startpoint, endpoint);
-			float fatness = controller.getType().bodyRadius+robot.getRadius();
-			float distance = t.distanceTo(robot.getLocation());
-			controller.setIndicatorDot(t, 255, 0, 128);
-			controller.setIndicatorDot(robot.getLocation().add(Util.randomDirection(), (float)(Math.random()*robot.getRadius())), 128, 0, 128);
-			if(distance<fatness){
-				distance = controller.getLocation().distanceTo(robot.getLocation());
-				float angle = (float)Math.asin(fatness/distance);
-				Direction direction = controller.getLocation().directionTo(robot.getLocation());
-				Direction leftDirection = direction.rotateLeftRads(angle);
-				Direction rightDirection = direction.rotateRightRads(angle);
-				float leftBetween = Math.abs(targetDirection.radiansBetween(leftDirection));
-				float rightBetween = Math.abs(targetDirection.radiansBetween(rightDirection));
-				if(leftBetween<rightBetween){
-					if(leftBetween==0){
-						return bugPathfindingBidirectional(leftDirection.rotateLeftRads(Constants.EPSILON), targetDistance, tries-1);
-					}else{
-						return bugPathfindingBidirectional(leftDirection, targetDistance, tries-1);
-					}
-				}else{
-					if(rightBetween==0){
-						return bugPathfindingBidirectional(rightDirection.rotateRightRads(Constants.EPSILON), targetDistance, tries-1);
-					}else{
-						return bugPathfindingBidirectional(rightDirection, targetDistance, tries-1);
-					}
-				}
-			}
-		}
-		return endpoint; //No Collisions!
-	}
-	public static int goTowardsRight(MapLocation target) throws GameActionException{
-		float distance = controller.getLocation().distanceTo(target);
-		if(distance==0){
-			return REACHED_GOAL;
-		}
-		Direction direction = controller.getLocation().directionTo(target);
-		controller.setIndicatorDot(target, 0, 255, 0);
-		MapLocation bugPathing = bugPathfindingRight(direction, Math.min(distance, controller.getType().strideRadius), Constants.RANDOM_TRIES);
-		if(controller.canMove(bugPathing)){
-			controller.move(bugPathing);
-			return HAS_MOVED;
-		}else{
-			controller.setIndicatorLine(controller.getLocation(), controller.getLocation().add(controller.getLocation().directionTo(bugPathing), 5f), 0, 0, 0);
-			return HAS_NOT_MOVED;
-		}
-	}
-	public static MapLocation bugPathfindingRight(Direction targetDirection, float targetDistance, int tries) throws GameActionException{
-		MapLocation endpoint = controller.getLocation().add(targetDirection, targetDistance);
-		if(tries<=0){
-			controller.setIndicatorDot(controller.getLocation(), 128, 128, 128);
-			return endpoint;
-		}
-		if(controller.canMove(targetDirection, targetDistance)){
-			return endpoint;
-		}
-		MapLocation startpoint = controller.getLocation();
-		controller.setIndicatorLine(startpoint, endpoint, 255, 128, 0);
-		TreeInfo[] nearbyTrees = controller.senseNearbyTrees(targetDistance+controller.getType().bodyRadius);
-		for(TreeInfo tree: nearbyTrees){
-			MapLocation t = findNearest(tree.getLocation(), startpoint, endpoint);
-			float fatness = controller.getType().bodyRadius+tree.getRadius();
-			float distance = t.distanceTo(tree.getLocation());
-			controller.setIndicatorDot(t, 255, 0, 128);
-			controller.setIndicatorDot(tree.getLocation().add(Util.randomDirection(), (float)(Math.random()*tree.getRadius())), 128, 0, 128);
-			if(distance<fatness){
-				distance = controller.getLocation().distanceTo(tree.getLocation());
-				Direction direction = controller.getLocation().directionTo(tree.getLocation())
-						.rotateRightRads((float)Math.asin(fatness/distance));
-				float angleBetween = targetDirection.radiansBetween(direction);
-				if(angleBetween==0){
-					return bugPathfindingRight(direction.rotateRightRads(Constants.EPSILON), targetDistance, tries-1);
-				}else{
-					return bugPathfindingRight(direction, targetDistance, tries-1);
-				}
-			}
-		}
-		RobotInfo[] nearbyRobots = controller.senseNearbyRobots(targetDistance+controller.getType().bodyRadius);
-		for(RobotInfo robot: nearbyRobots){
-			MapLocation t = findNearest(robot.getLocation(), startpoint, endpoint);
-			float fatness = controller.getType().bodyRadius+robot.getRadius();
-			float distance = t.distanceTo(robot.getLocation());
-			controller.setIndicatorDot(t, 255, 0, 128);
-			controller.setIndicatorDot(robot.getLocation().add(Util.randomDirection(), (float)(Math.random()*robot.getRadius())), 128, 0, 128);
-			if(distance<fatness){
-				distance = controller.getLocation().distanceTo(robot.getLocation());
-				Direction direction = controller.getLocation().directionTo(robot.getLocation())
-						.rotateRightRads((float)Math.asin(fatness/distance));
-				float angleBetween = targetDirection.radiansBetween(direction);
-				if(angleBetween==0){
-					return bugPathfindingRight(direction.rotateRightRads(Constants.EPSILON), targetDistance, tries-1);
-				}else{
-					return bugPathfindingRight(direction, targetDistance, tries-1);
-				}
-			}
-		}
-		return endpoint; //No Collisions!
-	}
-	public static int goTowardsLeft(MapLocation target) throws GameActionException{
-		float distance = controller.getLocation().distanceTo(target);
-		if(distance==0){
-			return REACHED_GOAL;
-		}
-		Direction direction = controller.getLocation().directionTo(target);
-		controller.setIndicatorDot(target, 0, 255, 0);
-		MapLocation bugPathing = bugPathfindingLeft(direction, Math.min(distance, controller.getType().strideRadius), Constants.RANDOM_TRIES);
-		if(controller.canMove(bugPathing)){
-			controller.move(bugPathing);
-			return HAS_MOVED;
-		}else{
-			controller.setIndicatorLine(controller.getLocation(), controller.getLocation().add(controller.getLocation().directionTo(bugPathing), 5f), 0, 0, 0);
-			return HAS_NOT_MOVED;
-		}
-	}
-	public static MapLocation bugPathfindingLeft(Direction targetDirection, float targetDistance, int tries) throws GameActionException{
-		MapLocation endpoint = controller.getLocation().add(targetDirection, targetDistance);
-		if(tries<=0){
-			controller.setIndicatorDot(controller.getLocation(), 128, 128, 128);
-			return endpoint;
-		}
-		if(controller.canMove(targetDirection, targetDistance)){
-			return endpoint;
-		}
-		MapLocation startpoint = controller.getLocation();
-		controller.setIndicatorLine(startpoint, endpoint, 255, 128, 0);
-		TreeInfo[] nearbyTrees = controller.senseNearbyTrees(targetDistance+controller.getType().bodyRadius);
-		for(TreeInfo tree: nearbyTrees){
-			MapLocation t = findNearest(tree.getLocation(), startpoint, endpoint);
-			float fatness = controller.getType().bodyRadius+tree.getRadius();
-			float distance = t.distanceTo(tree.getLocation());
-			controller.setIndicatorDot(t, 255, 0, 128);
-			controller.setIndicatorDot(tree.getLocation().add(Util.randomDirection(), (float)(Math.random()*tree.getRadius())), 128, 0, 128);
-			if(distance<fatness){
-				distance = controller.getLocation().distanceTo(tree.getLocation());
-				Direction direction = controller.getLocation().directionTo(tree.getLocation())
-						.rotateLeftRads((float)Math.asin(fatness/distance));
-				float angleBetween = targetDirection.radiansBetween(direction);
-				if(angleBetween==0){
-					return bugPathfindingLeft(direction.rotateRightRads(Constants.EPSILON), targetDistance, tries-1);
-				}else{
-					return bugPathfindingLeft(direction, targetDistance, tries-1);
-				}
-			}
-		}
-		RobotInfo[] nearbyRobots = controller.senseNearbyRobots(targetDistance+controller.getType().bodyRadius);
-		for(RobotInfo robot: nearbyRobots){
-			MapLocation t = findNearest(robot.getLocation(), startpoint, endpoint);
-			float fatness = controller.getType().bodyRadius+robot.getRadius();
-			float distance = t.distanceTo(robot.getLocation());
-			controller.setIndicatorDot(t, 255, 0, 128);
-			controller.setIndicatorDot(robot.getLocation().add(Util.randomDirection(), (float)(Math.random()*robot.getRadius())), 128, 0, 128);
-			if(distance<fatness){
-				distance = controller.getLocation().distanceTo(robot.getLocation());
-				Direction direction = controller.getLocation().directionTo(robot.getLocation())
-						.rotateLeftRads((float)Math.asin(fatness/distance));
-				float angleBetween = targetDirection.radiansBetween(direction);
-				if(angleBetween==0){
-					return bugPathfindingLeft(direction.rotateRightRads(Constants.EPSILON), targetDistance, tries-1);
-				}else{
-					return bugPathfindingLeft(direction, targetDistance, tries-1);
-				}
-			}
-		}
-		return endpoint; //No Collisions!
-	}
-	public static int goTowardsScout(MapLocation target) throws GameActionException{
-		float distance = controller.getLocation().distanceTo(target);
-		if(distance==0){
-			return REACHED_GOAL;
-		}
-		Direction direction = controller.getLocation().directionTo(target);
-		controller.setIndicatorDot(target, 0, 255, 0);
-		MapLocation bugPathing = bugPathfindingScout(direction, Math.min(distance, controller.getType().strideRadius), Constants.RANDOM_TRIES);
-		if(controller.canMove(bugPathing)){
-			controller.move(bugPathing);
-			return HAS_MOVED;
-		}else{
-			controller.setIndicatorLine(controller.getLocation(), controller.getLocation().add(controller.getLocation().directionTo(bugPathing), 5f), 0, 0, 0);
-			return HAS_NOT_MOVED;
-		}
-	}
-	public static MapLocation bugPathfindingScout(Direction targetDirection, float targetDistance, int tries) throws GameActionException{
-		MapLocation endpoint = controller.getLocation().add(targetDirection, targetDistance);
-		if(tries<=0){
-			controller.setIndicatorDot(controller.getLocation(), 128, 128, 128);
-			return endpoint;
-		}
-		if(controller.canMove(targetDirection, targetDistance)){
-			return endpoint;
-		}
-		MapLocation startpoint = controller.getLocation();
-		controller.setIndicatorLine(startpoint, endpoint, 255, 128, 0);
-		RobotInfo[] nearbyRobots = controller.senseNearbyRobots(targetDistance+controller.getType().bodyRadius);
-		for(RobotInfo robot: nearbyRobots){
-			MapLocation t = findNearest(robot.getLocation(), startpoint, endpoint);
-			float fatness = controller.getType().bodyRadius+robot.getRadius();
-			float distance = t.distanceTo(robot.getLocation());
-			controller.setIndicatorDot(t, 255, 0, 128);
-			controller.setIndicatorDot(robot.getLocation().add(Util.randomDirection(), (float)(Math.random()*robot.getRadius())), 128, 0, 128);
-			if(distance<fatness){
-				distance = controller.getLocation().distanceTo(robot.getLocation());
-				Direction direction = controller.getLocation().directionTo(robot.getLocation())
-						.rotateRightRads((float)Math.asin(fatness/distance));
-				float angleBetween = targetDirection.radiansBetween(direction);
-				if(angleBetween==0){
-					return bugPathfindingScout(direction.rotateRightRads(Constants.EPSILON), targetDistance, tries-1);
-				}else{
-					return bugPathfindingScout(direction, targetDistance, tries-1);
-				}
-			}
-		}
-		return endpoint; //No Collisions!
+		return true;
 	}
 	public static MapLocation findNearest(MapLocation p, MapLocation v, MapLocation w){
 		float distance = v.distanceSquaredTo(w);
 		if(distance==0){
 			return v;
 		}
-		//Assumes v and w are not the same point
 		float t = ((p.x-v.x)*(w.x-v.x)+(p.y-v.y)*(w.y-v.y))/distance;
 		t = Math.max(0, Math.min(1, t)); //Clamp t between 0 and 1
 		return Operation.project(v, w, t);

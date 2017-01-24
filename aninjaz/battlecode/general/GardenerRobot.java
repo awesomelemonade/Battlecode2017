@@ -29,7 +29,7 @@ public class GardenerRobot {
 	private static int useNonBidirectional = 0;
 	public static int goTowards(MapLocation location) throws GameActionException{
 		int status = 0;
-		if(useNonBidirectional>0){
+		/*if(useNonBidirectional>0){
 			status = Pathfinding.goTowardsRight(location);
 			if(status==Pathfinding.HAS_NOT_MOVED){
 				useNonBidirectional = -10;
@@ -48,7 +48,7 @@ public class GardenerRobot {
 			if(status==Pathfinding.HAS_NOT_MOVED){
 				useNonBidirectional = 10;
 			}
-		}
+		}*/
 		return status;
 	}
 	public static void run(RobotController controller) throws GameActionException{
@@ -58,7 +58,7 @@ public class GardenerRobot {
 		findOrigin();
 		
 		while(true){
-			if(goTowards(origin)==Pathfinding.REACHED_GOAL){
+			/*if(goTowards(origin)==Pathfinding.REACHED_GOAL){
 				break;
 			}
 			int channel = ArchonRobot.checkValidGardenerOrigin();
@@ -68,7 +68,8 @@ public class GardenerRobot {
 				originChannel = channel;
 				controller.broadcast(channel, CompressedData.compressData(Identifier.GARDENER_ORIGIN, USED_GARDENER_ORIGIN));
 			}
-			Util.yieldByteCodes();
+			Util.yieldByteCodes();*/
+			break;
 		}
 		Util.yieldByteCodes();
 		

@@ -26,11 +26,11 @@ public class RandomGardener {
 				direction = Util.tryRandomMove(direction);
 			}else{
 				if(bestTree.getHealth()/bestTree.getMaxHealth()<0.9f){
-					Pathfinding.goTowardsBidirectional(bestTree.getLocation());
+					//Pathfinding.goTowardsBidirectional(bestTree.getLocation());
 					direction = Util.randomDirection();
 				}else{
 					if(controller.getLocation().distanceTo(bestTree.getLocation())>WANDERING_RADIUS){
-						Pathfinding.goTowardsBidirectional(bestTree.getLocation());
+						//Pathfinding.goTowardsBidirectional(bestTree.getLocation());
 						direction = Util.randomDirection();
 					}else{
 						direction = generalRandomMove(direction);

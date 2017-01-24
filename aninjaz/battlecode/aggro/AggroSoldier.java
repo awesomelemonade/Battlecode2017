@@ -9,7 +9,6 @@ import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
-import battlecode.common.Team;
 import battlecode.common.TreeInfo;
 
 public class AggroSoldier {
@@ -17,7 +16,6 @@ public class AggroSoldier {
 	private static MapLocation initialArchon;
 	private static int currentTarget = -1;
 	private static boolean reachedInitialArchon = false;
-	private static int useNonBidirectional = 0;
 	public static void run(RobotController controller) throws GameActionException{
 		AggroSoldier.controller = controller;
 		Direction direction = Util.randomDirection();
@@ -27,52 +25,35 @@ public class AggroSoldier {
 			RobotInfo bestRobot = getBestRobot(nearbyRobots);
 			if(bestRobot!=null){
 				if(controller.getLocation().distanceTo(bestRobot.getLocation())>1){
-					goTowards(bestRobot.getLocation());
+					MapLocation location = Pathfinding.pathfind(bestRobot.getLocation());
+					if(controller.canMove(location)){
+						controller.move(location);
+					}else{
+						controller.setIndicatorLine(controller.getLocation(), location, 0, 0, 0);
+					}
 				}
 				shootRobot(bestRobot);
 			}else{
 				if(reachedInitialArchon){
 					direction = Util.tryRandomMove(direction);
 				}else{
-					int status = goTowards(initialArchon);
-					if(status==Pathfinding.REACHED_GOAL){
-						reachedInitialArchon = true;
-					}else if(status==Pathfinding.HAS_NOT_MOVED){
-						TreeInfo[] nearbyTrees = controller.senseNearbyTrees(-1, Team.NEUTRAL);
-						shootSingle(nearbyTrees[0].getLocation());
+					MapLocation location = Pathfinding.pathfind(initialArchon);
+					if(controller.canMove(location)){
+						controller.move(location);
+						controller.setIndicatorLine(controller.getLocation(), location, 0, 255, 255);
 					}else{
-						if(controller.getLocation().distanceTo(initialArchon)>controller.getType().sensorRadius){
-							shootSingle(initialArchon);
-						}
+						controller.setIndicatorLine(controller.getLocation(), location, 0, 0, 0);
+					}
+					if(location.distanceTo(initialArchon)<2f){
+						reachedInitialArchon = true;
+					}
+					if(controller.getLocation().distanceTo(initialArchon)>controller.getType().sensorRadius){
+						shootSingle(initialArchon);
 					}
 				}
 			}
 			Util.yieldByteCodes();
 		}
-	}
-	public static int goTowards(MapLocation location) throws GameActionException{
-		int status = 0;
-		if(useNonBidirectional>0){
-			status = Pathfinding.goTowardsRight(location);
-			if(status==Pathfinding.HAS_NOT_MOVED){
-				useNonBidirectional = -10;
-			}else{
-				useNonBidirectional--;
-			}
-		}else if(useNonBidirectional<0){
-			status = Pathfinding.goTowardsLeft(location);
-			if(status==Pathfinding.HAS_NOT_MOVED){
-				useNonBidirectional = 10;
-			}else{
-				useNonBidirectional++;
-			}
-		}else{
-			status = Pathfinding.goTowardsBidirectional(location);
-			if(status==Pathfinding.HAS_NOT_MOVED){
-				useNonBidirectional = 10;
-			}
-		}
-		return status;
 	}
 	public static void shootRobot(RobotInfo robot) throws GameActionException{
 		if(robot.getType()==RobotType.GARDENER||robot.getType()==RobotType.ARCHON){

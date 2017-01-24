@@ -5,6 +5,7 @@ import aninjaz.battlecode.util.Pathfinding;
 import aninjaz.battlecode.general.Constants;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
+import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
@@ -17,7 +18,13 @@ public class AggroScout {
 			RobotInfo nearestGardener = getGardener(nearbyRobots);
 			if(nearestGardener!=null){
 				if(controller.getLocation().distanceTo(nearestGardener.getLocation())>1){
-					Pathfinding.goTowardsScout(nearestGardener.getLocation());
+					//Pathfinding.goTowardsScout(nearestGardener.getLocation());
+					MapLocation location = Pathfinding.pathfindScout(nearestGardener.getLocation());
+					if(controller.canMove(location)){
+						controller.move(location);
+					}else{
+						controller.setIndicatorLine(controller.getLocation(), location, 0, 0, 0);
+					}
 				}
 				if(controller.canFireSingleShot()){
 					controller.fireSingleShot(controller.getLocation().directionTo(nearestGardener.getLocation()));

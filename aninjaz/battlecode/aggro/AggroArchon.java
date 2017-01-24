@@ -5,6 +5,7 @@ import aninjaz.battlecode.general.Util;
 import aninjaz.battlecode.util.Pathfinding;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
+import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.Team;
@@ -34,8 +35,11 @@ public class AggroArchon {
 								continue;
 							}else{
 								controller.setIndicatorLine(controller.getLocation(), tree.getLocation(), 255, 255, 0);
-								if(Pathfinding.goTowardsBidirectional(tree.getLocation())==Pathfinding.HAS_NOT_MOVED){
-									direction = Util.tryRandomMove(direction);
+								MapLocation location = Pathfinding.pathfind(tree.getLocation());
+								if(controller.canMove(location)){
+									controller.move(location);
+								}else{
+									controller.setIndicatorLine(controller.getLocation(), location, 0, 0, 0);
 								}
 								break move;
 							}

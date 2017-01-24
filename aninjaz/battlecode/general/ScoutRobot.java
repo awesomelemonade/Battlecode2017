@@ -19,10 +19,11 @@ public class ScoutRobot {
 							controller.shake(tree.getID());
 							continue;
 						}else{
-							controller.setIndicatorLine(controller.getLocation(), tree.getLocation(), 255, 255, 0);
+							/*controller.setIndicatorLine(controller.getLocation(), tree.getLocation(), 255, 255, 0);
 							if(Pathfinding.goTowardsScout(tree.getLocation())==Pathfinding.HAS_NOT_MOVED){
 								direction = Util.tryRandomMove(direction);
-							}
+							}*/
+							controller.move(Pathfinding.pathfindScout(tree.getLocation()));
 							break move;
 						}
 					}
