@@ -16,7 +16,9 @@ public class AggroScout {
 			RobotInfo[] nearbyRobots = controller.senseNearbyRobots(-1, Constants.OTHER_TEAM);
 			RobotInfo nearestGardener = getGardener(nearbyRobots);
 			if(nearestGardener!=null){
-				Pathfinding.goTowardsScout(nearestGardener.getLocation());
+				if(controller.getLocation().distanceTo(nearestGardener.getLocation())>1){
+					Pathfinding.goTowardsScout(nearestGardener.getLocation());
+				}
 				if(controller.canFireSingleShot()){
 					controller.fireSingleShot(controller.getLocation().directionTo(nearestGardener.getLocation()));
 				}

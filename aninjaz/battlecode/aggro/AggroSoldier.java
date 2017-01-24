@@ -26,7 +26,9 @@ public class AggroSoldier {
 			RobotInfo[] nearbyRobots = controller.senseNearbyRobots(-1, Constants.OTHER_TEAM);
 			RobotInfo bestRobot = getBestRobot(nearbyRobots);
 			if(bestRobot!=null){
-				goTowards(bestRobot.getLocation());
+				if(controller.getLocation().distanceTo(bestRobot.getLocation())>1){
+					goTowards(bestRobot.getLocation());
+				}
 				shootRobot(bestRobot);
 			}else{
 				if(reachedInitialArchon){

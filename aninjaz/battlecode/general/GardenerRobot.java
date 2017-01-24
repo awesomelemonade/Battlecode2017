@@ -14,45 +14,145 @@ import battlecode.common.TreeInfo;
 public class GardenerRobot {
 	public static final int UNUSED_GARDENER_ORIGIN = 0;
 	public static final int USED_GARDENER_ORIGIN = 1;
-	private static final float WATER_RADIUS = 3f;
+	private static final float WATER_RADIUS = 2f;
 	private static RobotController controller;
 	private static MapLocation origin;
-	private static MapLocation startOrigin;
+	private static int originChannel; //TODO: Unset gardener origin after gardener dies
+	private static Direction[] plantOffset = new Direction[]
+			{Constants.SOUTH_WEST, Constants.NORTH_WEST, Constants.SOUTH_EAST, Constants.NORTH_EAST};
+	private static Direction[] plantDirection = new Direction[]
+			{Direction.getWest(), Direction.getWest(), Direction.getEast(), Direction.getEast(),
+					Direction.getWest(), Direction.getEast(), Direction.getSouth(), Direction.getNorth()};
+	private static Direction[] plantMovement = new Direction[]
+			{Direction.getSouth(), Direction.getNorth(), Direction.getSouth(), Direction.getNorth(), null, null, null, null};
+	private static final float offsetDistance = 0.001f;
+	private static int useNonBidirectional = 0;
+	public static int goTowards(MapLocation location) throws GameActionException{
+		int status = 0;
+		if(useNonBidirectional>0){
+			status = Pathfinding.goTowardsRight(location);
+			if(status==Pathfinding.HAS_NOT_MOVED){
+				useNonBidirectional = -10;
+			}else{
+				useNonBidirectional--;
+			}
+		}else if(useNonBidirectional<0){
+			status = Pathfinding.goTowardsLeft(location);
+			if(status==Pathfinding.HAS_NOT_MOVED){
+				useNonBidirectional = 10;
+			}else{
+				useNonBidirectional++;
+			}
+		}else{
+			status = Pathfinding.goTowardsBidirectional(location);
+			if(status==Pathfinding.HAS_NOT_MOVED){
+				useNonBidirectional = 10;
+			}
+		}
+		return status;
+	}
 	public static void run(RobotController controller) throws GameActionException{
 		GardenerRobot.controller = controller;
+		ArchonRobot.controller = controller;
 		
 		findOrigin();
-		startOrigin = origin.translate(0, -1-Constants.EPSILON);
-		
-		Direction direction = Util.randomDirection();
-		int randomMoves = 0;
 		
 		while(true){
-			if(randomMoves>0){
-				direction = Util.tryRandomMove(direction);
-				randomMoves--;
-			}else{
-				int status = Pathfinding.goTowardsRight(startOrigin);
-				if(status==Pathfinding.HAS_NOT_MOVED){
-					direction = Util.randomDirection();
-					randomMoves = 20;
-				}
-				if(status==Pathfinding.REACHED_GOAL){
-					break;
-				}
+			if(goTowards(origin)==Pathfinding.REACHED_GOAL){
+				break;
+			}
+			int channel = ArchonRobot.checkValidGardenerOrigin();
+			if(channel!=-1){
+				controller.broadcast(originChannel, CompressedData.compressData(Identifier.GARDENER_ORIGIN, UNUSED_GARDENER_ORIGIN));
+				origin = controller.getLocation();
+				originChannel = channel;
+				controller.broadcast(channel, CompressedData.compressData(Identifier.GARDENER_ORIGIN, USED_GARDENER_ORIGIN));
 			}
 			Util.yieldByteCodes();
 		}
 		Util.yieldByteCodes();
 		
 		while(true){
+			controller.setIndicatorDot(origin, 128, 0, 255);
+			plantTrees();
 			waterTrees();
 			Util.yieldByteCodes();
 		}
 	}
-	public static void setupTrees(){
-		
-		
+	private static float[] treeX = new float[]{-2, -2, 2, 2, -2, 2, 0, 0};
+	private static float[] treeY = new float[]{-2, 2, -2, 2, 0, 0, -2, 2};
+	public static void plantTrees() throws GameActionException{
+		int plantIndex = nextPlantIndex();
+		if(plantIndex!=-1){ //Invalid plant index
+			if(controller.getTeamBullets()>GameConstants.BULLET_TREE_COST){
+				Direction movement = plantMovement[plantIndex];
+				Direction direction = plantDirection[plantIndex];
+				if(movement==null){
+					waitForPlantWhileWatering(direction);
+					planted[plantIndex] = true;
+				}else{
+					Direction opposite = movement.opposite();
+					Direction offset = plantOffset[plantIndex];
+					waitForMoveWhileWatering(movement);
+					waitForMoveWhileWatering(movement);
+					waitForMoveWhileWatering(movement);
+					waitForMoveWhileWatering(movement);
+					waitForMoveWhileWatering(offset, offsetDistance);
+					waitForPlantWhileWatering(direction);
+					planted[plantIndex] = true;
+					waitForMoveWhileWatering(offset.opposite(), offsetDistance);
+					waitForMoveWhileWatering(opposite);
+					waitForMoveWhileWatering(opposite);
+					waitForMoveWhileWatering(opposite);
+					waitForMoveWhileWatering(opposite);
+				}
+			}
+		}
+		for(int i=0;i<planted.length;++i){
+			if(planted[i]){
+				MapLocation treeLocation = origin.translate(treeX[i], treeY[i]);
+				TreeInfo tree = controller.senseTreeAtLocation(treeLocation);
+				if(tree==null){
+					controller.setIndicatorDot(treeLocation, 255, 128, 0); //Orange
+					planted[i] = false;
+				}
+			}
+		}
+	}
+	public static int nextPlantIndex(){
+		for(int i=0;i<planted.length;++i){
+			if(!planted[i]){
+				return i;
+			}
+		}
+		return -1;
+	}
+	public static void waitForPlantWhileWatering(Direction direction) throws GameActionException{
+		while(!controller.canPlantTree(direction)){
+			waterTrees();
+			Util.yieldByteCodes();
+		}
+		controller.plantTree(direction);
+	}
+	public static void waitForMoveWhileWatering(Direction direction) throws GameActionException{
+		controller.setIndicatorDot(controller.getLocation(), 128, 128, 128);
+		while((!controller.canMove(direction))||(controller.hasMoved())){
+			controller.setIndicatorDot(controller.getLocation(), 128, 128, 128);
+			waterTrees();
+			Util.yieldByteCodes();
+		}
+		controller.move(direction);
+	}
+	public static void waitForMoveWhileWatering(Direction direction, float distance) throws GameActionException{
+		controller.setIndicatorDot(controller.getLocation(), 128, 128, 128);
+		waterTrees();
+		Util.yieldByteCodes();
+		while((!controller.canMove(direction, distance))||(controller.hasMoved())){
+			controller.setIndicatorDot(controller.getLocation(), 128, 128, 128);
+			waterTrees();
+			Util.yieldByteCodes();
+		}
+		controller.move(direction, distance);
 	}
 	public static void findOrigin() throws GameActionException{
 		while(origin==null){
@@ -83,14 +183,15 @@ public class GardenerRobot {
 			}
 			if(candidateLocation!=null){
 				origin = candidateLocation;
+				originChannel = candidateChannel;
 				controller.broadcast(candidateChannel, CompressedData.compressData(Identifier.GARDENER_ORIGIN, USED_GARDENER_ORIGIN));
-				controller.broadcast(Constants.CHANNEL_AVAILABLE_GARDENER_ORIGINS, controller.readBroadcast(Constants.CHANNEL_AVAILABLE_GARDENER_ORIGINS)-1);
 			}
 			//Explore and find candidates?
 			waterTrees(); //why not :P
 			Util.yieldByteCodes();
 		}
 	}
+	private static boolean[] planted = new boolean[8];
 	public static void waterTrees() throws GameActionException{
 		TreeInfo[] nearbyTrees = controller.senseNearbyTrees(WATER_RADIUS, controller.getTeam());
 		int bestTreeId = -1;
@@ -106,3 +207,4 @@ public class GardenerRobot {
 		}
 	}
 }
+
