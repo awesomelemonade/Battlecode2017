@@ -28,15 +28,17 @@ public class AggroSoldier {
 				if(bestRobot.getType()!=RobotType.LUMBERJACK||controller.getLocation().distanceTo(bestRobot.getLocation())>6f){
 					MapLocation location = Pathfinding.pathfind(bestRobot.getLocation(), bestRobot.getRadius());
 					if(controller.canMove(location)){
-							direction = controller.getLocation().directionTo(location);
 							controller.move(location);
 					}else{
 						controller.setIndicatorLine(controller.getLocation(), location, 0, 0, 0);
 					}
 				}else{
 					if(controller.getLocation().distanceTo(bestRobot.getLocation())<5f){
-						if(controller.canMove(direction.opposite())){
-							controller.move(direction.opposite());
+						if(bestRobot.getType()==RobotType.LUMBERJACK){
+							Direction temp = controller.getLocation().directionTo(bestRobot.getLocation()).opposite();
+							if(controller.canMove(temp)){
+								controller.move(temp);
+							}
 						}
 					}
 				}
