@@ -52,6 +52,7 @@ public class RobotPlayer {
 				return AGGRO_STRAT;
 			}
 		}
+		AggroArchon.SETTLE_ROUND = 40;
 		return AGGRO_STRAT;
 		//return MIDRANGE_STRAT;
 	}

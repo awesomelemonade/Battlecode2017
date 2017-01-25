@@ -23,6 +23,7 @@ public class Constants {
 	public static final int RANDOM_TRIES = 10;
 	
 	public static final int CHANNEL_CURRENT_STRAT = 0;
-	public static final int CHANNEL_AVAILABLE_GARDENER_ORIGINS = 1;
-	public static final int CHANNEL_SPAWN_GARDENER_COMMANDER = 2;
+	public static final int CHANNEL_SPAWNED_INITIAL_GARDENER = 1;
+	public static final int CHANNEL_AVAILABLE_GARDENER_ORIGINS = 2;
+	public static final int CHANNEL_SPAWN_GARDENER_COMMANDER = 3;
 }

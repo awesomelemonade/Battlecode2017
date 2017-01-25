@@ -34,7 +34,7 @@ public class Pathfinding {
 	public static MapLocation pathfindScout(MapLocation target) throws GameActionException{
 		currentLocation = controller.getLocation();
 		Direction direction = controller.getLocation().directionTo(target);
-		float distance = bodyRadius+currentLocation.distanceTo(target)+Constants.EPSILON;
+		float distance = currentLocation.distanceTo(target)+Constants.EPSILON;
 		nearbyRobots = controller.senseNearbyRobots(distance);
 		nearbyTrees = new TreeInfo[]{}; //for scouts, we can just set nearbyTrees to an empty array
 		if(isClear(currentLocation, target)){
@@ -43,9 +43,12 @@ public class Pathfinding {
 		generateTangentAngles();
 		Direction[] angles = splitAngles(direction, direction, 0, 0, 10);
 		if(angles[0]==null&&angles[1]==null){
-			controller.setIndicatorDot(currentLocation, 128, 128, 128);
-			return currentLocation; //Completely surrounded :(
-			//return pathfind(direction, Math.max(0, targetDistance-1));
+			float newDistance = controller.getLocation().distanceTo(target)-1;
+			if(newDistance<=0){
+				return currentLocation;
+			}else{
+				return pathfind(currentLocation.add(direction, newDistance));
+			}
 		}
 		if(angles[0]==null){
 			return currentLocation.add(angles[1], strideRadius);
@@ -68,19 +71,21 @@ public class Pathfinding {
 	public static MapLocation pathfind(MapLocation target) throws GameActionException{
 		currentLocation = controller.getLocation();
 		Direction direction = controller.getLocation().directionTo(target);
-		float distance = bodyRadius+currentLocation.distanceTo(target)+Constants.EPSILON;
+		float distance = currentLocation.distanceTo(target)+Constants.EPSILON;
 		nearbyRobots = controller.senseNearbyRobots(distance);
 		nearbyTrees = controller.senseNearbyTrees(distance); //for scouts, we can just set nearbyTrees to an empty array
 		if(isClear(currentLocation, target)){
-			System.out.println("CLEAR");
 			return target;
 		}
 		generateTangentAngles();
 		Direction[] angles = splitAngles(direction, direction, 0, 0, 10);
-		System.out.println("Angles: "+angles[0]+" - "+angles[1]);
 		if(angles[0]==null&&angles[1]==null){
-			return currentLocation; //Completely surrounded :(
-			//return pathfind(direction, Math.max(0, targetDistance-1));
+			float newDistance = controller.getLocation().distanceTo(target)-1;
+			if(newDistance<=0){
+				return currentLocation;
+			}else{
+				return pathfind(currentLocation.add(direction, newDistance));
+			}
 		}
 		if(angles[0]==null){
 			return currentLocation.add(angles[1], strideRadius);

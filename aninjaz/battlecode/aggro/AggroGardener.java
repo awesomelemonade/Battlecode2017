@@ -18,7 +18,7 @@ public class AggroGardener {
 	private static Direction randomMove = Util.randomDirection();
 	public static void run(RobotController controller) throws GameActionException {
 		AggroGardener.controller = controller;
-		float offset = (float) (Math.PI*2);
+		float offset = (float) (Math.random()*Math.PI*2);
 		opening = new Direction(offset);
 		plants = new Direction[]{
 				new Direction((float) (Math.PI/3+offset)),
@@ -38,7 +38,7 @@ public class AggroGardener {
 		//find valid origin
 		findOrigin();
 		while(true){
-			if(scoutsSpawned>1){
+			if(unitsSpawned>1){
 				tryPlant();
 			}else{
 				if(getTreeCount()<2){
@@ -50,14 +50,17 @@ public class AggroGardener {
 			Util.yieldByteCodes();
 		}
 	}
-	private static int scoutsSpawned = 0;
+	private static int unitsSpawned = 0;
+	private static RobotType[] buildableUnits = new RobotType[]{RobotType.SCOUT, RobotType.SOLDIER};
+	private static RobotType nextType = buildableUnits[(int) (Math.random()*buildableUnits.length)];
 	public static void createUnits() throws GameActionException{
 		if(!controller.isBuildReady()){
 			return;
 		}
-		if(controller.canBuildRobot(RobotType.SCOUT, opening)){
-			controller.buildRobot(RobotType.SCOUT, opening);
-			scoutsSpawned++;
+		if(controller.canBuildRobot(nextType, opening)){
+			controller.buildRobot(nextType, opening);
+			nextType = buildableUnits[(int) (Math.random()*buildableUnits.length)];
+			unitsSpawned++;
 		}
 	}
 	public static void tryPlant() throws GameActionException{
@@ -87,7 +90,9 @@ public class AggroGardener {
 			RobotInfo[] nearbyRobots = controller.senseNearbyRobots(CHECK_RADIUS, controller.getTeam());
 			TreeInfo[] nearbyTrees = controller.senseNearbyTrees(CHECK_RADIUS);
 			if(nearbyRobots.length==0&&nearbyTrees.length==0){
-				origin = controller.getLocation();
+				if(controller.onTheMap(controller.getLocation(), CHECK_RADIUS)){
+					origin = controller.getLocation();
+				}
 			}
 			Util.yieldByteCodes();
 		}

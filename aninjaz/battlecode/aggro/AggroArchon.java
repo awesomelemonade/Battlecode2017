@@ -13,13 +13,17 @@ import battlecode.common.Team;
 import battlecode.common.TreeInfo;
 
 public class AggroArchon {
-	public static final int SETTLE_ROUND = 450;
+	public static int SETTLE_ROUND = 450;
 	private static RobotController controller;
 	
 	public static void run(RobotController controller) throws GameActionException{
 		AggroArchon.controller = controller;
 		Direction direction = Util.randomDirection();
-		hireGardener();
+		int initialGardener = controller.readBroadcast(Constants.CHANNEL_SPAWNED_INITIAL_GARDENER);
+		if(initialGardener==0){
+			hireGardener();
+			controller.broadcast(Constants.CHANNEL_SPAWNED_INITIAL_GARDENER, 1);
+		}
 		while(true){
 			RobotInfo[] nearbyRobots = controller.senseNearbyRobots(-1, Constants.OTHER_TEAM);
 			if(nearbyRobots.length>0){
@@ -54,11 +58,15 @@ public class AggroArchon {
 				}
 			}
 			if(controller.getRoundNum()>AggroArchon.SETTLE_ROUND){
-				tryHireGardener();
+				if(controller.getRoundNum()>=nextGardenerRound){
+					tryHireGardener();
+					nextGardenerRound = controller.getRoundNum()+50;
+				}
 			}
 			Util.yieldByteCodes();
 		}
-	}	
+	}
+	private static int nextGardenerRound = 0;
 	public static void tryHireGardener() throws GameActionException{
 		Direction direction = Util.randomDirection();
 		int tries = 10;

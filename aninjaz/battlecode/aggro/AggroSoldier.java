@@ -9,6 +9,7 @@ import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
+import battlecode.common.Team;
 import battlecode.common.TreeInfo;
 
 public class AggroSoldier {
@@ -33,20 +34,25 @@ public class AggroSoldier {
 				shootRobot(bestRobot);
 			}else{
 				if(reachedInitialArchon){
+					controller.setIndicatorDot(controller.getLocation(), 0, 255, 255);
 					direction = Util.tryRandomMove(direction);
 				}else{
 					controller.setIndicatorDot(initialArchon, 0, 255, 0);
 					MapLocation location = Pathfinding.pathfind(initialArchon);
 					if(controller.canMove(location)){
 						controller.move(location);
+						if(controller.getLocation().distanceTo(initialArchon)>controller.getType().sensorRadius){
+							shootSingle(initialArchon);
+						}
 					}else{
 						controller.setIndicatorLine(controller.getLocation(), location, 0, 0, 0);
+						TreeInfo[] nearbyTrees = controller.senseNearbyTrees(-1, Team.NEUTRAL);
+						if(nearbyTrees.length>0){
+							shootSingle(nearbyTrees[0].getLocation());
+						}
 					}
-					if(location.distanceTo(initialArchon)<1f){
+					if(controller.getLocation().distanceTo(initialArchon)<1f){
 						reachedInitialArchon = true;
-					}
-					if(controller.getLocation().distanceTo(initialArchon)>controller.getType().sensorRadius){
-						shootSingle(initialArchon);
 					}
 				}
 			}
