@@ -107,18 +107,22 @@ public class MidrangeGardener {
 			randomMove = Util.tryRandomMove(randomMove);
 			RobotInfo[] nearbyRobots = controller.senseNearbyRobots(CHECK_RADIUS, controller.getTeam());
 			TreeInfo[] nearbyTrees = controller.senseNearbyTrees(CHECK_RADIUS);
-			if(nearbyRobots.length==0&&nearbyTrees.length==0){
+			if(nearbyRobots.length==0&&nearbyTrees.length==0&&getArchonCount(controller.senseNearbyRobots(-1, controller.getTeam()))==0){
 				if(controller.onTheMap(controller.getLocation(), CHECK_RADIUS)){
-					origin = controller.getLocation();
-				}
-			}
-			if(origin==null){
-				if(controller.getRoundNum()-spawnTurn>80){
 					origin = controller.getLocation();
 				}
 			}
 			Util.yieldByteCodes();
 		}
+	}
+	public static int getArchonCount(RobotInfo[] nearbyRobots){
+		int count = 0;
+		for(RobotInfo robot: nearbyRobots){
+			if(robot.getType()==RobotType.ARCHON){
+				count++;
+			}
+		}
+		return count;
 	}
 	public static void waterTrees() throws GameActionException{
 		TreeInfo[] nearbyTrees = controller.senseNearbyTrees(WATER_RADIUS, controller.getTeam());
