@@ -105,13 +105,7 @@ public class RobotPlayer {
 			MidrangeArchon.run(controller);
 			break;
 		case GARDENER:
-			int tankGardeners = controller.readBroadcast(Constants.CHANNEL_SPAWN_TANK_GARDENER);
-			if(tankGardeners>0){
-				controller.broadcast(Constants.CHANNEL_SPAWN_TANK_GARDENER, tankGardeners-1);
-				TankGardener.run(controller);
-			}else{
-				TreeRangeGardener.run(controller);
-			}
+			spawnGardener();
 			break;
 		case SOLDIER:
 			AggroSoldier.run(controller);
@@ -125,6 +119,25 @@ public class RobotPlayer {
 		case TANK:
 			MidrangeTank.run(controller);
 			break;
+		}
+	}
+	public static void spawnGardener() throws GameActionException{
+		int tankGardenerRequests = controller.readBroadcast(Constants.CHANNEL_SPAWN_TANK_GARDENER);
+		if(tankGardenerRequests>0){
+			controller.broadcast(Constants.CHANNEL_SPAWN_TANK_GARDENER, tankGardenerRequests-1);
+			TankGardener.run(controller);
+			return;
+		}
+		int treeRange = controller.readBroadcast(Constants.CHANNEL_SPAWN_TREERANGE_GARDENER);
+		if(treeRange>0){
+			controller.broadcast(Constants.CHANNEL_SPAWN_TREERANGE_GARDENER, treeRange-1);
+			TreeRangeGardener.run(controller);
+			return;
+		}
+		int midrange = controller.readBroadcast(Constants.CHANNEL_SPAWN_MIDRANGE_GARDENER);
+		if(midrange>0){
+			controller.broadcast(Constants.CHANNEL_SPAWN_MIDRANGE_GARDENER, midrange-1);
+			
 		}
 	}
 	public static void runDefaultStrat() throws Exception{
