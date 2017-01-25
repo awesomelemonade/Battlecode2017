@@ -11,7 +11,7 @@ import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import battlecode.common.TreeInfo;
 
-public class MidrangeGardener {
+public class TreeRangeGardener {
 	private static final float CHECK_RADIUS = 4f;
 	private static final float WATER_RADIUS = 2f;
 	private static RobotController controller;
@@ -21,7 +21,7 @@ public class MidrangeGardener {
 	private static Direction randomMove = Util.randomDirection();
 	private static int spawnTurn = 0;
 	public static void run(RobotController controller) throws GameActionException {
-		MidrangeGardener.controller = controller;
+		TreeRangeGardener.controller = controller;
 		float offset = (float) (Math.random()*Math.PI*2);
 		opening = new Direction(offset);
 		plants = new Direction[]{

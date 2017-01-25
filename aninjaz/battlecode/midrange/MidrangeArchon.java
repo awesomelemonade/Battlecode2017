@@ -14,6 +14,7 @@ import battlecode.common.TreeInfo;
 
 public class MidrangeArchon {
 	private static RobotController controller;
+	private static int battleMode = 0;
 	
 	public static void run(RobotController controller) throws GameActionException{
 		MidrangeArchon.controller = controller;
@@ -22,6 +23,28 @@ public class MidrangeArchon {
 		if(initialGardener==0){
 			hireGardener();
 			controller.broadcast(Constants.CHANNEL_SPAWNED_INITIAL_GARDENER, 1);
+		}
+		TreeInfo[] treesAtStart = controller.senseNearbyTrees(-1, Team.NEUTRAL);
+		if(treesAtStart!=null){
+			int count = 0;
+			int radiusSum = 0;
+			for(TreeInfo tree : treesAtStart){
+				radiusSum+=tree.getRadius();
+				if(tree.getContainedRobot()!=null){
+					count++;
+					if(tree.getContainedRobot()==RobotType.TANK){
+						if(tree.getRadius()<=3){
+							count+=99999999;
+						}
+					}
+				}
+			}
+			if(count>=3){
+				battleMode = 1;
+			}
+			if(count>=10||treesAtStart.length>=10||radiusSum>=6){
+				battleMode = 2;
+			}
 		}
 		while(true){
 			TreeInfo[] nearbyTrees = controller.senseNearbyTrees(-1, Team.NEUTRAL);
@@ -88,6 +111,12 @@ public class MidrangeArchon {
 		if(tries>0){
 			if(controller.getTeamBullets()>700){
 				controller.broadcast(Constants.CHANNEL_SPAWN_TANK_GARDENER, controller.readBroadcast(Constants.CHANNEL_SPAWN_TANK_GARDENER)+1);
+			}
+			else if(battleMode == 1){
+				controller.broadcast(Constants.CHANNEL_SPAWN_TREERANGE_GARDENER, controller.readBroadcast(Constants.CHANNEL_SPAWN_TREERANGE_GARDENER)+1);
+			}
+			else if(battleMode == 2){
+				controller.broadcast(Constants.CHANNEL_SPAWN_MIDRANGE_GARDENER, controller.readBroadcast(Constants.CHANNEL_SPAWN_TREERANGE_GARDENER)+1);
 			}
 			controller.hireGardener(direction);
 		}

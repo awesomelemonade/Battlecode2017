@@ -6,7 +6,7 @@ import aninjaz.battlecode.aggro.AggroScout;
 import aninjaz.battlecode.aggro.AggroSoldier;
 import aninjaz.battlecode.midrange.HasslerScout;
 import aninjaz.battlecode.midrange.MidrangeArchon;
-import aninjaz.battlecode.midrange.MidrangeGardener;
+import aninjaz.battlecode.midrange.TreeRangeGardener;
 import aninjaz.battlecode.midrange.MidrangeLumberjack;
 import aninjaz.battlecode.midrange.MidrangeTank;
 import aninjaz.battlecode.midrange.TankGardener;
@@ -70,7 +70,7 @@ public class RobotPlayer {
 		MapLocation[] ourArchons = controller.getInitialArchonLocations(controller.getTeam());
 		MapLocation[] theirArchons = controller.getInitialArchonLocations(Constants.OTHER_TEAM);
 		if(ourArchons.length==1){
-			if(ourArchons[0].distanceTo(theirArchons[0])<=35){
+			if(ourArchons[0].distanceTo(theirArchons[0])<=36){
 				//Check trees in between
 				return AGGRO_STRAT;
 			}
@@ -110,7 +110,7 @@ public class RobotPlayer {
 				controller.broadcast(Constants.CHANNEL_SPAWN_TANK_GARDENER, tankGardeners-1);
 				TankGardener.run(controller);
 			}else{
-				MidrangeGardener.run(controller);
+				TreeRangeGardener.run(controller);
 			}
 			break;
 		case SOLDIER:
