@@ -58,9 +58,7 @@ public class TreeRangeGardener {
 		}
 		findOrigin();
 		while(true){
-			if(unitsSpawned>1){
-				tryPlant();
-			}
+			tryPlant();
 			waterTrees();
 			createUnits();
 			Util.yieldByteCodes();

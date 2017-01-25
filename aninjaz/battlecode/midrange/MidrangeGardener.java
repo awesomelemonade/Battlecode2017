@@ -63,9 +63,7 @@ public class MidrangeGardener {
 					nextType = RobotType.SOLDIER;
 				}
 			}
-			if(unitsSpawned>1){
-				tryPlant();
-			}
+			tryPlant();
 			waterTrees();
 			createUnits();
 			Util.yieldByteCodes();
