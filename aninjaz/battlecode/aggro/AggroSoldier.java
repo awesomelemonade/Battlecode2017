@@ -33,10 +33,11 @@ public class AggroSoldier {
 					}else{
 						controller.setIndicatorLine(controller.getLocation(), location, 0, 0, 0);
 					}
-				}
-				else{
-					if(controller.canMove(direction.opposite())){
-						controller.move(direction.opposite());
+				}else{
+					if(controller.getLocation().distanceTo(bestRobot.getLocation())<5f){
+						if(controller.canMove(direction.opposite())){
+							controller.move(direction.opposite());
+						}
 					}
 				}
 				shootRobot(bestRobot);
