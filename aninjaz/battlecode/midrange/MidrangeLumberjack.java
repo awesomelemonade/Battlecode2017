@@ -24,6 +24,10 @@ public class MidrangeLumberjack {
 				int status = controller.readBroadcast(Constants.CHANNEL_LUMBERJACK_TARGET_INFO);
 				if(status==1){
 					target = CompressedData.uncompressMapLocation(controller.readBroadcast(Constants.CHANNEL_LUMBERJACK_TARGET_LOCATION));
+					if(controller.getLocation().distanceTo(target)<2f){
+						controller.broadcast(Constants.CHANNEL_LUMBERJACK_TARGET_INFO, 0);
+						target = null;
+					}
 				}
 			}else{
 				controller.broadcast(Constants.CHANNEL_LUMBERJACK_TARGET_INFO, 1);
@@ -32,6 +36,7 @@ public class MidrangeLumberjack {
 			if(target==null){
 				direction = Util.tryRandomMove(direction);
 			}else{
+				controller.setIndicatorDot(target, 255, 128, 0);
 				TreeInfo[] nearbyTrees = controller.senseNearbyTrees();
 				if(nearbyTrees.length>15){
 					if(controller.canMove(target)){

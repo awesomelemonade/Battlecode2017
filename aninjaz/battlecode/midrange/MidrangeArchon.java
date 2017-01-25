@@ -86,7 +86,7 @@ public class MidrangeArchon {
 					}
 				}
 			}
-			if(controller.getRoundNum()>80){
+			if(controller.isBuildReady()&&controller.getRoundNum()>80){
 				RobotInfo[] ourGardeners = controller.senseNearbyRobots(-1, controller.getTeam());
 				int count = 0;
 				for(RobotInfo robot: ourGardeners){
@@ -94,7 +94,7 @@ public class MidrangeArchon {
 						count++;
 					}
 				}
-				if(count<=3){
+				if(count<=2){
 					tryHireGardener();
 				}
 			}

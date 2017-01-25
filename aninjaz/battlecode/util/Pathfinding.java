@@ -88,19 +88,54 @@ public class Pathfinding {
 			}
 		}
 		if(angles[0]==null){
-			return currentLocation.add(angles[1], strideRadius);
+			MapLocation location = currentLocation.add(angles[1], strideRadius);
+			if(!controller.onTheMap(location, bodyRadius)){
+				float newDistance = controller.getLocation().distanceTo(target)-1;
+				return pathfind(currentLocation.add(direction, newDistance));
+			}else{
+				return location;
+			}
 		}
 		if(angles[1]==null){
-			return currentLocation.add(angles[0], strideRadius);
+			MapLocation location = currentLocation.add(angles[0], strideRadius);
+			if(!controller.onTheMap(location, bodyRadius)){
+				float newDistance = controller.getLocation().distanceTo(target)-1;
+				return pathfind(currentLocation.add(direction, newDistance));
+			}else{
+				return location;
+			}
 		}
 		float angle1 = direction.radiansBetween(angles[0]);
 		float angle2 = angles[1].radiansBetween(direction);
 		if(angle1<angle2){
-			return currentLocation.add(angles[0], strideRadius);
+			MapLocation location = currentLocation.add(angles[0], strideRadius);
+			if(!controller.onTheMap(location, bodyRadius)){
+				location = currentLocation.add(angles[1], strideRadius);
+				if(!controller.onTheMap(location, bodyRadius)){
+					float newDistance = controller.getLocation().distanceTo(target)-1;
+					return pathfind(currentLocation.add(direction, newDistance));
+				}else{
+					return location;
+				}
+			}else{
+				return location;
+			}
 		}else{
-			return currentLocation.add(angles[1], strideRadius);
+			MapLocation location = currentLocation.add(angles[1], strideRadius);
+			if(!controller.onTheMap(location, bodyRadius)){
+				location = currentLocation.add(angles[0], strideRadius);
+				if(!controller.onTheMap(location, bodyRadius)){
+					float newDistance = controller.getLocation().distanceTo(target)-1;
+					return pathfind(currentLocation.add(direction, newDistance));
+				}else{
+					return location;
+				}
+			}else{
+				return location;
+			}
 		}
 	}
+	
 	public static void generateTangentAngles() throws GameActionException{
 		robotLeftAngles = new Direction[nearbyRobots.length];
 		robotRightAngles = new Direction[nearbyRobots.length];
