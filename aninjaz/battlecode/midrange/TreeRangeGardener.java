@@ -60,10 +60,6 @@ public class TreeRangeGardener {
 		while(true){
 			if(unitsSpawned>1){
 				tryPlant();
-			}else{
-				if(getTreeCount()<2){
-					tryPlant();
-				}
 			}
 			waterTrees();
 			createUnits();
