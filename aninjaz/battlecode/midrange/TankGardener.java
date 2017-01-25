@@ -2,6 +2,7 @@ package aninjaz.battlecode.midrange;
 
 import aninjaz.battlecode.general.Constants;
 import aninjaz.battlecode.general.Util;
+import aninjaz.battlecode.util.CompressedData;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.GameConstants;
@@ -55,6 +56,11 @@ public class TankGardener {
 		}
 		findOrigin();
 		while(true){
+			RobotInfo[] nearbyRobots = controller.senseNearbyRobots(4f, Constants.OTHER_TEAM);
+			if(nearbyRobots.length>0){
+				controller.broadcast(Constants.CHANNEL_LUMBERJACK_TARGET_INFO, 1);
+				controller.broadcast(Constants.CHANNEL_LUMBERJACK_TARGET_LOCATION, CompressedData.compressMapLocation(nearbyRobots[0].getLocation()));
+			}
 			tryPlant();
 			waterTrees();
 			createUnits();

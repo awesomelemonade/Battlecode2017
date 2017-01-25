@@ -71,8 +71,6 @@ public class AggroSoldier {
 		}
 		if(controller.canFirePentadShot()){
 			controller.firePentadShot(direction);
-		}else if(controller.canFireTriadShot()){
-			controller.fireTriadShot(direction);
 		}else if(controller.canFireSingleShot()){
 			controller.fireSingleShot(direction);
 		}
