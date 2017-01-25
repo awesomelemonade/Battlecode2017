@@ -11,27 +11,24 @@ import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import battlecode.common.TreeInfo;
 
-public class MidrangeGardener {
-	private static final float CHECK_RADIUS = 4f;
+public class TankGardener {
+	private static final float CHECK_RADIUS = 6f;
 	private static final float WATER_RADIUS = 2f;
 	private static RobotController controller;
 	private static MapLocation origin;
 	private static Direction[] plants;
 	private static Direction opening;
 	private static Direction randomMove = Util.randomDirection();
-	private static int spawnTurn = 0;
 	public static void run(RobotController controller) throws GameActionException {
-		MidrangeGardener.controller = controller;
+		TankGardener.controller = controller;
 		float offset = (float) (Math.random()*Math.PI*2);
-		opening = new Direction(offset);
+		opening = new Direction(offset*1.5f);
 		plants = new Direction[]{
-				new Direction((float) (Math.PI/3+offset)),
 				new Direction((float) (Math.PI*2/3+offset)),
 				new Direction((float) (Math.PI+offset)),
 				new Direction((float) (Math.PI*4/3+offset)),
 				new Direction((float) (Math.PI*5/3+offset))
 		};
-		spawnTurn = controller.getRoundNum();
 		//find valid origin
 		Direction direction = Util.randomDirection();
 		int initialScout = controller.readBroadcast(Constants.CHANNEL_SPAWNED_INITIAL_SCOUT);
@@ -71,7 +68,7 @@ public class MidrangeGardener {
 		}
 	}
 	private static int unitsSpawned = 0;
-	private static RobotType nextType = RobotType.LUMBERJACK;
+	private static RobotType nextType = RobotType.TANK;
 	public static void createUnits() throws GameActionException{
 		if(!controller.isBuildReady()){
 			return;
@@ -109,11 +106,6 @@ public class MidrangeGardener {
 			TreeInfo[] nearbyTrees = controller.senseNearbyTrees(CHECK_RADIUS);
 			if(nearbyRobots.length==0&&nearbyTrees.length==0){
 				if(controller.onTheMap(controller.getLocation(), CHECK_RADIUS)){
-					origin = controller.getLocation();
-				}
-			}
-			if(origin==null){
-				if(controller.getRoundNum()-spawnTurn>80){
 					origin = controller.getLocation();
 				}
 			}

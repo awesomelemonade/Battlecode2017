@@ -1,36 +1,49 @@
 package aninjaz.battlecode.midrange;
 
 import aninjaz.battlecode.general.Util;
-import aninjaz.battlecode.util.Pathfinding;
 import aninjaz.battlecode.general.Constants;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
-import battlecode.common.RobotType;
-import battlecode.common.Team;
-import battlecode.common.TreeInfo;
 
 public class MidrangeTank {
-	private static MapLocation[] targetArchons;
-	private static MapLocation initialArchon;
+	private static MapLocation[] initialArchons;
 	private static int index = 0;
-	private static int idleCounter;
-	public static void run(RobotController controller){
+	
+	public static void run(RobotController controller) throws GameActionException{
+		initialArchons = controller.getInitialArchonLocations(Constants.OTHER_TEAM);
 		Direction direction = Util.randomDirection();
-		targetArchons = controller.getInitialArchonLocations(Constants.OTHER_TEAM);
-		initialArchon = targetArchons[index];
 		while(true){
-			RobotInfo nearestRobot = controller.senseNearbyRobots(-1, Constants.OTHER_TEAM)[0];
-			if(idleCounter<15){
-				if(nearestRobot.getType()!=RobotType.ARCHON){
-					direction = controller.getLocation().directionTo(initialArchon);
+			if(index<initialArchons.length){
+				if(controller.getLocation().distanceTo(initialArchons[index])<2f){
+					index++;
 				}
 			}
-			else{
-				
+			if(index<initialArchons.length){
+				if(controller.canMove(initialArchons[index])){
+					controller.move(initialArchons[index]);
+					direction = Util.randomDirection();
+				}else{
+					direction = Util.tryRandomMove(direction);
+				}
+			}else{
+				direction = Util.tryRandomMove(direction);
 			}
+			RobotInfo[] nearbyRobots = controller.senseNearbyRobots(-1, Constants.OTHER_TEAM);
+			for(RobotInfo robot: nearbyRobots){
+				Direction dir = controller.getLocation().directionTo(robot.getLocation());
+				if(Util.isSafeToShoot(dir)){
+					if(controller.canFirePentadShot()){
+						controller.firePentadShot(dir);
+					}else if(controller.canFireSingleShot()){
+						controller.fireSingleShot(dir);
+					}
+					break;
+				}
+			}
+			Util.yieldByteCodes();
 		}
 	}
 }

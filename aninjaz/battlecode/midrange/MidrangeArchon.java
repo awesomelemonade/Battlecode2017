@@ -2,13 +2,13 @@ package aninjaz.battlecode.midrange;
 
 import aninjaz.battlecode.general.Constants;
 import aninjaz.battlecode.general.Util;
-import aninjaz.battlecode.util.CompressedData;
 import aninjaz.battlecode.util.Pathfinding;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
+import battlecode.common.RobotType;
 import battlecode.common.Team;
 import battlecode.common.TreeInfo;
 
@@ -33,10 +33,6 @@ public class MidrangeArchon {
 					controller.move(location);
 				}else{
 					controller.setIndicatorLine(controller.getLocation(), location, 0, 0, 0);
-				}
-				if(nearbyTrees.length>0){
-					controller.broadcast(Constants.CHANNEL_LUMBERJACK_REQUEST_INFO, 1);
-					controller.broadcast(Constants.CHANNEL_LUMBERJACK_REQUEST_LOCATION, CompressedData.compressMapLocation(nearbyTrees[0].getLocation()));
 				}
 			}else{
 				move:{
@@ -64,16 +60,20 @@ public class MidrangeArchon {
 					}
 					if(tries>0){
 						controller.move(direction);
-					}else{
-						if(nearbyTrees.length>0){
-							controller.broadcast(Constants.CHANNEL_LUMBERJACK_REQUEST_INFO, 1);
-							controller.broadcast(Constants.CHANNEL_LUMBERJACK_REQUEST_LOCATION, CompressedData.compressMapLocation(nearbyTrees[0].getLocation()));
-						}
 					}
 				}
 			}
 			if(controller.getRoundNum()>80){
-				tryHireGardener();
+				RobotInfo[] ourGardeners = controller.senseNearbyRobots(-1, controller.getTeam());
+				int count = 0;
+				for(RobotInfo robot: ourGardeners){
+					if(robot.getType()==RobotType.GARDENER){
+						count++;
+					}
+				}
+				if(count<=3){
+					tryHireGardener();
+				}
 			}
 			Util.yieldByteCodes();
 		}
@@ -86,6 +86,9 @@ public class MidrangeArchon {
 			tries--;
 		}
 		if(tries>0){
+			if(controller.getTeamBullets()>700){
+				controller.broadcast(Constants.CHANNEL_SPAWN_TANK_GARDENER, controller.readBroadcast(Constants.CHANNEL_SPAWN_TANK_GARDENER)+1);
+			}
 			controller.hireGardener(direction);
 		}
 	}

@@ -8,6 +8,7 @@ import aninjaz.battlecode.midrange.HasslerScout;
 import aninjaz.battlecode.midrange.MidrangeArchon;
 import aninjaz.battlecode.midrange.MidrangeGardener;
 import aninjaz.battlecode.midrange.MidrangeLumberjack;
+import aninjaz.battlecode.midrange.TankGardener;
 import aninjaz.battlecode.util.DynamicBroadcasting;
 import aninjaz.battlecode.util.Pathfinding;
 import battlecode.common.*;
@@ -103,7 +104,13 @@ public class RobotPlayer {
 			MidrangeArchon.run(controller);
 			break;
 		case GARDENER:
-			MidrangeGardener.run(controller);
+			int tankGardeners = controller.readBroadcast(Constants.CHANNEL_SPAWN_TANK_GARDENER);
+			if(tankGardeners>0){
+				controller.broadcast(Constants.CHANNEL_SPAWN_TANK_GARDENER, tankGardeners-1);
+				TankGardener.run(controller);
+			}else{
+				MidrangeGardener.run(controller);
+			}
 			break;
 		case SOLDIER:
 			AggroSoldier.run(controller);

@@ -19,21 +19,15 @@ public class MidrangeLumberjack {
 		MidrangeLumberjack.controller = controller;
 		Direction direction = Util.randomDirection();
 		while(true){
-			int request = controller.readBroadcast(Constants.CHANNEL_LUMBERJACK_REQUEST_INFO);
-			if(request==1){
-				target = CompressedData.uncompressMapLocation(controller.readBroadcast(Constants.CHANNEL_LUMBERJACK_REQUEST_LOCATION));
-				controller.broadcast(Constants.CHANNEL_LUMBERJACK_REQUEST_INFO, 0);
-			}else{
-				findTarget();
-				if(target==null){
-					int status = controller.readBroadcast(Constants.CHANNEL_LUMBERJACK_TARGET_INFO);
-					if(status==1){
-						target = CompressedData.uncompressMapLocation(controller.readBroadcast(Constants.CHANNEL_LUMBERJACK_TARGET_LOCATION));
-					}
-				}else{
-					controller.broadcast(Constants.CHANNEL_LUMBERJACK_TARGET_INFO, 1);
-					controller.broadcast(Constants.CHANNEL_LUMBERJACK_TARGET_LOCATION, CompressedData.compressMapLocation(target));
+			findTarget();
+			if(target==null){
+				int status = controller.readBroadcast(Constants.CHANNEL_LUMBERJACK_TARGET_INFO);
+				if(status==1){
+					target = CompressedData.uncompressMapLocation(controller.readBroadcast(Constants.CHANNEL_LUMBERJACK_TARGET_LOCATION));
 				}
+			}else{
+				controller.broadcast(Constants.CHANNEL_LUMBERJACK_TARGET_INFO, 1);
+				controller.broadcast(Constants.CHANNEL_LUMBERJACK_TARGET_LOCATION, CompressedData.compressMapLocation(target));
 			}
 			if(target==null){
 				direction = Util.tryRandomMove(direction);

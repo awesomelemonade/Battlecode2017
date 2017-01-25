@@ -28,8 +28,7 @@ public class Constants {
 	public static final int CHANNEL_SPAWNED_INITIAL_LUMBERJACK = 3;
 	public static final int CHANNEL_LUMBERJACK_TARGET_INFO = 4;
 	public static final int CHANNEL_LUMBERJACK_TARGET_LOCATION = 5;
-	public static final int CHANNEL_LUMBERJACK_REQUEST_INFO = 6;
-	public static final int CHANNEL_LUMBERJACK_REQUEST_LOCATION = 7;
+	public static final int CHANNEL_SPAWN_TANK_GARDENER = 6;
 	public static final int CHANNEL_AVAILABLE_GARDENER_ORIGINS = 999;
 	public static final int CHANNEL_SPAWN_GARDENER_COMMANDER = 998;
 }
