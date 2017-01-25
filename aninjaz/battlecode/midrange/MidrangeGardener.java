@@ -112,6 +112,9 @@ public class MidrangeGardener {
 					origin = controller.getLocation();
 				}
 			}
+			if(origin==null&&(controller.getRoundNum()-spawnTurn)>120){
+				origin = controller.getLocation();
+			}
 			Util.yieldByteCodes();
 		}
 	}
