@@ -28,7 +28,7 @@ public class AggroSoldier {
 				if(bestRobot.getType()!=RobotType.LUMBERJACK||controller.getLocation().distanceTo(bestRobot.getLocation())>6f){
 					MapLocation location = Pathfinding.pathfind(bestRobot.getLocation(), bestRobot.getRadius());
 					if(controller.canMove(location)){
-							controller.move(location);
+						controller.move(location);
 					}else{
 						controller.setIndicatorLine(controller.getLocation(), location, 0, 0, 0);
 					}
