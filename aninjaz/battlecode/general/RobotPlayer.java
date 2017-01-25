@@ -8,6 +8,7 @@ import aninjaz.battlecode.midrange.HasslerScout;
 import aninjaz.battlecode.midrange.MidrangeArchon;
 import aninjaz.battlecode.midrange.MidrangeGardener;
 import aninjaz.battlecode.midrange.MidrangeLumberjack;
+import aninjaz.battlecode.midrange.MidrangeTank;
 import aninjaz.battlecode.midrange.TankGardener;
 import aninjaz.battlecode.util.DynamicBroadcasting;
 import aninjaz.battlecode.util.Pathfinding;
@@ -122,7 +123,7 @@ public class RobotPlayer {
 			HasslerScout.run(controller);
 			break;
 		case TANK:
-			TankRobot.run(controller);
+			MidrangeTank.run(controller);
 			break;
 		}
 	}

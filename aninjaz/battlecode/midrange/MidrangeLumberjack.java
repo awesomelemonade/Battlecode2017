@@ -49,6 +49,7 @@ public class MidrangeLumberjack {
 				controller.setIndicatorDot(controller.getLocation(), 255, 255, 0);
 				controller.strike();
 			}else{
+				controller.setIndicatorDot(controller.getLocation(), 0, 0, 255);
 				chopNearest();
 			}
 			Util.yieldByteCodes();
