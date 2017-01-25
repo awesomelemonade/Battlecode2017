@@ -4,6 +4,10 @@ import aninjaz.battlecode.aggro.AggroArchon;
 import aninjaz.battlecode.aggro.AggroGardener;
 import aninjaz.battlecode.aggro.AggroScout;
 import aninjaz.battlecode.aggro.AggroSoldier;
+import aninjaz.battlecode.midrange.HasslerScout;
+import aninjaz.battlecode.midrange.MidrangeArchon;
+import aninjaz.battlecode.midrange.MidrangeGardener;
+import aninjaz.battlecode.midrange.MidrangeLumberjack;
 import aninjaz.battlecode.util.DynamicBroadcasting;
 import aninjaz.battlecode.util.Pathfinding;
 import battlecode.common.*;
@@ -22,14 +26,24 @@ public class RobotPlayer {
 		int currentStrat = controller.readBroadcast(Constants.CHANNEL_CURRENT_STRAT);
 		if(currentStrat==NO_STRAT){
 			currentStrat = findBestStrat();
+			switch(currentStrat){
+			case AGGRO_STRAT:
+				indicate(255, 0, 0);
+				break;
+			case MIDRANGE_STRAT:
+				indicate(0, 255, 255);
+				break;
+			}
 			controller.broadcast(Constants.CHANNEL_CURRENT_STRAT, currentStrat);
 		}
 		while(true){
-			System.out.println("Running: "+controller.getType());
 			try{
 				switch(currentStrat){
 				case AGGRO_STRAT:
 					runAggroStrat();
+					break;
+				case MIDRANGE_STRAT:
+					runMidrangeStrat();
 					break;
 				default:
 					runDefaultStrat();
@@ -43,18 +57,23 @@ public class RobotPlayer {
 			}
 		}
 	}
+	public static void indicate(int red, int green, int blue) throws GameActionException{
+		for(int i=-10;i<=10;++i){
+			for(int j=-10;j<=10;++j){
+				controller.setIndicatorDot(controller.getLocation().translate(i, j), red, green, blue);
+			}
+		}
+	}
 	public static int findBestStrat(){
 		MapLocation[] ourArchons = controller.getInitialArchonLocations(controller.getTeam());
 		MapLocation[] theirArchons = controller.getInitialArchonLocations(Constants.OTHER_TEAM);
 		if(ourArchons.length==1){
-			if(ourArchons[0].distanceTo(theirArchons[0])<=45){
+			if(ourArchons[0].distanceTo(theirArchons[0])<=40){
 				//Check trees in between
 				return AGGRO_STRAT;
 			}
 		}
-		AggroArchon.SETTLE_ROUND = 40;
-		return AGGRO_STRAT;
-		//return MIDRANGE_STRAT;
+		return MIDRANGE_STRAT;
 	}
 	public static void runAggroStrat() throws Exception{
 		switch (controller.getType()) {
@@ -72,6 +91,28 @@ public class RobotPlayer {
 			break;
 		case SCOUT:
 			AggroScout.run(controller);
+			break;
+		case TANK:
+			TankRobot.run(controller);
+			break;
+		}
+	}
+	public static void runMidrangeStrat() throws Exception{
+		switch (controller.getType()) {
+		case ARCHON:
+			MidrangeArchon.run(controller);
+			break;
+		case GARDENER:
+			MidrangeGardener.run(controller);
+			break;
+		case SOLDIER:
+			AggroSoldier.run(controller);
+			break;
+		case LUMBERJACK:
+			MidrangeLumberjack.run(controller);
+			break;
+		case SCOUT:
+			HasslerScout.run(controller);
 			break;
 		case TANK:
 			TankRobot.run(controller);

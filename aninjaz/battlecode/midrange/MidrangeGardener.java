@@ -1,4 +1,6 @@
-package aninjaz.battlecode.aggro;
+package aninjaz.battlecode.midrange;
+
+import aninjaz.battlecode.general.Constants;
 import aninjaz.battlecode.general.Util;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
@@ -8,7 +10,8 @@ import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import battlecode.common.TreeInfo;
-public class AggroGardener {
+
+public class MidrangeGardener {
 	private static final float CHECK_RADIUS = 3f;
 	private static final float WATER_RADIUS = 2f;
 	private static RobotController controller;
@@ -16,8 +19,9 @@ public class AggroGardener {
 	private static Direction[] plants;
 	private static Direction opening;
 	private static Direction randomMove = Util.randomDirection();
+	private static int spawnTurn = 0;
 	public static void run(RobotController controller) throws GameActionException {
-		AggroGardener.controller = controller;
+		MidrangeGardener.controller = controller;
 		float offset = (float) (Math.random()*Math.PI*2);
 		opening = new Direction(offset);
 		plants = new Direction[]{
@@ -27,15 +31,31 @@ public class AggroGardener {
 				new Direction((float) (Math.PI*4/3+offset)),
 				new Direction((float) (Math.PI*5/3+offset))
 		};
-		while(controller.getRoundNum()<AggroArchon.SETTLE_ROUND){
-			Direction direction = Util.randomDirection();
-			if(controller.canBuildRobot(RobotType.SOLDIER, direction)){
-				controller.buildRobot(RobotType.SOLDIER, direction);
+		spawnTurn = controller.getRoundNum();
+		//find valid origin
+		Direction direction = Util.randomDirection();
+		int initialScout = controller.readBroadcast(Constants.CHANNEL_SPAWNED_INITIAL_SCOUT);
+		while(initialScout==0){
+			direction = Util.tryRandomMove(direction);
+			Direction dir = Util.randomDirection();
+			if(controller.canBuildRobot(RobotType.SCOUT, dir)){
+				controller.buildRobot(RobotType.SCOUT, dir);
+				controller.broadcast(Constants.CHANNEL_SPAWNED_INITIAL_SCOUT, 1);
 			}
-			randomMove = Util.tryRandomMove(randomMove);
+			initialScout = controller.readBroadcast(Constants.CHANNEL_SPAWNED_INITIAL_SCOUT);
 			Util.yieldByteCodes();
 		}
-		//find valid origin
+		int initialLumberjack = controller.readBroadcast(Constants.CHANNEL_SPAWNED_INITIAL_LUMBERJACK);
+		while(initialLumberjack==0){
+			direction = Util.tryRandomMove(direction);
+			Direction dir = Util.randomDirection();
+			if(controller.canBuildRobot(RobotType.LUMBERJACK, dir)){
+				controller.buildRobot(RobotType.LUMBERJACK, dir);
+				controller.broadcast(Constants.CHANNEL_SPAWNED_INITIAL_LUMBERJACK, 1);
+			}
+			initialLumberjack = controller.readBroadcast(Constants.CHANNEL_SPAWNED_INITIAL_LUMBERJACK);
+			Util.yieldByteCodes();
+		}
 		findOrigin();
 		while(true){
 			if(unitsSpawned>1){
@@ -51,15 +71,13 @@ public class AggroGardener {
 		}
 	}
 	private static int unitsSpawned = 0;
-	private static RobotType[] buildableUnits = new RobotType[]{RobotType.SCOUT, RobotType.SOLDIER};
-	private static RobotType nextType = buildableUnits[(int) (Math.random()*buildableUnits.length)];
+	private static RobotType nextType = RobotType.LUMBERJACK;
 	public static void createUnits() throws GameActionException{
 		if(!controller.isBuildReady()){
 			return;
 		}
 		if(controller.canBuildRobot(nextType, opening)){
 			controller.buildRobot(nextType, opening);
-			nextType = buildableUnits[(int) (Math.random()*buildableUnits.length)];
 			unitsSpawned++;
 		}
 	}
@@ -91,6 +109,11 @@ public class AggroGardener {
 			TreeInfo[] nearbyTrees = controller.senseNearbyTrees(CHECK_RADIUS);
 			if(nearbyRobots.length==0&&nearbyTrees.length==0){
 				if(controller.onTheMap(controller.getLocation(), CHECK_RADIUS)){
+					origin = controller.getLocation();
+				}
+			}
+			if(origin==null){
+				if(controller.getRoundNum()-spawnTurn>80){
 					origin = controller.getLocation();
 				}
 			}

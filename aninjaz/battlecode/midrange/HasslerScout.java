@@ -18,39 +18,46 @@ public class HasslerScout {
 		while(true){
 			if(controller.getRoundNum()<150&&controller.getTeamBullets()<300){
 				TreeInfo[] nearbyTrees = controller.senseNearbyTrees(-1, Team.NEUTRAL);
-				for(TreeInfo tree: nearbyTrees){
-					if(tree.getContainedBullets()>0){
-						if(controller.canShake(tree.getID())){
-							controller.shake(tree.getID());
-						}else{
-							MapLocation location = Pathfinding.pathfindScout(tree.getLocation());
-							if(controller.canMove(location)){
-								controller.move(location);
+				move:{
+					for(TreeInfo tree: nearbyTrees){
+						if(tree.getContainedBullets()>0){
+							if(controller.canShake(tree.getID())){
+								controller.shake(tree.getID());
 							}else{
-								controller.setIndicatorLine(controller.getLocation(), location, 0, 0, 0);
+								MapLocation location = Pathfinding.pathfindScout(tree.getLocation());
+								if(controller.canMove(location)){
+									controller.move(location);
+									break move;
+								}else{
+									controller.setIndicatorLine(controller.getLocation(), location, 0, 0, 0);
+								}
 							}
 						}
 					}
+					direction = Util.tryRandomMove(direction);
 				}
-			}
-			else{
+			}else{
 				RobotInfo[] nearbyRobots = controller.senseNearbyRobots(-1, Constants.OTHER_TEAM);
 				RobotInfo nearestGardener = getGardener(nearbyRobots);
-				if(nearestGardener!=null){
-					MapLocation location = Pathfinding.pathfindScout(nearestGardener.getLocation());
-					if(controller.canMove(location)){
-						controller.move(location);
-					}else{
-						controller.setIndicatorLine(controller.getLocation(), location, 0, 0, 0);
+				move:{
+					if(nearestGardener!=null){
+						MapLocation location = Pathfinding.pathfindScout(nearestGardener.getLocation());
+						if(controller.canMove(location)){
+							controller.move(location);
+							break move;
+						}else{
+							controller.setIndicatorLine(controller.getLocation(), location, 0, 0, 0);
+						}
 					}
+					direction = Util.tryRandomMove(direction);
+				}
+				if(nearestGardener!=null){
 					if(controller.canFireSingleShot()){
 						controller.fireSingleShot(controller.getLocation().directionTo(nearestGardener.getLocation()));
 					}
-				}else{
-					direction = Util.tryRandomMove(direction);
 				}
-				Util.yieldByteCodes();
 			}
+			Util.yieldByteCodes();
 		}
 	}
 	public static RobotInfo getGardener(RobotInfo[] robots){
