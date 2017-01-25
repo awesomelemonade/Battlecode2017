@@ -42,7 +42,15 @@ public class HasslerScout {
 				move:{
 					if(nearestGardener!=null){
 						if(nearestGardener.getType()==RobotType.LUMBERJACK){
-							if(nearestGardener.getLocation().distanceTo(controller.getLocation())<6f){
+							float distance = nearestGardener.getLocation().distanceTo(controller.getLocation());
+							if(distance<4f){
+								Direction dir = nearestGardener.getLocation().directionTo(controller.getLocation());
+								if(controller.canMove(dir)){
+									controller.move(dir);
+								}
+								break move;
+							}
+							if(distance<6f){
 								break move;
 							}
 						}
