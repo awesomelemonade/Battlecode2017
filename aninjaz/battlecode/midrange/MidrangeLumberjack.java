@@ -80,8 +80,8 @@ public class MidrangeLumberjack {
 			if(tree.getTeam()!=controller.getTeam()){
 				if(controller.canChop(tree.getID())){
 					controller.chop(tree.getID());
+					return;
 				}
-				return;
 			}
 		}
 	}
