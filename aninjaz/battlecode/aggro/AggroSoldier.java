@@ -25,7 +25,7 @@ public class AggroSoldier {
 			RobotInfo[] nearbyRobots = controller.senseNearbyRobots(-1, Constants.OTHER_TEAM);
 			RobotInfo bestRobot = getBestRobot(nearbyRobots);
 			if(bestRobot!=null){
-				if(bestRobot.getType()!=RobotType.LUMBERJACK||controller.getLocation().distanceTo(bestRobot.getLocation())>6){
+				if(bestRobot.getType()!=RobotType.LUMBERJACK||controller.getLocation().distanceTo(bestRobot.getLocation())>6f){
 					MapLocation location = Pathfinding.pathfind(bestRobot.getLocation(), bestRobot.getRadius());
 					if(controller.canMove(location)){
 							direction = controller.getLocation().directionTo(location);
