@@ -55,13 +55,7 @@ public class TankGardener {
 		}
 		findOrigin();
 		while(true){
-			if(unitsSpawned>1){
-				tryPlant();
-			}else{
-				if(getTreeCount()<2){
-					tryPlant();
-				}
-			}
+			tryPlant();
 			waterTrees();
 			createUnits();
 			Util.yieldByteCodes();
