@@ -44,7 +44,7 @@ public class Util {
 		Clock.yield();
 	}
 	public static void checkWin() throws GameActionException{
-		if(controller.getTeamBullets()/(7.5+(controller.getRoundNum()*12.5/3000))>GameConstants.VICTORY_POINTS_TO_WIN-controller.getTeamBullets()){
+		if(controller.getTeamBullets()/(7.5+(controller.getRoundNum()*12.5/3000))+controller.getTeamVictoryPoints()>GameConstants.VICTORY_POINTS_TO_WIN){
 			controller.donate(controller.getTeamBullets());
 		}
 		if(controller.getRoundLimit()-controller.getRoundNum()<=2){
