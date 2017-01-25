@@ -41,6 +41,11 @@ public class HasslerScout {
 				RobotInfo nearestGardener = getGardener(nearbyRobots);
 				move:{
 					if(nearestGardener!=null){
+						if(nearestGardener.getType()==RobotType.LUMBERJACK){
+							if(nearestGardener.getLocation().distanceTo(controller.getLocation())<6f){
+								break move;
+							}
+						}
 						MapLocation location = Pathfinding.pathfindScout(nearestGardener.getLocation());
 						if(controller.canMove(location)){
 							controller.move(location);
