@@ -41,6 +41,14 @@ public class MidrangeLumberjack {
 				if(nearbyTrees.length>15){
 					if(controller.canMove(target)){
 						controller.move(target);
+					}else{
+						RobotInfo[] nearbyRobots = controller.senseNearbyRobots(2f, controller.getTeam());
+						if(nearbyRobots.length>0){
+							MapLocation location = Pathfinding.pathfind(target);
+							if(controller.canMove(location)){
+								controller.move(location);
+							}
+						}
 					}
 				}else{
 					MapLocation location = Pathfinding.pathfind(target);
