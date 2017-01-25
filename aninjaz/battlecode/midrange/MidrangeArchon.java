@@ -87,14 +87,7 @@ public class MidrangeArchon {
 				}
 			}
 			if(controller.isBuildReady()&&controller.getRoundNum()>80){
-				RobotInfo[] ourGardeners = controller.senseNearbyRobots(-1, controller.getTeam());
-				int count = 0;
-				for(RobotInfo robot: ourGardeners){
-					if(robot.getType()==RobotType.GARDENER){
-						count++;
-					}
-				}
-				if(count<=2){
+				if(controller.getTreeCount()>=(controller.readBroadcast(Constants.CHANNEL_GARDENER_COUNT)-1)*5+2){
 					tryHireGardener();
 				}
 			}
@@ -118,6 +111,7 @@ public class MidrangeArchon {
 			else if(battleMode == 2){
 				//controller.broadcast(Constants.CHANNEL_SPAWN_MIDRANGE_GARDENER, controller.readBroadcast(Constants.CHANNEL_SPAWN_TREERANGE_GARDENER)+1);
 			}
+			controller.broadcast(Constants.CHANNEL_GARDENER_COUNT, controller.readBroadcast(Constants.CHANNEL_GARDENER_COUNT)+1);
 			controller.hireGardener(direction);
 		}
 	}

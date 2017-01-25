@@ -68,8 +68,15 @@ public class TreeRangeGardener {
 			waterTrees();
 			createUnits();
 			Util.yieldByteCodes();
+			if(!lowHealth){
+				if(controller.getHealth()/controller.getType().maxHealth<0.15f){
+					controller.broadcast(Constants.CHANNEL_GARDENER_COUNT, controller.readBroadcast(Constants.CHANNEL_GARDENER_COUNT)-1);
+					lowHealth = true;
+				}
+			}
 		}
 	}
+	private static boolean lowHealth = false;
 	private static int unitsSpawned = 0;
 	private static RobotType nextType = RobotType.LUMBERJACK;
 	public static void createUnits() throws GameActionException{

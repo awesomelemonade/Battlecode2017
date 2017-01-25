@@ -32,6 +32,9 @@ public class Constants {
 	//public static final int CHANNEL_SPAWN_MIDRANGE_GARDENER = 7;
 	public static final int CHANNEL_SPAWN_TREERANGE_GARDENER = 8;
 	public static final int CHANNEL_SPAWNED_TANK = 9;
+	
+	public static final int CHANNEL_GARDENER_COUNT = 10;
+	
 	public static final int CHANNEL_AVAILABLE_GARDENER_ORIGINS = 999;
 	public static final int CHANNEL_SPAWN_GARDENER_COMMANDER = 998;
 }
