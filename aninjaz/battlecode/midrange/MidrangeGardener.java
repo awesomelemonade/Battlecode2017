@@ -58,6 +58,11 @@ public class MidrangeGardener {
 		}
 		findOrigin();
 		while(true){
+			if(nextType==RobotType.LUMBERJACK){
+				if(controller.readBroadcast(Constants.CHANNEL_SPAWNED_TANK)==1){
+					nextType = RobotType.SOLDIER;
+				}
+			}
 			if(unitsSpawned>1){
 				tryPlant();
 			}

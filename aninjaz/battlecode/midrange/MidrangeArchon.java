@@ -116,7 +116,7 @@ public class MidrangeArchon {
 				controller.broadcast(Constants.CHANNEL_SPAWN_TREERANGE_GARDENER, controller.readBroadcast(Constants.CHANNEL_SPAWN_TREERANGE_GARDENER)+1);
 			}
 			else if(battleMode == 2){
-				controller.broadcast(Constants.CHANNEL_SPAWN_MIDRANGE_GARDENER, controller.readBroadcast(Constants.CHANNEL_SPAWN_TREERANGE_GARDENER)+1);
+				//controller.broadcast(Constants.CHANNEL_SPAWN_MIDRANGE_GARDENER, controller.readBroadcast(Constants.CHANNEL_SPAWN_TREERANGE_GARDENER)+1);
 			}
 			controller.hireGardener(direction);
 		}

@@ -15,6 +15,7 @@ public class MidrangeTank {
 	public static void run(RobotController controller) throws GameActionException{
 		initialArchons = controller.getInitialArchonLocations(Constants.OTHER_TEAM);
 		Direction direction = Util.randomDirection();
+		controller.broadcast(Constants.CHANNEL_SPAWNED_TANK, 1);
 		while(true){
 			if(index<initialArchons.length){
 				if(controller.getLocation().distanceTo(initialArchons[index])<2f){

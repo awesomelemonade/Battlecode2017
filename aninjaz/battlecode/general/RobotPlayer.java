@@ -6,6 +6,7 @@ import aninjaz.battlecode.aggro.AggroScout;
 import aninjaz.battlecode.aggro.AggroSoldier;
 import aninjaz.battlecode.midrange.HasslerScout;
 import aninjaz.battlecode.midrange.MidrangeArchon;
+import aninjaz.battlecode.midrange.MidrangeGardener;
 import aninjaz.battlecode.midrange.TreeRangeGardener;
 import aninjaz.battlecode.midrange.MidrangeLumberjack;
 import aninjaz.battlecode.midrange.MidrangeTank;
@@ -134,11 +135,8 @@ public class RobotPlayer {
 			TreeRangeGardener.run(controller);
 			return;
 		}
-		int midrange = controller.readBroadcast(Constants.CHANNEL_SPAWN_MIDRANGE_GARDENER);
-		if(midrange>0){
-			controller.broadcast(Constants.CHANNEL_SPAWN_MIDRANGE_GARDENER, midrange-1);
-			
-		}
+		MidrangeGardener.run(controller);
+		return;
 	}
 	public static void runDefaultStrat() throws Exception{
 		switch (controller.getType()) {
