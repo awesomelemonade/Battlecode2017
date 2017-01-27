@@ -87,7 +87,7 @@ public class MidrangeArchon {
 				}
 			}
 			if(controller.isBuildReady()&&controller.getRoundNum()>80){
-				if(controller.getTreeCount()>=(controller.readBroadcast(Constants.CHANNEL_GARDENER_COUNT)-1)*5+2){
+				if(controller.getTreeCount()>=(controller.readBroadcast(Constants.CHANNEL_GARDENER_COUNT)-1)*4+2){
 					tryHireGardener();
 				}
 			}

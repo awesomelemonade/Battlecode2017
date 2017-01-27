@@ -43,7 +43,7 @@ public class MidrangeLumberjack {
 						controller.move(target);
 					}
 				}else{
-					MapLocation location = Pathfinding.pathfindScout(target);
+					MapLocation location = Pathfinding.pathfindTankLumberjack(target);
 					if(controller.canMove(location)){
 						controller.move(location);
 					}

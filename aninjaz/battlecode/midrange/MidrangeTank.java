@@ -1,6 +1,7 @@
 package aninjaz.battlecode.midrange;
 
 import aninjaz.battlecode.general.Util;
+import aninjaz.battlecode.util.Pathfinding;
 import aninjaz.battlecode.general.Constants;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
@@ -23,8 +24,9 @@ public class MidrangeTank {
 				}
 			}
 			if(index<initialArchons.length){
-				if(controller.canMove(initialArchons[index])){
-					controller.move(initialArchons[index]);
+				MapLocation location = Pathfinding.pathfindTankLumberjack(initialArchons[index]);
+				if(controller.canMove(location)){
+					controller.move(location);
 					direction = Util.randomDirection();
 				}else{
 					direction = Util.tryRandomMove(direction);

@@ -27,9 +27,84 @@ public class Pathfinding {
 		bodyRadius = controller.getType().bodyRadius;
 		strideRadius = controller.getType().strideRadius;
 	}
+	public static MapLocation pathfindTankLumberjack(MapLocation target, float radius) throws GameActionException{
+		return pathfindTankLumberjack(controller.getLocation().add(controller.getLocation().directionTo(target), controller.getLocation().distanceTo(target)-radius));
+	}
+	//Tangent Bug Pathfinding
+
+	//Tangent Bug Pathfinding
+	public static MapLocation pathfindTankLumberjack(MapLocation target) throws GameActionException{
+		currentLocation = controller.getLocation();
+		Direction direction = controller.getLocation().directionTo(target);
+		float distance = currentLocation.distanceTo(target)+Constants.EPSILON;
+		nearbyRobots = controller.senseNearbyRobots(distance);
+		nearbyTrees = controller.senseNearbyTrees(distance, controller.getTeam()); //for scouts, we can just set nearbyTrees to an empty array
+		if(isClear(currentLocation, target)){
+			return target;
+		}
+		generateTangentAngles();
+		Direction[] angles = splitAngles(direction, direction, 0, 0, 10);
+		if(angles[0]==null&&angles[1]==null){
+			float newDistance = controller.getLocation().distanceTo(target)-1;
+			if(newDistance<=0){
+				return currentLocation;
+			}else{
+				return pathfindTankLumberjack(currentLocation.add(direction, newDistance));
+			}
+		}
+		if(angles[0]==null){
+			MapLocation location = currentLocation.add(angles[1], strideRadius);
+			if(!controller.onTheMap(location, bodyRadius)){
+				float newDistance = controller.getLocation().distanceTo(target)-1;
+				return pathfindTankLumberjack(currentLocation.add(direction, newDistance));
+			}else{
+				return location;
+			}
+		}
+		if(angles[1]==null){
+			MapLocation location = currentLocation.add(angles[0], strideRadius);
+			if(!controller.onTheMap(location, bodyRadius)){
+				float newDistance = controller.getLocation().distanceTo(target)-1;
+				return pathfindTankLumberjack(currentLocation.add(direction, newDistance));
+			}else{
+				return location;
+			}
+		}
+		float angle1 = direction.radiansBetween(angles[0]);
+		float angle2 = angles[1].radiansBetween(direction);
+		if(angle1<angle2){
+			MapLocation location = currentLocation.add(angles[0], strideRadius);
+			if(!controller.onTheMap(location, bodyRadius)){
+				location = currentLocation.add(angles[1], strideRadius);
+				if(!controller.onTheMap(location, bodyRadius)){
+					float newDistance = controller.getLocation().distanceTo(target)-1;
+					return pathfindTankLumberjack(currentLocation.add(direction, newDistance));
+				}else{
+					return location;
+				}
+			}else{
+				return location;
+			}
+		}else{
+			MapLocation location = currentLocation.add(angles[1], strideRadius);
+			if(!controller.onTheMap(location, bodyRadius)){
+				location = currentLocation.add(angles[0], strideRadius);
+				if(!controller.onTheMap(location, bodyRadius)){
+					float newDistance = controller.getLocation().distanceTo(target)-1;
+					return pathfindTankLumberjack(currentLocation.add(direction, newDistance));
+				}else{
+					return location;
+				}
+			}else{
+				return location;
+			}
+		}
+	}
 	public static MapLocation pathfindScout(MapLocation target, float radius) throws GameActionException{
 		return pathfindScout(controller.getLocation().add(controller.getLocation().directionTo(target), controller.getLocation().distanceTo(target)-radius));
 	}
+	//Tangent Bug Pathfinding
+
 	//Tangent Bug Pathfinding
 	public static MapLocation pathfindScout(MapLocation target) throws GameActionException{
 		currentLocation = controller.getLocation();
@@ -47,21 +122,55 @@ public class Pathfinding {
 			if(newDistance<=0){
 				return currentLocation;
 			}else{
-				return pathfind(currentLocation.add(direction, newDistance));
+				return pathfindScout(currentLocation.add(direction, newDistance));
 			}
 		}
 		if(angles[0]==null){
-			return currentLocation.add(angles[1], strideRadius);
+			MapLocation location = currentLocation.add(angles[1], strideRadius);
+			if(!controller.onTheMap(location, bodyRadius)){
+				float newDistance = controller.getLocation().distanceTo(target)-1;
+				return pathfindScout(currentLocation.add(direction, newDistance));
+			}else{
+				return location;
+			}
 		}
 		if(angles[1]==null){
-			return currentLocation.add(angles[0], strideRadius);
+			MapLocation location = currentLocation.add(angles[0], strideRadius);
+			if(!controller.onTheMap(location, bodyRadius)){
+				float newDistance = controller.getLocation().distanceTo(target)-1;
+				return pathfindScout(currentLocation.add(direction, newDistance));
+			}else{
+				return location;
+			}
 		}
 		float angle1 = direction.radiansBetween(angles[0]);
 		float angle2 = angles[1].radiansBetween(direction);
 		if(angle1<angle2){
-			return currentLocation.add(angles[0], strideRadius);
+			MapLocation location = currentLocation.add(angles[0], strideRadius);
+			if(!controller.onTheMap(location, bodyRadius)){
+				location = currentLocation.add(angles[1], strideRadius);
+				if(!controller.onTheMap(location, bodyRadius)){
+					float newDistance = controller.getLocation().distanceTo(target)-1;
+					return pathfindScout(currentLocation.add(direction, newDistance));
+				}else{
+					return location;
+				}
+			}else{
+				return location;
+			}
 		}else{
-			return currentLocation.add(angles[1], strideRadius);
+			MapLocation location = currentLocation.add(angles[1], strideRadius);
+			if(!controller.onTheMap(location, bodyRadius)){
+				location = currentLocation.add(angles[0], strideRadius);
+				if(!controller.onTheMap(location, bodyRadius)){
+					float newDistance = controller.getLocation().distanceTo(target)-1;
+					return pathfindScout(currentLocation.add(direction, newDistance));
+				}else{
+					return location;
+				}
+			}else{
+				return location;
+			}
 		}
 	}
 	public static MapLocation pathfind(MapLocation target, float radius) throws GameActionException{
