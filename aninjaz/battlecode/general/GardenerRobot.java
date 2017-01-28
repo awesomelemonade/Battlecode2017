@@ -185,7 +185,7 @@ public class GardenerRobot {
 			if(candidateLocation!=null){
 				origin = candidateLocation;
 				originChannel = candidateChannel;
-				controller.broadcast(candidateChannel, CompressedData.compressData(Identifier.GARDENER_ORIGIN, USED_GARDENER_ORIGIN));
+				controller.broadcast(candidateChannel, CompressedData.compressData(Identifier.GARDENER_ORIGIN, 0, USED_GARDENER_ORIGIN));
 			}
 			//Explore and find candidates?
 			waterTrees(); //why not :P

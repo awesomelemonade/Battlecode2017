@@ -1,5 +1,6 @@
 package aninjaz.battlecode.experimental;
 
+import aninjaz.battlecode.general.Constants;
 import aninjaz.battlecode.general.Util;
 import aninjaz.battlecode.util.CompressedData;
 import aninjaz.battlecode.util.DynamicBroadcasting;
@@ -14,9 +15,12 @@ import battlecode.common.Team;
 import battlecode.common.TreeInfo;
 
 public class FlowerGardener {
+	private static final float WATER_RADIUS = 2f;
 	public static final int FLOWER_GARDENER_ORIGIN = 35; // [0, 255]
-	public static final int COMPRESSED_UNUSED_ORIGIN = CompressedData.compressData(FLOWER_GARDENER_ORIGIN, 0, 0);
-	public static final int COMPRESSED_USED_ORIGIN = CompressedData.compressData(FLOWER_GARDENER_ORIGIN, 0, 1);
+	public static final int COMPRESSED_UNUSED_STANDARD_ORIGIN = CompressedData.compressData(FLOWER_GARDENER_ORIGIN, 0, 0);
+	public static final int COMPRESSED_USED_STANDARD_ORIGIN = CompressedData.compressData(FLOWER_GARDENER_ORIGIN, 0, 1);
+	public static final int COMPRESSED_UNUSED_TANK_ORIGIN = CompressedData.compressData(FLOWER_GARDENER_ORIGIN, 1, 0);
+	public static final int COMPRESSED_USED_TANK_ORIGIN = CompressedData.compressData(FLOWER_GARDENER_ORIGIN, 1, 1);
 	public static final float STANDARD_FLOWER_RADIUS = 4f+GameConstants.GENERAL_SPAWN_OFFSET;
 	public static final float TANK_FLOWER_RADIUS = 6f+GameConstants.GENERAL_SPAWN_OFFSET;
 	public static final float NEUTRAL_TREE_RADIUS = 3f+GameConstants.GENERAL_SPAWN_OFFSET;
@@ -33,32 +37,103 @@ public class FlowerGardener {
 		//findorigin
 			//spawn initial robots
 		randomDirection = Util.randomDirection();
+		//Determine spawntype
+		spawnType = RobotType.LUMBERJACK;
+		if(spawnType==RobotType.TANK){
+			setupTankTrees(0);
+		}else{
+			setupTrees(0);
+		}
 		while(!settled){
-			if(findOrigin()){
+			if(originChannel!=-1){
+				controller.broadcast(originChannel, COMPRESSED_UNUSED_STANDARD_ORIGIN);
+				originChannel = -1;
+			}
+			if(isValidOrigin(controller.getLocation(), spawnType)){
+				origin = controller.getLocation();
+				originChannel = DynamicBroadcasting.markNextAvailableMapper();
+				if(spawnType==RobotType.TANK){
+					controller.broadcast(originChannel, COMPRESSED_USED_TANK_ORIGIN);
+				}else{
+					controller.broadcast(originChannel, COMPRESSED_USED_STANDARD_ORIGIN);
+				}
+				controller.broadcast(originChannel-1, CompressedData.compressMapLocation(origin));
 				settled = true;
 			}else{
-				if(origin==null){
-					randomDirection = Util.tryRandomMove(randomDirection);
-				}else{
+				float bestDistance = Float.MAX_VALUE;
+				MapLocation bestLocation = null;
+				int bestChannel = -1;
+				for(int mapper=0;mapper<DynamicBroadcasting.MAPPERS;++mapper){
+					int mapperChannel = DynamicBroadcasting.getMapperChannel(mapper);
+					int mapperData = controller.readBroadcast(mapperChannel);
+					for(int bit=0;bit<Integer.SIZE;++bit){
+						if(((mapperData>>>bit)&1)==1){
+							int dataChannel = DynamicBroadcasting.getDataChannel(mapper, bit);
+							int compressedData = controller.readBroadcast(dataChannel);
+							if(compressedData==FlowerGardener.COMPRESSED_UNUSED_STANDARD_ORIGIN){
+								MapLocation location = CompressedData.uncompressMapLocation(controller.readBroadcast(dataChannel-1));
+								float distance = controller.getLocation().distanceTo(location);
+								if(distance<bestDistance){
+									bestLocation = location;
+									bestChannel = dataChannel;
+									bestDistance = distance;
+								}
+							}
+						}
+					}
+				}
+				if(bestLocation!=null){
+					origin = bestLocation;
+					originChannel = bestChannel;
+					controller.broadcast(originChannel, COMPRESSED_USED_STANDARD_ORIGIN);
 					MapLocation location = Pathfinding.pathfind(origin);
 					if(controller.canMove(location)){
-						controller.move(location);
+						controller.move(origin);
 						if(controller.getLocation().equals(origin)){
+							System.out.println("MOVED TO BE SETTLED");
 							settled = true;
 						}
 					}
+				}else{
+					randomDirection = Util.tryRandomMove(randomDirection);
 				}
 			}
 			Util.yieldByteCodes();
 		}
+		System.out.println("SETTLED");
 		//setupTrees
 		while(true){
-			
+			plantTrees();
+			spawnUnits();
 			waterTrees();
 			Util.yieldByteCodes();
 		}
 	}
+	public static void plantTrees() throws GameActionException{
+		if(!controller.isBuildReady()){
+			return;
+		}
+		for(Direction direction: plants){
+			if(controller.canPlantTree(direction)){
+				controller.plantTree(direction);
+				return;
+			}
+		}
+	}
+	public static void spawnUnits() throws GameActionException{
+		if(!controller.isBuildReady()){
+			return;
+		}
+		if(controller.canBuildRobot(spawnType, opening)){
+			controller.buildRobot(spawnType, opening);
+		}
+	}
 	public static boolean isValidOrigin(MapLocation origin, RobotType type) throws GameActionException{
+		for(Direction direction: Constants.CARDINAL_DIRECTIONS){
+			if(!controller.onTheMap(origin.add(direction, 2f+GameConstants.GENERAL_SPAWN_OFFSET), GameConstants.BULLET_TREE_RADIUS)){
+				return false;
+			}
+		}
 		TreeInfo[] nearbyTrees = controller.senseNearbyTrees(NEUTRAL_TREE_RADIUS, Team.NEUTRAL);
 		if(nearbyTrees.length>0){
 			return false;
@@ -84,50 +159,6 @@ public class FlowerGardener {
 		}
 		return true;
 	}
-	public static boolean findOrigin(){
-		//attempt
-		if(currentLocationIsValid()){
-			//set origin to controller.getLocation()
-			//return;
-			return true;
-		}
-		if(spawnType==RobotType.TANK){
-			return false;
-		}
-		float bestDistance = Float.MAX_VALUE;
-		MapLocation bestLocation = null;
-		int bestChannel = -1;
-		for(int mapper=0;mapper<DynamicBroadcasting.MAPPERS;++mapper){
-			int mapperChannel = DynamicBroadcasting.getMapperChannel(mapper);
-			int mapperData = controller.readBroadcast(mapperChannel);
-			for(int bit=0;bit<Integer.SIZE;++bit){
-				if(((mapperData>>>bit)&1)==1){
-					int dataChannel = DynamicBroadcasting.getDataChannel(mapper, bit);
-					int compressedData = controller.readBroadcast(dataChannel);
-					if(compressedData==FlowerGardener.COMPRESSED_UNUSED_ORIGIN){
-						MapLocation location = CompressedData.uncompressMapLocation(controller.readBroadcast(dataChannel-1));
-						float distance = controller.getLocation().distanceTo(location);
-						if(distance<bestDistance){
-							bestLocation = location;
-							bestChannel = dataChannel;
-							bestDistance = distance;
-						}
-					}
-				}
-			}
-		}
-		if(bestLocation!=null){
-			if(origin!=null&&originChannel!=bestChannel){
-				controller.broadcast(originChannel, COMPRESSED_UNUSED_ORIGIN);
-			}
-			if(origin==null||originChannel!=bestChannel){
-				origin = bestLocation;
-				originChannel = bestChannel;
-				controller.broadcast(bestChannel, COMPRESSED_USED_ORIGIN);
-			}
-		}
-		return false;
-	}
 	public static void setupTrees(float offset){
 		opening = new Direction(offset);
 		plants = new Direction[]{
@@ -146,5 +177,19 @@ public class FlowerGardener {
 				new Direction((float) (Math.PI/2+offset)),
 				new Direction((float) (Math.PI*3/2+offset))
 		};
+	}
+	public static void waterTrees() throws GameActionException{
+		TreeInfo[] nearbyTrees = controller.senseNearbyTrees(WATER_RADIUS, controller.getTeam());
+		int bestTreeId = -1;
+		float leastHealth = GameConstants.BULLET_TREE_MAX_HEALTH;
+		for(TreeInfo tree: nearbyTrees){
+			if(tree.getHealth()<leastHealth){
+				bestTreeId = tree.getID();
+				leastHealth = tree.getHealth();
+			}
+		}
+		if(bestTreeId!=-1){
+			controller.water(bestTreeId); //No need for canWater()?
+		}
 	}
 }

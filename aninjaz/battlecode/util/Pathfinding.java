@@ -255,7 +255,7 @@ public class Pathfinding {
 			RobotInfo robot = nearbyRobots[i];
 			MapLocation location = robot.getLocation();
 			Direction direction = currentLocation.directionTo(location);
-			float angle = getTangentAngle(location, robot.getRadius()+Constants.EPSILON);
+			float angle = getTangentAngle(location, robot.getRadius());
 			robotLeftAngles[i] = direction.rotateLeftRads(angle);
 			robotRightAngles[i] = direction.rotateRightRads(angle);
 		}
@@ -263,7 +263,7 @@ public class Pathfinding {
 			TreeInfo tree = nearbyTrees[i];
 			MapLocation location = tree.getLocation();
 			Direction direction = currentLocation.directionTo(location);
-			float angle = getTangentAngle(location, tree.getRadius()+Constants.EPSILON);
+			float angle = getTangentAngle(location, tree.getRadius());
 			treeLeftAngles[i] = direction.rotateLeftRads(angle);
 			treeRightAngles[i] = direction.rotateRightRads(angle);
 		}
@@ -360,7 +360,7 @@ public class Pathfinding {
 	}
 	public static boolean isSafeSpawn(MapLocation target) throws GameActionException{
 		currentLocation = target;
-		Direction direction = Direction.NORTH;
+		Direction direction = Direction.getNorth();
 		float distance = bodyRadius+1f;
 		nearbyRobots = controller.senseNearbyRobots(distance);
 		nearbyTrees = controller.senseNearbyTrees(distance); //for scouts, we can just set nearbyTrees to an empty array

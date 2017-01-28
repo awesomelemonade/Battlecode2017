@@ -4,6 +4,7 @@ import aninjaz.battlecode.aggro.AggroArchon;
 import aninjaz.battlecode.aggro.AggroGardener;
 import aninjaz.battlecode.aggro.AggroScout;
 import aninjaz.battlecode.aggro.AggroSoldier;
+import aninjaz.battlecode.experimental.FlowerGardener;
 import aninjaz.battlecode.midrange.HasslerScout;
 import aninjaz.battlecode.midrange.MidrangeArchon;
 import aninjaz.battlecode.midrange.MidrangeGardener;
@@ -19,6 +20,7 @@ public class RobotPlayer {
 	private static final int NO_STRAT = 0;
 	private static final int AGGRO_STRAT = 1;
 	private static final int MIDRANGE_STRAT = 2;
+	private static final int EXPERIMENTAL_STRAT = 3;
 	private static RobotController controller;
 	public static void run(RobotController controller) throws GameActionException{
 		RobotPlayer.controller = controller;
@@ -48,6 +50,9 @@ public class RobotPlayer {
 				case MIDRANGE_STRAT:
 					runMidrangeStrat();
 					break;
+				case EXPERIMENTAL_STRAT:
+					runExperimentalStrat();
+					break;
 				default:
 					runDefaultStrat();
 				}
@@ -76,7 +81,8 @@ public class RobotPlayer {
 				return AGGRO_STRAT;
 			}
 		}
-		return MIDRANGE_STRAT;
+		return EXPERIMENTAL_STRAT;
+		//return MIDRANGE_STRAT;
 	}
 	public static void runAggroStrat() throws Exception{
 		switch (controller.getType()) {
@@ -137,6 +143,28 @@ public class RobotPlayer {
 		}
 		MidrangeGardener.run(controller);
 		return;
+	}
+	public static void runExperimentalStrat() throws Exception{
+		switch (controller.getType()) {
+		case ARCHON:
+			MidrangeArchon.run(controller);
+			break;
+		case GARDENER:
+			FlowerGardener.run(controller);
+			break;
+		case SOLDIER:
+			AggroSoldier.run(controller);
+			break;
+		case LUMBERJACK:
+			MidrangeLumberjack.run(controller);
+			break;
+		case SCOUT:
+			HasslerScout.run(controller);
+			break;
+		case TANK:
+			MidrangeTank.run(controller);
+			break;
+		}
 	}
 	public static void runDefaultStrat() throws Exception{
 		switch (controller.getType()) {
