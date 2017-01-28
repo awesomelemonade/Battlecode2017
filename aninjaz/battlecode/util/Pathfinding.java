@@ -3,6 +3,7 @@ package aninjaz.battlecode.util;
 import aninjaz.battlecode.general.Constants;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
+import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
@@ -353,5 +354,18 @@ public class Pathfinding {
 		float t = ((p.x-v.x)*(w.x-v.x)+(p.y-v.y)*(w.y-v.y))/distanceSquared;
 		t = Math.max(0, Math.min(1, t)); //Clamp t between 0 and 1
 		return Operation.project(v, w, t);
+	}
+	public static boolean isSafeSpawn(Direction direction, float radius) throws GameActionException{
+		return isSafeSpawn(controller.getLocation().add(direction, bodyRadius+radius+GameConstants.GENERAL_SPAWN_OFFSET));
+	}
+	public static boolean isSafeSpawn(MapLocation target) throws GameActionException{
+		currentLocation = target;
+		Direction direction = Direction.NORTH;
+		float distance = bodyRadius+1f;
+		nearbyRobots = controller.senseNearbyRobots(distance);
+		nearbyTrees = controller.senseNearbyTrees(distance); //for scouts, we can just set nearbyTrees to an empty array
+		generateTangentAngles();
+		Direction[] angles = splitAngles(direction, direction, 0, 0, 10);
+		return angles[0]!=null||angles[1]!=null;
 	}
 }

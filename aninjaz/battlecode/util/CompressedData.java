@@ -6,17 +6,21 @@ public class CompressedData {
 	private static final int MAP_X_LOCATION = 16;
 	private static final int MAP_LOCATION_SIZE = 65535;
 	
-	private static final int IDENTIFIER_BYTES = 255; //2^8-1
-	private static final int DATA_LOCATION = 8;
-	private static final int DATA_SIZE = 16777215; //2^24-1
+	private static final int IDENTIFIER_BITS = 255; //2^8-1
+	private static final int SUBIDENTIFIER_LOCATION = 8;
+	private static final int DATA_LOCATION = 16;
+	private static final int DATA_BITS = 65535; //2^16-1
 	public static int getIdentifier(int compressedData){
-		return compressedData & IDENTIFIER_BYTES;
+		return compressedData & IDENTIFIER_BITS;
+	}
+	public static int getSubIdentifier(int compressedData){
+		return (compressedData>>>SUBIDENTIFIER_LOCATION) & IDENTIFIER_BITS;
 	}
 	public static int getData(int compressedData){
-		return (compressedData>>>DATA_LOCATION) & DATA_SIZE;
+		return (compressedData>>>DATA_LOCATION) & DATA_BITS;
 	}
-	public static int compressData(int identifier, int data){
-		return (data<<DATA_LOCATION) | identifier;
+	public static int compressData(int identifier, int subidentifier, int data){
+		return (data<<DATA_LOCATION) | (subidentifier<<SUBIDENTIFIER_LOCATION) | identifier;
 	}
 	public static MapLocation uncompressMapLocation(int compressedData){
 		return new MapLocation(
