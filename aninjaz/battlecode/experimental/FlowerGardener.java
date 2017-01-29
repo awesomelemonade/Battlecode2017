@@ -113,7 +113,7 @@ public class FlowerGardener {
 	}
 	public static float calcOffsetDirection() throws GameActionException{
 		for(Direction direction: Constants.CARDINAL_DIRECTIONS){
-			if(!controller.onTheMap(origin.add(direction, RobotType.GARDENER.sensorRadius))){
+			if(!controller.onTheMap(origin.add(direction, RobotType.GARDENER.sensorRadius-Constants.EPSILON))){
 				return direction.opposite().radians;
 			}
 		}
