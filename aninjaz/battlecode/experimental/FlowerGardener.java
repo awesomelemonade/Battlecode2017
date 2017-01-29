@@ -25,26 +25,51 @@ public class FlowerGardener {
 	public static final float TANK_FLOWER_RADIUS = 6f+GameConstants.GENERAL_SPAWN_OFFSET;
 	public static final float NEUTRAL_TREE_RADIUS = 3f+GameConstants.GENERAL_SPAWN_OFFSET;
 	private static RobotController controller;
-	private static Direction randomDirection;
 	private static boolean settled = false;
 	private static MapLocation origin;
 	private static int originChannel = -1;
 	private static Direction opening;
 	private static Direction[] plants;
-	private static RobotType spawnType;
+	public static RobotType spawnType;
 	private static int spawnTime;
 	public static void run(RobotController controller) throws GameActionException{
 		FlowerGardener.controller = controller;
 		spawnTime = controller.getRoundNum();
+		Direction randomDirection = Util.randomDirection();
 		//findorigin
 			//spawn initial robots
-		randomDirection = Util.randomDirection();
+		int initialScout = controller.readBroadcast(Constants.CHANNEL_SPAWNED_INITIAL_SCOUT);
+		int initialLumberjack = controller.readBroadcast(Constants.CHANNEL_SPAWNED_INITIAL_LUMBERJACK);
+		while(initialScout==0||initialLumberjack==0){
+			if(initialScout==0){
+				Direction direction = Pathfinding.findSpawn(RobotType.SCOUT.bodyRadius);
+				if(controller.canBuildRobot(RobotType.SCOUT, direction)){
+					controller.broadcast(Constants.CHANNEL_SPAWNED_INITIAL_SCOUT, 1);
+					controller.buildRobot(RobotType.SCOUT, direction);
+				}
+			}else if(initialLumberjack==0){
+				Direction direction = Pathfinding.findSpawn(RobotType.LUMBERJACK.bodyRadius);
+				if(controller.canBuildRobot(RobotType.LUMBERJACK, direction)){
+					controller.broadcast(Constants.CHANNEL_SPAWNED_INITIAL_LUMBERJACK, 1);
+					controller.buildRobot(RobotType.LUMBERJACK, direction);
+				}
+			}
+			randomDirection = Util.tryRandomMove(randomDirection);
+			Util.yieldByteCodes();
+			initialScout = controller.readBroadcast(Constants.CHANNEL_SPAWNED_INITIAL_SCOUT);
+			initialLumberjack = controller.readBroadcast(Constants.CHANNEL_SPAWNED_INITIAL_LUMBERJACK);
+		}
+		
 		//Determine spawntype
-		spawnType = RobotType.LUMBERJACK;
 		while(!settled){
 			if(originChannel!=-1){
 				controller.broadcast(originChannel, COMPRESSED_UNUSED_STANDARD_ORIGIN);
 				originChannel = -1;
+			}
+			if(controller.getTeamBullets()>500f){
+				spawnType = RobotType.TANK;
+			}else{
+				spawnType = RobotType.LUMBERJACK;
 			}
 			if(isValidOrigin(controller.getLocation(), spawnType)){
 				origin = controller.getLocation();
@@ -87,7 +112,6 @@ public class FlowerGardener {
 					if(controller.canMove(location)){
 						controller.move(origin);
 						if(controller.getLocation().equals(origin)){
-							System.out.println("MOVED TO BE SETTLED");
 							settled = true;
 						}
 					}
@@ -97,7 +121,6 @@ public class FlowerGardener {
 			}
 			Util.yieldByteCodes();
 		}
-		System.out.println("SETTLED");
 		float offsetDirection = calcOffsetDirection();
 		if(spawnType==RobotType.TANK){
 			setupTankTrees(offsetDirection);
@@ -105,6 +128,17 @@ public class FlowerGardener {
 			setupTrees(offsetDirection);
 		}
 		while(true){
+			if(spawnType!=RobotType.TANK){
+				TreeInfo[] nearbyTrees = controller.senseNearbyTrees(-1, Team.NEUTRAL);
+				if(nearbyTrees.length>0){
+					controller.broadcast(Constants.CHANNEL_REQUEST_LUMBERJACKS, controller.getRoundNum());
+				}
+				if(controller.getRoundNum()-controller.readBroadcast(Constants.CHANNEL_REQUEST_LUMBERJACKS)<=5){
+					spawnType = RobotType.LUMBERJACK;
+				}else{
+					spawnType = RobotType.SOLDIER;
+				}
+			}
 			plantTrees();
 			spawnUnits();
 			waterTrees();

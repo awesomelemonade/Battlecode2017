@@ -22,6 +22,15 @@ public class CompressedData {
 	public static int compressData(int identifier, int subIdentifier, int data){
 		return (data<<DATA_LOCATION) | (subIdentifier<<SUBIDENTIFIER_LOCATION) | identifier;
 	}
+	public static int getFloatDataA(int compressedData){
+		return compressedData&DATA_BITS;
+	}
+	public static float getFloatDataB(int compressedData){
+		return ((float)((compressedData>>>DATA_LOCATION)&DATA_BITS))/100f;
+	}
+	public static int compressFloatData(int a, float b){
+		return (Math.round(b*100)<<DATA_LOCATION) | a;
+	}
 	public static MapLocation uncompressMapLocation(int compressedData){
 		return new MapLocation(
 				((float)((compressedData>>>MAP_X_LOCATION)&MAP_LOCATION_SIZE))/100f,

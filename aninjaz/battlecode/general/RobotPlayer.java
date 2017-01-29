@@ -8,6 +8,7 @@ import aninjaz.battlecode.experimental.FlowerGardener;
 import aninjaz.battlecode.midrange.HasslerScout;
 import aninjaz.battlecode.midrange.MidrangeArchon;
 import aninjaz.battlecode.midrange.MidrangeLumberjack;
+import aninjaz.battlecode.midrange.MidrangeSoldier;
 import aninjaz.battlecode.midrange.MidrangeTank;
 import aninjaz.battlecode.util.DynamicBroadcasting;
 import aninjaz.battlecode.util.DynamicTargeting;
@@ -18,7 +19,6 @@ public class RobotPlayer {
 	private static final int NO_STRAT = 0;
 	private static final int AGGRO_STRAT = 1;
 	private static final int MIDRANGE_STRAT = 2;
-	private static final int EXPERIMENTAL_STRAT = 3;
 	private static RobotController controller;
 	public static void run(RobotController controller) throws GameActionException{
 		RobotPlayer.controller = controller;
@@ -49,9 +49,6 @@ public class RobotPlayer {
 				case MIDRANGE_STRAT:
 					runMidrangeStrat();
 					break;
-				case EXPERIMENTAL_STRAT:
-					runExperimentalStrat();
-					break;
 				default:
 					runDefaultStrat();
 				}
@@ -75,13 +72,12 @@ public class RobotPlayer {
 		MapLocation[] ourArchons = controller.getInitialArchonLocations(controller.getTeam());
 		MapLocation[] theirArchons = controller.getInitialArchonLocations(Constants.OTHER_TEAM);
 		if(ourArchons.length==1){
-			if(ourArchons[0].distanceTo(theirArchons[0])<=36){
+			if(ourArchons[0].distanceTo(theirArchons[0])<=10){
 				//Check trees in between
 				return AGGRO_STRAT;
 			}
 		}
-		return EXPERIMENTAL_STRAT;
-		//return MIDRANGE_STRAT;
+		return MIDRANGE_STRAT;
 	}
 	public static void runAggroStrat() throws Exception{
 		switch (controller.getType()) {
@@ -111,48 +107,10 @@ public class RobotPlayer {
 			MidrangeArchon.run(controller);
 			break;
 		case GARDENER:
-			spawnGardener();
-			break;
-		case SOLDIER:
-			AggroSoldier.run(controller);
-			break;
-		case LUMBERJACK:
-			MidrangeLumberjack.run(controller);
-			break;
-		case SCOUT:
-			HasslerScout.run(controller);
-			break;
-		case TANK:
-			MidrangeTank.run(controller);
-			break;
-		}
-	}
-	public static void spawnGardener() throws GameActionException{
-		int tankGardenerRequests = controller.readBroadcast(Constants.CHANNEL_SPAWN_TANK_GARDENER);
-		if(tankGardenerRequests>0){
-			controller.broadcast(Constants.CHANNEL_SPAWN_TANK_GARDENER, tankGardenerRequests-1);
-			FlowerGardener.run(controller);
-			return;
-		}
-		int treeRange = controller.readBroadcast(Constants.CHANNEL_SPAWN_TREERANGE_GARDENER);
-		if(treeRange>0){
-			controller.broadcast(Constants.CHANNEL_SPAWN_TREERANGE_GARDENER, treeRange-1);
-			FlowerGardener.run(controller);
-			return;
-		}
-		FlowerGardener.run(controller);
-		return;
-	}
-	public static void runExperimentalStrat() throws Exception{
-		switch (controller.getType()) {
-		case ARCHON:
-			MidrangeArchon.run(controller);
-			break;
-		case GARDENER:
 			FlowerGardener.run(controller);
 			break;
 		case SOLDIER:
-			AggroSoldier.run(controller);
+			MidrangeSoldier.run(controller);
 			break;
 		case LUMBERJACK:
 			MidrangeLumberjack.run(controller);

@@ -23,17 +23,19 @@ public class MidrangeLumberjack {
 			RobotInfo[] nearbyRobots = controller.senseNearbyRobots(-1, Constants.OTHER_TEAM);
 			TreeInfo bestTree = findBestTree(nearbyTrees);
 			if(bestTree!=null){
-				DynamicTargeting.addTreeTarget(DynamicTargeting.getPriority(bestTree), bestTree.getLocation());
+				DynamicTargeting.addTreeTarget(bestTree);
 			}
 			if(nearbyRobots.length>0){
-				DynamicTargeting.addRobotTarget(DynamicTargeting.PRIORITY_ATTACK_ENEMY, nearbyRobots[0].getLocation());
+				DynamicTargeting.addRobotTarget(nearbyRobots[0]);
 			}
-			MapLocation target = DynamicTargeting.getTarget();
+			DynamicTargeting.getTarget();
+			MapLocation target = DynamicTargeting.targetLocation;
 			if(target==null){
 				controller.setIndicatorDot(controller.getLocation(), 0, 255, 255);
 				direction = Util.tryRandomMove(direction);
 			}else{
-				MapLocation location = Pathfinding.pathfindTankLumberjack(target);
+				controller.setIndicatorDot(target, 255, 128, 0);
+				MapLocation location = Pathfinding.pathfindTankLumberjack(target, DynamicTargeting.targetRadius);
 				if(controller.canMove(location)){
 					controller.move(location);
 				}

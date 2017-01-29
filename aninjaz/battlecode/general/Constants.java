@@ -25,14 +25,17 @@ public class Constants {
 	
 	public static final int CHANNEL_CURRENT_STRAT = 0;
 	public static final int CHANNEL_SPAWNED_INITIAL_GARDENER = 1;
-	public static final int CHANNEL_SPAWNED_INITIAL_SCOUT = 2;
+	public static final int CHANNEL_REQUEST_LUMBERJACKS = 2;
+	public static final int CHANNEL_SPAWNED_INITIAL_SCOUT = 3;
+	public static final int CHANNEL_SPAWNED_INITIAL_LUMBERJACK = 4;
+	/*public static final int CHANNEL_SPAWNED_INITIAL_SCOUT = 2;
 	public static final int CHANNEL_SPAWNED_INITIAL_LUMBERJACK = 3;
 	public static final int CHANNEL_LUMBERJACK_TARGET_INFO = 4;
 	public static final int CHANNEL_LUMBERJACK_TARGET_LOCATION = 5;
 	public static final int CHANNEL_SPAWN_TANK_GARDENER = 6;
 	//public static final int CHANNEL_SPAWN_MIDRANGE_GARDENER = 7;
 	public static final int CHANNEL_SPAWN_TREERANGE_GARDENER = 8;
-	public static final int CHANNEL_SPAWNED_TANK = 9;
+	public static final int CHANNEL_SPAWNED_TANK = 9;*/
 	
 	public static final int CHANNEL_GARDENER_COUNT = 10;
 	

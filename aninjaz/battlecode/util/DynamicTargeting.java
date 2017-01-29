@@ -3,6 +3,8 @@ package aninjaz.battlecode.util;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
+import battlecode.common.RobotInfo;
+import battlecode.common.RobotType;
 import battlecode.common.TreeInfo;
 
 public class DynamicTargeting {
@@ -10,19 +12,24 @@ public class DynamicTargeting {
 	public static final int TARGET_IDENTIFIER = 87;
 	public static final int SUBIDENTIFIER_ROBOT = 1;
 	public static final int SUBIDENTIFIER_TREE = 2;
+	public static final int SUBIDENTIFIER_ARCHON = 3;
+	public static final int PRIORITY_TARGET_ARCHON = 3;
 	public static final int PRIORITY_CHOP_STANDARD_TREE = 5;
 	public static final int PRIORITY_CHOP_ROBOT_TREE = 10;
 	public static final int PRIORITY_ATTACK_ENEMY = 15;
-	public static int getPriority(TreeInfo tree){
-		if(tree.getContainedRobot()==null){
-			return PRIORITY_CHOP_STANDARD_TREE;
-		}else{
-			return PRIORITY_CHOP_ROBOT_TREE;
-		}
-	}
-	public static void addTreeTarget(int priority, MapLocation target) throws GameActionException{
-		int compressedTargetData = CompressedData.compressData(TARGET_IDENTIFIER, SUBIDENTIFIER_TREE, priority);
+	public static void addArchonTarget(MapLocation target) throws GameActionException{
+		int compressedTargetData = CompressedData.compressData(TARGET_IDENTIFIER, SUBIDENTIFIER_ARCHON, PRIORITY_TARGET_ARCHON);
 		int compressedTargetLocation = CompressedData.compressMapLocation(target);
+		controller.setIndicatorDot(target, 0, 255, 0);
+		int targetChannel = DynamicBroadcasting.markNextAvailableMapper();
+		controller.broadcast(targetChannel, compressedTargetData);
+		controller.broadcast(targetChannel-1, compressedTargetLocation);
+		controller.broadcast(targetChannel-3, 0);
+	}
+	public static void addTreeTarget(TreeInfo tree) throws GameActionException{
+		int compressedTargetData = CompressedData.compressData(TARGET_IDENTIFIER, SUBIDENTIFIER_TREE,
+				tree.getContainedRobot()==null?PRIORITY_CHOP_STANDARD_TREE:PRIORITY_CHOP_ROBOT_TREE);
+		int compressedTargetLocation = CompressedData.compressMapLocation(tree.getLocation());
 		for(int mapper=0;mapper<DynamicBroadcasting.MAPPERS;++mapper){
 			int mapperChannel = DynamicBroadcasting.getMapperChannel(mapper);
 			int mapperData = controller.readBroadcast(mapperChannel);
@@ -37,17 +44,17 @@ public class DynamicTargeting {
 				}
 			}
 		}
-		controller.setIndicatorDot(target, 0, 255, 0);
 		int targetChannel = DynamicBroadcasting.markNextAvailableMapper();
 		controller.broadcast(targetChannel, compressedTargetData);
 		controller.broadcast(targetChannel-1, compressedTargetLocation);
+		controller.broadcast(targetChannel-3, CompressedData.compressFloatData(0, tree.getRadius()));
 	}
-	public static void addRobotTarget(int priority, MapLocation target) throws GameActionException{
+	public static void addRobotTarget(RobotInfo robot) throws GameActionException{
 		int count = 0;
 		int oldestChannel = -1;
 		int oldestRound = 3000;
-		int compressedTargetData = CompressedData.compressData(TARGET_IDENTIFIER, SUBIDENTIFIER_ROBOT, priority);
-		int compressedTargetLocation = CompressedData.compressMapLocation(target);
+		int compressedTargetData = CompressedData.compressData(TARGET_IDENTIFIER, SUBIDENTIFIER_ROBOT, PRIORITY_ATTACK_ENEMY);
+		int compressedTargetLocation = CompressedData.compressMapLocation(robot.getLocation());
 		for(int mapper=0;mapper<DynamicBroadcasting.MAPPERS;++mapper){
 			int mapperChannel = DynamicBroadcasting.getMapperChannel(mapper);
 			int mapperData = controller.readBroadcast(mapperChannel);
@@ -73,21 +80,27 @@ public class DynamicTargeting {
 				}
 			}
 		}
-		controller.setIndicatorDot(target, 0, 255, 0);
 		if(count<5){
 			int targetChannel = DynamicBroadcasting.markNextAvailableMapper();
 			controller.broadcast(targetChannel, compressedTargetData);
 			controller.broadcast(targetChannel-1, compressedTargetLocation);
 			controller.broadcast(targetChannel-2, controller.getRoundNum());
+			controller.broadcast(targetChannel-3, CompressedData.compressFloatData(robot.getType()==RobotType.LUMBERJACK?1:0, robot.getRadius()));
 		}else{
 			controller.broadcast(oldestChannel, compressedTargetData);
 			controller.broadcast(oldestChannel-1, compressedTargetLocation);
 			controller.broadcast(oldestChannel-2, controller.getRoundNum());
+			controller.broadcast(oldestChannel-3, CompressedData.compressFloatData(robot.getType()==RobotType.LUMBERJACK?1:0, robot.getRadius()));
 		}
 	}
-	public static MapLocation getTarget(int subIdentifier) throws GameActionException{
+	public static MapLocation targetLocation;
+	public static float targetRadius;
+	public static boolean targetLumberjack = false;
+	public static void getTargetNonTree() throws GameActionException{
+		targetLocation = null;
+		targetRadius = -1;
+		targetLumberjack = false;
 		int bestPriority = 0;
-		MapLocation bestLocation = null;
 		float bestDistance = Float.MAX_VALUE;
 		for(int mapper=0;mapper<DynamicBroadcasting.MAPPERS;++mapper){
 			int mapperChannel = DynamicBroadcasting.getMapperChannel(mapper);
@@ -97,29 +110,29 @@ public class DynamicTargeting {
 					int dataChannel = DynamicBroadcasting.getDataChannel(mapper, bit);
 					int compressedData = controller.readBroadcast(dataChannel);
 					if(CompressedData.getIdentifier(compressedData)==TARGET_IDENTIFIER){
-						if(CompressedData.getSubIdentifier(compressedData)==subIdentifier){
+						if(CompressedData.getSubIdentifier(compressedData)!=SUBIDENTIFIER_TREE){
 							int priority = CompressedData.getData(compressedData);
 							MapLocation location = CompressedData.uncompressMapLocation(controller.readBroadcast(dataChannel-1));
-							if(priority>bestPriority){
+							float distance = location.distanceTo(controller.getLocation());
+							if(priority>bestPriority||(priority==bestPriority&&distance<bestDistance)){
 								bestPriority = priority;
-								bestLocation = location;
-							}else if(priority==bestPriority){
-								float distance = bestLocation.distanceTo(controller.getLocation());
-								if(distance<bestDistance){
-									bestLocation = location;
-									bestDistance = distance;
-								}
+								bestDistance = distance;
+								targetLocation = location;
+								int data = controller.readBroadcast(dataChannel-3);
+								targetLumberjack = CompressedData.getFloatDataA(data)==1;
+								targetRadius = CompressedData.getFloatDataB(data);
 							}
 						}
 					}
 				}
 			}
 		}
-		return bestLocation;
 	}
-	public static MapLocation getTarget() throws GameActionException{
+	public static void getTarget() throws GameActionException{
+		targetLocation = null;
+		targetRadius = -1;
+		targetLumberjack = false;
 		int bestPriority = 0;
-		MapLocation bestLocation = null;
 		float bestDistance = Float.MAX_VALUE;
 		for(int mapper=0;mapper<DynamicBroadcasting.MAPPERS;++mapper){
 			int mapperChannel = DynamicBroadcasting.getMapperChannel(mapper);
@@ -132,21 +145,18 @@ public class DynamicTargeting {
 						int priority = CompressedData.getData(compressedData);
 						MapLocation location = CompressedData.uncompressMapLocation(controller.readBroadcast(dataChannel-1));
 						float distance = location.distanceTo(controller.getLocation());
-						if(priority>bestPriority){
+						if(priority>bestPriority||(priority==bestPriority&&distance<bestDistance)){
 							bestPriority = priority;
-							bestLocation = location;
 							bestDistance = distance;
-						}else if(priority==bestPriority){
-							if(distance<bestDistance){
-								bestLocation = location;
-								bestDistance = distance;
-							}
+							targetLocation = location;
+							int data = controller.readBroadcast(dataChannel-3);
+							targetLumberjack = CompressedData.getFloatDataA(data)==1;
+							targetRadius = CompressedData.getFloatDataB(data);
 						}
 					}
 				}
 			}
 		}
-		return bestLocation;
 	}
 	public static void removeTargets() throws GameActionException{
 		for(int mapper=0;mapper<DynamicBroadcasting.MAPPERS;++mapper){
@@ -157,7 +167,7 @@ public class DynamicTargeting {
 					int dataChannel = DynamicBroadcasting.getDataChannel(mapper, bit);
 					if(CompressedData.getIdentifier(controller.readBroadcast(dataChannel))==DynamicTargeting.TARGET_IDENTIFIER){
 						MapLocation location = CompressedData.uncompressMapLocation(controller.readBroadcast(dataChannel-1));
-						if(location.isWithinDistance(controller.getLocation(), 2f)){
+						if(location.isWithinDistance(controller.getLocation(), 5f)){
 							DynamicBroadcasting.unmarkMapper(dataChannel);
 							controller.broadcast(dataChannel, 0);
 						}
