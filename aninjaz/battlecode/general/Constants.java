@@ -21,6 +21,7 @@ public class Constants {
 	};
 	
 	public static final int RANDOM_TRIES = 10;
+	public static final int DONATE_WHEN_OVER = 1000;
 	
 	public static final int CHANNEL_CURRENT_STRAT = 0;
 	public static final int CHANNEL_SPAWNED_INITIAL_GARDENER = 1;
