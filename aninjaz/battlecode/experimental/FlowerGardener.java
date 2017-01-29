@@ -32,18 +32,15 @@ public class FlowerGardener {
 	private static Direction opening;
 	private static Direction[] plants;
 	private static RobotType spawnType;
+	private static int spawnTime;
 	public static void run(RobotController controller) throws GameActionException{
 		FlowerGardener.controller = controller;
+		spawnTime = controller.getRoundNum();
 		//findorigin
 			//spawn initial robots
 		randomDirection = Util.randomDirection();
 		//Determine spawntype
 		spawnType = RobotType.LUMBERJACK;
-		if(spawnType==RobotType.TANK){
-			setupTankTrees(0);
-		}else{
-			setupTrees(0);
-		}
 		while(!settled){
 			if(originChannel!=-1){
 				controller.broadcast(originChannel, COMPRESSED_UNUSED_STANDARD_ORIGIN);
@@ -101,13 +98,26 @@ public class FlowerGardener {
 			Util.yieldByteCodes();
 		}
 		System.out.println("SETTLED");
-		//setupTrees
+		float offsetDirection = calcOffsetDirection();
+		if(spawnType==RobotType.TANK){
+			setupTankTrees(offsetDirection);
+		}else{
+			setupTrees(offsetDirection);
+		}
 		while(true){
 			plantTrees();
 			spawnUnits();
 			waterTrees();
 			Util.yieldByteCodes();
 		}
+	}
+	public static float calcOffsetDirection() throws GameActionException{
+		for(Direction direction: Constants.CARDINAL_DIRECTIONS){
+			if(!controller.onTheMap(origin.add(direction, RobotType.GARDENER.sensorRadius))){
+				return direction.opposite().radians;
+			}
+		}
+		return (float) (Math.PI*2);
 	}
 	public static void plantTrees() throws GameActionException{
 		if(!controller.isBuildReady()){
@@ -136,7 +146,9 @@ public class FlowerGardener {
 		}
 		TreeInfo[] nearbyTrees = controller.senseNearbyTrees(NEUTRAL_TREE_RADIUS, Team.NEUTRAL);
 		if(nearbyTrees.length>0){
-			return false;
+			if(controller.getRoundNum()-spawnTime<80){
+				return false;
+			}
 		}
 		float ourRadius = type==RobotType.TANK?TANK_FLOWER_RADIUS:STANDARD_FLOWER_RADIUS;
 		for(int mapper=0;mapper<DynamicBroadcasting.MAPPERS;++mapper){

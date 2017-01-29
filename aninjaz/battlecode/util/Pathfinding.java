@@ -355,17 +355,21 @@ public class Pathfinding {
 		t = Math.max(0, Math.min(1, t)); //Clamp t between 0 and 1
 		return Operation.project(v, w, t);
 	}
-	public static boolean isSafeSpawn(Direction direction, float radius) throws GameActionException{
-		return isSafeSpawn(controller.getLocation().add(direction, bodyRadius+radius+GameConstants.GENERAL_SPAWN_OFFSET));
-	}
-	public static boolean isSafeSpawn(MapLocation target) throws GameActionException{
-		currentLocation = target;
-		Direction direction = Direction.getNorth();
-		float distance = bodyRadius+1f;
-		nearbyRobots = controller.senseNearbyRobots(distance);
-		nearbyTrees = controller.senseNearbyTrees(distance); //for scouts, we can just set nearbyTrees to an empty array
-		generateTangentAngles();
-		Direction[] angles = splitAngles(direction, direction, 0, 0, 10);
-		return angles[0]!=null||angles[1]!=null;
+	public static Direction findSpawn(float radius) throws GameActionException{
+		MapLocation location = controller.getLocation();
+		float spawnOffset = radius+GameConstants.GENERAL_SPAWN_OFFSET;
+		float spacing = (float) Math.PI;
+		for(int i=0;i<Constants.RANDOM_TRIES;++i){
+			Direction direction = new Direction(0);
+			for(int angle=0;angle<Constants.TWO_PI;++spacing){
+				MapLocation temp = location.add(direction, spawnOffset);
+				if((!controller.isCircleOccupied(temp, radius))&&controller.onTheMap(temp, radius)){
+					return direction;
+				}
+				direction.rotateRightRads(spacing);
+			}
+			spacing/=2;
+		}
+		return null;
 	}
 }

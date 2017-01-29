@@ -95,7 +95,7 @@ public class MidrangeArchon {
 		}
 	}
 	public static void tryHireGardener() throws GameActionException{
-		Direction direction = Util.randomDirection();
+		/*Direction direction = Util.randomDirection();
 		int tries = 10;
 		while((!controller.canHireGardener(direction))&&tries>0){
 			direction = Util.randomDirection();
@@ -113,6 +113,13 @@ public class MidrangeArchon {
 			}
 			controller.broadcast(Constants.CHANNEL_GARDENER_COUNT, controller.readBroadcast(Constants.CHANNEL_GARDENER_COUNT)+1);
 			controller.hireGardener(direction);
+		}*/
+		Direction direction = Pathfinding.findSpawn(RobotType.GARDENER.bodyRadius);
+		if(direction!=null){
+			controller.setIndicatorLine(controller.getLocation(), controller.getLocation().add(direction, 4f), 255, 0, 0);
+			if(controller.canHireGardener(direction)){
+				controller.hireGardener(direction);
+			}
 		}
 	}
 	public static void hireGardener() throws GameActionException{
