@@ -7,11 +7,8 @@ import aninjaz.battlecode.aggro.AggroSoldier;
 import aninjaz.battlecode.experimental.FlowerGardener;
 import aninjaz.battlecode.midrange.HasslerScout;
 import aninjaz.battlecode.midrange.MidrangeArchon;
-import aninjaz.battlecode.midrange.MidrangeGardener;
-import aninjaz.battlecode.midrange.TreeRangeGardener;
 import aninjaz.battlecode.midrange.MidrangeLumberjack;
 import aninjaz.battlecode.midrange.MidrangeTank;
-import aninjaz.battlecode.midrange.TankGardener;
 import aninjaz.battlecode.util.DynamicBroadcasting;
 import aninjaz.battlecode.util.Pathfinding;
 import battlecode.common.*;
@@ -96,13 +93,13 @@ public class RobotPlayer {
 			AggroSoldier.run(controller);
 			break;
 		case LUMBERJACK:
-			LumberjackRobot.run(controller);
+			MidrangeLumberjack.run(controller);
 			break;
 		case SCOUT:
 			AggroScout.run(controller);
 			break;
 		case TANK:
-			TankRobot.run(controller);
+			MidrangeTank.run(controller);
 			break;
 		}
 	}
@@ -132,16 +129,16 @@ public class RobotPlayer {
 		int tankGardenerRequests = controller.readBroadcast(Constants.CHANNEL_SPAWN_TANK_GARDENER);
 		if(tankGardenerRequests>0){
 			controller.broadcast(Constants.CHANNEL_SPAWN_TANK_GARDENER, tankGardenerRequests-1);
-			TankGardener.run(controller);
+			FlowerGardener.run(controller);
 			return;
 		}
 		int treeRange = controller.readBroadcast(Constants.CHANNEL_SPAWN_TREERANGE_GARDENER);
 		if(treeRange>0){
 			controller.broadcast(Constants.CHANNEL_SPAWN_TREERANGE_GARDENER, treeRange-1);
-			TreeRangeGardener.run(controller);
+			FlowerGardener.run(controller);
 			return;
 		}
-		MidrangeGardener.run(controller);
+		FlowerGardener.run(controller);
 		return;
 	}
 	public static void runExperimentalStrat() throws Exception{
@@ -169,22 +166,22 @@ public class RobotPlayer {
 	public static void runDefaultStrat() throws Exception{
 		switch (controller.getType()) {
 		case ARCHON:
-			ArchonRobot.run(controller);
+			MidrangeArchon.run(controller);
 			break;
 		case GARDENER:
-			GardenerRobot.run(controller);
+			FlowerGardener.run(controller);
 			break;
 		case SOLDIER:
-			SoldierRobot.run(controller);
+			AggroSoldier.run(controller);
 			break;
 		case LUMBERJACK:
-			LumberjackRobot.run(controller);
+			MidrangeLumberjack.run(controller);
 			break;
 		case SCOUT:
-			ScoutRobot.run(controller);
+			HasslerScout.run(controller);
 			break;
 		case TANK:
-			TankRobot.run(controller);
+			MidrangeTank.run(controller);
 			break;
 		}
 	}
