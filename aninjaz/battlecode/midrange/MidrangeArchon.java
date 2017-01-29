@@ -118,6 +118,7 @@ public class MidrangeArchon {
 		if(direction!=null){
 			controller.setIndicatorLine(controller.getLocation(), controller.getLocation().add(direction, 4f), 255, 0, 0);
 			if(controller.canHireGardener(direction)){
+				controller.broadcast(Constants.CHANNEL_GARDENER_COUNT, controller.readBroadcast(Constants.CHANNEL_GARDENER_COUNT)+1);
 				controller.hireGardener(direction);
 			}
 		}

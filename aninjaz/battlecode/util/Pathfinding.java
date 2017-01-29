@@ -357,16 +357,17 @@ public class Pathfinding {
 	}
 	public static Direction findSpawn(float radius) throws GameActionException{
 		MapLocation location = controller.getLocation();
-		float spawnOffset = radius+GameConstants.GENERAL_SPAWN_OFFSET;
+		float spawnOffset = radius+GameConstants.GENERAL_SPAWN_OFFSET+2f;
 		float spacing = (float) Math.PI;
 		for(int i=0;i<Constants.RANDOM_TRIES;++i){
 			Direction direction = new Direction(0);
 			for(int angle=0;angle<Constants.TWO_PI;++spacing){
 				MapLocation temp = location.add(direction, spawnOffset);
+				controller.setIndicatorDot(temp, 0, 255, 255);
 				if((!controller.isCircleOccupied(temp, radius))&&controller.onTheMap(temp, radius)){
 					return direction;
 				}
-				direction.rotateRightRads(spacing);
+				direction = direction.rotateRightRads(spacing);
 			}
 			spacing/=2;
 		}
