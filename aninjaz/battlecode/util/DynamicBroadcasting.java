@@ -7,7 +7,7 @@ import battlecode.common.RobotController;
 public class DynamicBroadcasting {
 	public static RobotController controller;
 	public static final int MAPPERS = 4;
-	public static final int DATA_STRIDE = 3;
+	public static final int DATA_STRIDE = 4;
 	private static final int START_MAPPER_CONSTANT = GameConstants.BROADCAST_MAX_CHANNELS-1;
 	private static final int START_DATA_CONSTANT = START_MAPPER_CONSTANT-MAPPERS;
 	private static final int INTERNAL_STRIDE = DATA_STRIDE*Integer.SIZE;

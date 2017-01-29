@@ -15,42 +15,29 @@ import battlecode.common.TreeInfo;
 
 public class MidrangeArchon {
 	private static RobotController controller;
-	private static int battleMode = 0;
+	private static int lastHireTurn = 0;
 	
 	public static void run(RobotController controller) throws GameActionException{
 		MidrangeArchon.controller = controller;
 		Direction direction = Util.randomDirection();
-		int initialGardener = controller.readBroadcast(Constants.CHANNEL_SPAWNED_INITIAL_GARDENER);
-		if(initialGardener==0){
-			hireGardener();
-			controller.broadcast(Constants.CHANNEL_SPAWNED_INITIAL_GARDENER, 1);
-		}
-		TreeInfo[] treesAtStart = controller.senseNearbyTrees(-1, Team.NEUTRAL);
-		if(treesAtStart!=null){
-			int count = 0;
-			int radiusSum = 0;
-			for(TreeInfo tree : treesAtStart){
-				radiusSum+=tree.getRadius();
-				if(tree.getContainedRobot()!=null){
-					count++;
-					if(tree.getContainedRobot()==RobotType.TANK){
-						if(tree.getRadius()<=3){
-							count+=99999999;
-						}
-					}
+		while(controller.readBroadcast(Constants.CHANNEL_SPAWNED_INITIAL_GARDENER)==0){
+			direction = Util.tryRandomMove(direction);
+			if(tryHireGardener()){
+				MapLocation[] initialArchons = controller.getInitialArchonLocations(Constants.OTHER_TEAM);
+				for(MapLocation archon: initialArchons){
+					DynamicTargeting.addArchonTarget(archon);
 				}
+				controller.broadcast(Constants.CHANNEL_SPAWNED_INITIAL_GARDENER, 1);
 			}
-			if(count>=3){
-				battleMode = 1;
-			}
-			if(count>=10||treesAtStart.length>=10||radiusSum>=6){
-				battleMode = 2;
-			}
+			Util.yieldByteCodes();
 		}
 		while(true){
 			DynamicTargeting.indicateTargets();
 			TreeInfo[] nearbyTrees = controller.senseNearbyTrees(-1, Team.NEUTRAL);
 			RobotInfo[] nearbyRobots = controller.senseNearbyRobots(-1, Constants.OTHER_TEAM);
+			if(nearbyTrees.length>0){
+				controller.broadcast(Constants.CHANNEL_REQUEST_LUMBERJACKS, controller.getRoundNum());
+			}
 			if(nearbyRobots.length>0){
 				Direction opposite = controller.getLocation().directionTo(nearbyRobots[0].getLocation()).opposite();
 				MapLocation location = Pathfinding.pathfind(controller.getLocation().add(opposite, 4f));
@@ -89,47 +76,25 @@ public class MidrangeArchon {
 				}
 			}
 			if(controller.isBuildReady()&&controller.getRoundNum()>80){
-				if(controller.getTreeCount()>=(controller.readBroadcast(Constants.CHANNEL_GARDENER_COUNT)-1)*4+2){
+				if(controller.getTreeCount()>=(controller.readBroadcast(Constants.CHANNEL_GARDENER_COUNT)-1)*3+2
+						&&((controller.getRoundNum()-lastHireTurn)>35)){
 					tryHireGardener();
 				}
 			}
 			Util.yieldByteCodes();
 		}
 	}
-	public static void tryHireGardener() throws GameActionException{
-		/*Direction direction = Util.randomDirection();
-		int tries = 10;
-		while((!controller.canHireGardener(direction))&&tries>0){
-			direction = Util.randomDirection();
-			tries--;
-		}
-		if(tries>0){
-			if(controller.getTeamBullets()>700){
-				controller.broadcast(Constants.CHANNEL_SPAWN_TANK_GARDENER, controller.readBroadcast(Constants.CHANNEL_SPAWN_TANK_GARDENER)+1);
-			}
-			else if(battleMode == 1){
-				controller.broadcast(Constants.CHANNEL_SPAWN_TREERANGE_GARDENER, controller.readBroadcast(Constants.CHANNEL_SPAWN_TREERANGE_GARDENER)+1);
-			}
-			else if(battleMode == 2){
-				//controller.broadcast(Constants.CHANNEL_SPAWN_MIDRANGE_GARDENER, controller.readBroadcast(Constants.CHANNEL_SPAWN_TREERANGE_GARDENER)+1);
-			}
-			controller.broadcast(Constants.CHANNEL_GARDENER_COUNT, controller.readBroadcast(Constants.CHANNEL_GARDENER_COUNT)+1);
-			controller.hireGardener(direction);
-		}*/
+	public static boolean tryHireGardener() throws GameActionException{
 		Direction direction = Pathfinding.findSpawn(RobotType.GARDENER.bodyRadius);
 		if(direction!=null){
 			controller.setIndicatorLine(controller.getLocation(), controller.getLocation().add(direction, 4f), 255, 0, 0);
 			if(controller.canHireGardener(direction)){
 				controller.broadcast(Constants.CHANNEL_GARDENER_COUNT, controller.readBroadcast(Constants.CHANNEL_GARDENER_COUNT)+1);
 				controller.hireGardener(direction);
+				lastHireTurn = controller.getRoundNum();
+				return true;
 			}
 		}
-	}
-	public static void hireGardener() throws GameActionException{
-		Direction direction = Util.randomDirection();
-		while((!controller.canHireGardener(direction))){
-			direction = Util.randomDirection();
-		}
-		controller.hireGardener(direction);
+		return false;
 	}
 }
