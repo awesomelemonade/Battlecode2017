@@ -2,10 +2,8 @@ package aninjaz.battlecode.midrange;
 
 import aninjaz.battlecode.general.Constants;
 import aninjaz.battlecode.general.Util;
-import aninjaz.battlecode.util.CompressedData;
 import aninjaz.battlecode.util.DynamicTargeting;
 import aninjaz.battlecode.util.Pathfinding;
-import battlecode.common.Clock;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
@@ -23,31 +21,25 @@ public class MidrangeLumberjack {
 			DynamicTargeting.removeTargets();
 			TreeInfo[] nearbyTrees = controller.senseNearbyTrees(-1, Team.NEUTRAL);
 			RobotInfo[] nearbyRobots = controller.senseNearbyRobots(-1, Constants.OTHER_TEAM);
-			int startBytecodes = Clock.getBytecodeNum();
-			for(TreeInfo tree: nearbyTrees){
-				DynamicTargeting.addTarget(DynamicTargeting.SUBIDENTIFIER_TREE, DynamicTargeting.getPriority(tree), tree.getLocation());
+			TreeInfo bestTree = findBestTree(nearbyTrees);
+			if(bestTree!=null){
+				DynamicTargeting.addTreeTarget(DynamicTargeting.getPriority(bestTree), bestTree.getLocation());
 			}
-			System.out.println("Adding Trees: "+(Clock.getBytecodeNum()-startBytecodes));
-			startBytecodes = Clock.getBytecodeNum();
-			for(RobotInfo robot: nearbyRobots){
-				DynamicTargeting.addTarget(DynamicTargeting.SUBIDENTIFIER_ROBOT, 15, robot.getLocation());
+			if(nearbyRobots.length>0){
+				DynamicTargeting.addRobotTarget(DynamicTargeting.PRIORITY_ATTACK_ENEMY, nearbyRobots[0].getLocation());
 			}
-			System.out.println("Adding Robots: "+(Clock.getBytecodeNum()-startBytecodes));
-			startBytecodes = Clock.getBytecodeNum();
 			MapLocation target = DynamicTargeting.getTarget();
-			System.out.println("Retrieving Target: "+(Clock.getBytecodeNum()-startBytecodes));
 			if(target==null){
 				controller.setIndicatorDot(controller.getLocation(), 0, 255, 255);
 				direction = Util.tryRandomMove(direction);
 			}else{
-				controller.setIndicatorDot(target, 255, 128, 0);
 				MapLocation location = Pathfinding.pathfindTankLumberjack(target);
 				if(controller.canMove(location)){
 					controller.move(location);
 				}
 			}
 			if(nearbyRobots.length>0&&controller.canStrike()&&
-					controller.getLocation().distanceTo(nearbyRobots[0].getLocation())-nearbyRobots[0].getRadius()<=2f){
+					controller.getLocation().isWithinDistance(nearbyRobots[0].getLocation(), 2f+nearbyRobots[0].getRadius())){
 				controller.setIndicatorDot(controller.getLocation(), 255, 255, 0);
 				controller.strike();
 			}else{
@@ -56,6 +48,17 @@ public class MidrangeLumberjack {
 			}
 			Util.yieldByteCodes();
 		}
+	}
+	public static TreeInfo findBestTree(TreeInfo[] nearbyTrees){
+		if(nearbyTrees.length==0){
+			return null;
+		}
+		for(TreeInfo tree: nearbyTrees){
+			if(tree.getContainedRobot()!=null){
+				return tree;
+			}
+		}
+		return nearbyTrees[0];
 	}
 	public static void chopNearest() throws GameActionException{
 		TreeInfo[] nearbyTrees = controller.senseNearbyTrees();
