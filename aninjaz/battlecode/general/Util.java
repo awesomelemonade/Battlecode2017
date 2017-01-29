@@ -106,4 +106,5 @@ public class Util {
 	public static float getTangentAngle(MapLocation location, float radius){
 		return (float) Math.asin(radius/controller.getLocation().distanceTo(location));
 	}
+	
 }
