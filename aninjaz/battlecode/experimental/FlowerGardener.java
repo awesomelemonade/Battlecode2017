@@ -117,7 +117,7 @@ public class FlowerGardener {
 				return direction.opposite().radians;
 			}
 		}
-		return (float) (Math.PI*2);
+		return (float) (Math.random()*Math.PI*2);
 	}
 	public static void plantTrees() throws GameActionException{
 		if(!controller.isBuildReady()){
