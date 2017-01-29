@@ -10,6 +10,7 @@ import aninjaz.battlecode.midrange.MidrangeArchon;
 import aninjaz.battlecode.midrange.MidrangeLumberjack;
 import aninjaz.battlecode.midrange.MidrangeTank;
 import aninjaz.battlecode.util.DynamicBroadcasting;
+import aninjaz.battlecode.util.DynamicTargeting;
 import aninjaz.battlecode.util.Pathfinding;
 import battlecode.common.*;
 
@@ -23,6 +24,7 @@ public class RobotPlayer {
 		RobotPlayer.controller = controller;
 		Pathfinding.init(controller);
 		DynamicBroadcasting.controller = controller;
+		DynamicTargeting.controller = controller;
 		Util.controller = controller;
 		Constants.OTHER_TEAM = controller.getTeam()==Team.A?Team.B:Team.A;
 		int currentStrat = controller.readBroadcast(Constants.CHANNEL_CURRENT_STRAT);

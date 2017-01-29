@@ -19,8 +19,8 @@ public class CompressedData {
 	public static int getData(int compressedData){
 		return (compressedData>>>DATA_LOCATION) & DATA_BITS;
 	}
-	public static int compressData(int identifier, int subidentifier, int data){
-		return (data<<DATA_LOCATION) | (subidentifier<<SUBIDENTIFIER_LOCATION) | identifier;
+	public static int compressData(int identifier, int subIdentifier, int data){
+		return (data<<DATA_LOCATION) | (subIdentifier<<SUBIDENTIFIER_LOCATION) | identifier;
 	}
 	public static MapLocation uncompressMapLocation(int compressedData){
 		return new MapLocation(

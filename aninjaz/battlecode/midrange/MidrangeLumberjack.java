@@ -3,7 +3,9 @@ package aninjaz.battlecode.midrange;
 import aninjaz.battlecode.general.Constants;
 import aninjaz.battlecode.general.Util;
 import aninjaz.battlecode.util.CompressedData;
+import aninjaz.battlecode.util.DynamicTargeting;
 import aninjaz.battlecode.util.Pathfinding;
+import battlecode.common.Clock;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
@@ -14,43 +16,38 @@ import battlecode.common.TreeInfo;
 
 public class MidrangeLumberjack {
 	private static RobotController controller;
-	private static MapLocation target;
 	public static void run(RobotController controller) throws GameActionException{
 		MidrangeLumberjack.controller = controller;
 		Direction direction = Util.randomDirection();
 		while(true){
-			findTarget();
-			if(target==null){
-				int status = controller.readBroadcast(Constants.CHANNEL_LUMBERJACK_TARGET_INFO);
-				if(status==1){
-					target = CompressedData.uncompressMapLocation(controller.readBroadcast(Constants.CHANNEL_LUMBERJACK_TARGET_LOCATION));
-					if(controller.getLocation().distanceTo(target)<2f){
-						controller.broadcast(Constants.CHANNEL_LUMBERJACK_TARGET_INFO, 0);
-						target = null;
-					}
-				}
-			}else{
-				controller.broadcast(Constants.CHANNEL_LUMBERJACK_TARGET_INFO, 1);
-				controller.broadcast(Constants.CHANNEL_LUMBERJACK_TARGET_LOCATION, CompressedData.compressMapLocation(target));
+			DynamicTargeting.removeTargets();
+			TreeInfo[] nearbyTrees = controller.senseNearbyTrees(-1, Team.NEUTRAL);
+			RobotInfo[] nearbyRobots = controller.senseNearbyRobots(-1, Constants.OTHER_TEAM);
+			int startBytecodes = Clock.getBytecodeNum();
+			for(TreeInfo tree: nearbyTrees){
+				DynamicTargeting.addTarget(DynamicTargeting.SUBIDENTIFIER_TREE, DynamicTargeting.getPriority(tree), tree.getLocation());
 			}
+			System.out.println("Adding Trees: "+(Clock.getBytecodeNum()-startBytecodes));
+			startBytecodes = Clock.getBytecodeNum();
+			for(RobotInfo robot: nearbyRobots){
+				DynamicTargeting.addTarget(DynamicTargeting.SUBIDENTIFIER_ROBOT, 15, robot.getLocation());
+			}
+			System.out.println("Adding Robots: "+(Clock.getBytecodeNum()-startBytecodes));
+			startBytecodes = Clock.getBytecodeNum();
+			MapLocation target = DynamicTargeting.getTarget();
+			System.out.println("Retrieving Target: "+(Clock.getBytecodeNum()-startBytecodes));
 			if(target==null){
+				controller.setIndicatorDot(controller.getLocation(), 0, 255, 255);
 				direction = Util.tryRandomMove(direction);
 			}else{
 				controller.setIndicatorDot(target, 255, 128, 0);
-				RobotInfo[] nearbyRobots = controller.senseNearbyRobots();
-				if(nearbyRobots.length>15){
-					if(controller.canMove(target)){
-						controller.move(target);
-					}
-				}else{
-					MapLocation location = Pathfinding.pathfindTankLumberjack(target);
-					if(controller.canMove(location)){
-						controller.move(location);
-					}
+				MapLocation location = Pathfinding.pathfindTankLumberjack(target);
+				if(controller.canMove(location)){
+					controller.move(location);
 				}
 			}
-			RobotInfo[] nearbyRobots = controller.senseNearbyRobots(2f, Constants.OTHER_TEAM);
-			if(nearbyRobots.length>0&&controller.canStrike()){
+			if(nearbyRobots.length>0&&controller.canStrike()&&
+					controller.getLocation().distanceTo(nearbyRobots[0].getLocation())-nearbyRobots[0].getRadius()<=2f){
 				controller.setIndicatorDot(controller.getLocation(), 255, 255, 0);
 				controller.strike();
 			}else{
@@ -59,25 +56,6 @@ public class MidrangeLumberjack {
 			}
 			Util.yieldByteCodes();
 		}
-	}
-	public static void findTarget(){
-		RobotInfo[] nearbyRobots = controller.senseNearbyRobots(-1, Constants.OTHER_TEAM);
-		if(nearbyRobots.length>0){
-			target = nearbyRobots[0].getLocation();
-			return;
-		}
-		TreeInfo[] nearbyTrees = controller.senseNearbyTrees(-1, Team.NEUTRAL);
-		for(TreeInfo tree: nearbyTrees){
-			if(tree.getContainedRobot()!=null){
-				target = tree.getLocation();
-				return;
-			}
-		}
-		if(nearbyTrees.length>0){
-			target = nearbyTrees[0].getLocation();
-			return;
-		}
-		target = null;
 	}
 	public static void chopNearest() throws GameActionException{
 		TreeInfo[] nearbyTrees = controller.senseNearbyTrees();

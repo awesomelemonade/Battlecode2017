@@ -2,6 +2,7 @@ package aninjaz.battlecode.midrange;
 
 import aninjaz.battlecode.general.Constants;
 import aninjaz.battlecode.general.Util;
+import aninjaz.battlecode.util.DynamicTargeting;
 import aninjaz.battlecode.util.Pathfinding;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
@@ -47,6 +48,7 @@ public class MidrangeArchon {
 			}
 		}
 		while(true){
+			DynamicTargeting.indicateTargets();
 			TreeInfo[] nearbyTrees = controller.senseNearbyTrees(-1, Team.NEUTRAL);
 			RobotInfo[] nearbyRobots = controller.senseNearbyRobots(-1, Constants.OTHER_TEAM);
 			if(nearbyRobots.length>0){
