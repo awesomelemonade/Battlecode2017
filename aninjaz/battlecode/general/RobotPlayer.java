@@ -72,7 +72,7 @@ public class RobotPlayer {
 		MapLocation[] ourArchons = controller.getInitialArchonLocations(controller.getTeam());
 		MapLocation[] theirArchons = controller.getInitialArchonLocations(Constants.OTHER_TEAM);
 		if(ourArchons.length==1){
-			if(ourArchons[0].distanceTo(theirArchons[0])<=36){
+			if(ourArchons[0].distanceTo(theirArchons[0])<=10){
 				//Check trees in between
 				return AGGRO_STRAT;
 			}
