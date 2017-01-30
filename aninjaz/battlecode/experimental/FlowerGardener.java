@@ -79,7 +79,6 @@ public class FlowerGardener {
 			initialLumberjack = controller.readBroadcast(Constants.CHANNEL_SPAWNED_INITIAL_LUMBERJACK);
 			initialSoldier = controller.readBroadcast(Constants.CHANNEL_SPAWNED_INITIAL_SOLDIER);
 		}
-		
 		//Determine spawntype
 		while(!settled){
 			if(originChannel!=-1){
