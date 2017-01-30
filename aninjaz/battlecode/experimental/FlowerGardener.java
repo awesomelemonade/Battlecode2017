@@ -159,14 +159,11 @@ public class FlowerGardener {
 		}else{
 			setupTrees(offsetDirection);
 		}
+		if(battleMode != SOLDIER_RANGE && battleMode != FAR_SOLDIER){
+			soldierDefenseCount=3;
+		}
 		while(true){
-			if(battleMode != SOLDIER_RANGE && battleMode != FAR_SOLDIER){
-				soldierDefenseCount=3;
-			}
-			else if(battleMode==FAR_SOLDIER){
-				soldierDefenseCount=2;
-			}
-			if(soldierDefenseCount<3){
+			if(soldierDefenseCount<2){
 				spawnType = RobotType.SOLDIER;
 			}
 			else if(spawnType!=RobotType.TANK){
