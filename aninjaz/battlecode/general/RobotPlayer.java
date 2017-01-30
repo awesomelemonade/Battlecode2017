@@ -183,7 +183,7 @@ public class RobotPlayer {
 			FlowerGardener.run(controller);
 			break;
 		case SOLDIER:
-			AggroSoldier.run(controller);
+			MidrangeSoldier.run(controller);
 			break;
 		case LUMBERJACK:
 			MidrangeLumberjack.run(controller);
