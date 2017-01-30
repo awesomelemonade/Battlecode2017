@@ -167,7 +167,7 @@ public class DynamicTargeting {
 					int dataChannel = DynamicBroadcasting.getDataChannel(mapper, bit);
 					if(CompressedData.getIdentifier(controller.readBroadcast(dataChannel))==DynamicTargeting.TARGET_IDENTIFIER){
 						MapLocation location = CompressedData.uncompressMapLocation(controller.readBroadcast(dataChannel-1));
-						if(location.isWithinDistance(controller.getLocation(), 5f)){
+						if(location.isWithinDistance(controller.getLocation(), controller.getType().sensorRadius)){
 							DynamicBroadcasting.unmarkMapper(dataChannel);
 							controller.broadcast(dataChannel, 0);
 						}

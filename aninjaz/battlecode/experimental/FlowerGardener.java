@@ -121,6 +121,18 @@ public class FlowerGardener {
 			}
 			Util.yieldByteCodes();
 		}
+		if(controller.getRoundNum()-spawnTime>80){ //forced to be settled
+			TreeInfo[] nearbyTrees = controller.senseNearbyTrees(3.5f, Team.NEUTRAL);
+			while(nearbyTrees.length>0){
+				Direction direction = Pathfinding.findSpawn(RobotType.LUMBERJACK.bodyRadius);
+				if(controller.canBuildRobot(RobotType.LUMBERJACK, direction)){
+					controller.broadcast(Constants.CHANNEL_SPAWNED_INITIAL_LUMBERJACK, 1);
+					controller.buildRobot(RobotType.LUMBERJACK, direction);
+				}
+				Util.yieldByteCodes();
+				nearbyTrees = controller.senseNearbyTrees(3.5f, Team.NEUTRAL);
+			}
+		}
 		float offsetDirection = calcOffsetDirection();
 		if(spawnType==RobotType.TANK){
 			setupTankTrees(offsetDirection);
