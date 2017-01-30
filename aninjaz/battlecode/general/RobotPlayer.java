@@ -5,7 +5,7 @@ import aninjaz.battlecode.aggro.AggroGardener;
 import aninjaz.battlecode.aggro.AggroScout;
 import aninjaz.battlecode.aggro.AggroSoldier;
 import aninjaz.battlecode.experimental.FlowerGardener;
-import aninjaz.battlecode.midrange.HasslerScout;
+import aninjaz.battlecode.midrange.CollectorScout;
 import aninjaz.battlecode.midrange.MidrangeArchon;
 import aninjaz.battlecode.midrange.MidrangeLumberjack;
 import aninjaz.battlecode.midrange.MidrangeSoldier;
@@ -19,6 +19,7 @@ public class RobotPlayer {
 	private static final int NO_STRAT = 0;
 	private static final int AGGRO_STRAT = 1;
 	private static final int MIDRANGE_STRAT = 2;
+	private static final int TURTLE_STRAT = 3;
 	private static RobotController controller;
 	public static void run(RobotController controller) throws GameActionException{
 		RobotPlayer.controller = controller;
@@ -35,8 +36,10 @@ public class RobotPlayer {
 				indicate(255, 0, 0);
 				break;
 			case MIDRANGE_STRAT:
-				indicate(0, 255, 255);
+				indicate(0, 255, 0);
 				break;
+			case TURTLE_STRAT:
+				indicate(0, 0, 255);
 			}
 			controller.broadcast(Constants.CHANNEL_CURRENT_STRAT, currentStrat);
 		}
@@ -49,6 +52,8 @@ public class RobotPlayer {
 				case MIDRANGE_STRAT:
 					runMidrangeStrat();
 					break;
+				case TURTLE_STRAT:
+					runTurtleStrat();
 				default:
 					runDefaultStrat();
 				}
@@ -75,6 +80,13 @@ public class RobotPlayer {
 			if(ourArchons[0].distanceTo(theirArchons[0])<=10){
 				//Check trees in between
 				return AGGRO_STRAT;
+			}
+		}
+		for(MapLocation archon : ourArchons){
+			for(MapLocation theirarchon : theirArchons){
+				if(archon.distanceTo(theirarchon)<50){
+					
+				}
 			}
 		}
 		return MIDRANGE_STRAT;
@@ -116,7 +128,29 @@ public class RobotPlayer {
 			MidrangeLumberjack.run(controller);
 			break;
 		case SCOUT:
-			HasslerScout.run(controller);
+			CollectorScout.run(controller);
+			break;
+		case TANK:
+			MidrangeTank.run(controller);
+			break;
+		}
+	}
+	public static void runTurtleStrat() throws Exception{
+		switch (controller.getType()) {
+		case ARCHON:
+			MidrangeArchon.run(controller);
+			break;
+		case GARDENER:
+			FlowerGardener.run(controller);
+			break;
+		case SOLDIER:
+			MidrangeSoldier.run(controller);
+			break;
+		case LUMBERJACK:
+			MidrangeLumberjack.run(controller);
+			break;
+		case SCOUT:
+			CollectorScout.run(controller);
 			break;
 		case TANK:
 			MidrangeTank.run(controller);
@@ -138,7 +172,7 @@ public class RobotPlayer {
 			MidrangeLumberjack.run(controller);
 			break;
 		case SCOUT:
-			HasslerScout.run(controller);
+			CollectorScout.run(controller);
 			break;
 		case TANK:
 			MidrangeTank.run(controller);

@@ -12,11 +12,11 @@ import battlecode.common.RobotType;
 import battlecode.common.Team;
 import battlecode.common.TreeInfo;
 
-public class HasslerScout {
+public class CollectorScout {
 	public static void run(RobotController controller) throws GameActionException{
 		Direction direction = Util.randomDirection();
 		while(true){
-			if(controller.getRoundNum()<150&&controller.getTeamBullets()<300){
+			if(controller.senseNearbyTrees(-1, Team.NEUTRAL)!=null){
 				TreeInfo[] nearbyTrees = controller.senseNearbyTrees(-1, Team.NEUTRAL);
 				move:{
 					for(TreeInfo tree: nearbyTrees){
