@@ -18,8 +18,10 @@ import battlecode.common.*;
 public class RobotPlayer {
 	private static final int NO_STRAT = 0;
 	private static final int AGGRO_STRAT = 1;
-	private static final int MIDRANGE_STRAT = 2;
+	private static final int CRAMPED = 2;
 	private static final int TURTLE_STRAT = 3;
+	private static final int SOLDIER_RANGE = 4;
+	
 	private static RobotController controller;
 	public static void run(RobotController controller) throws GameActionException{
 		RobotPlayer.controller = controller;
@@ -35,11 +37,15 @@ public class RobotPlayer {
 			case AGGRO_STRAT:
 				indicate(255, 0, 0);
 				break;
-			case MIDRANGE_STRAT:
+			case CRAMPED:
 				indicate(0, 255, 0);
 				break;
 			case TURTLE_STRAT:
 				indicate(0, 0, 255);
+				break;
+			case SOLDIER_RANGE:
+				indicate(255,255,255);
+				break;
 			}
 			controller.broadcast(Constants.CHANNEL_CURRENT_STRAT, currentStrat);
 		}
@@ -49,7 +55,7 @@ public class RobotPlayer {
 				case AGGRO_STRAT:
 					runAggroStrat();
 					break;
-				case MIDRANGE_STRAT:
+				case CRAMPED:
 					runMidrangeStrat();
 					break;
 				case TURTLE_STRAT:
@@ -82,10 +88,21 @@ public class RobotPlayer {
 				return AGGRO_STRAT;
 			}
 		}
+		TreeInfo[] nearbyTrees = controller.senseNearbyTrees(-5, Team.NEUTRAL);
+		if(nearbyTrees.length>=15){
+			return CRAMPED;
+		}
+		int sum = 0;
+		for(TreeInfo tree: nearbyTrees){
+			sum+=tree.radius;
+		}
+		if(sum>=20){
+			return CRAMPED;
+		}
 		for(MapLocation archon : ourArchons){
 			for(MapLocation theirarchon : theirArchons){
 				if(archon.distanceTo(theirarchon)<50){
-					return MIDRANGE_STRAT;
+					return SOLDIER_RANGE;
 				}
 			}
 		}
