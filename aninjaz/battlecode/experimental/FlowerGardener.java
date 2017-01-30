@@ -47,10 +47,10 @@ public class FlowerGardener {
 		int initialSoldier = controller.readBroadcast(Constants.CHANNEL_SPAWNED_INITIAL_SOLDIER);
 		int battleMode = controller.readBroadcast(Constants.CHANNEL_CURRENT_STRAT);
 		if(battleMode == CRAMPED){
-			initialSoldier = 1;
+			controller.broadcast(Constants.CHANNEL_SPAWNED_INITIAL_SOLDIER, 1);
 		}
 		else if(battleMode == TURTLE_STRAT||battleMode == SOLDIER_RANGE){
-			initialLumberjack = 1;
+			controller.broadcast(Constants.CHANNEL_SPAWNED_INITIAL_LUMBERJACK, 1);
 		}
 		while(initialScout==0||initialLumberjack==0||initialSoldier==0){
 			if(initialScout==0){
