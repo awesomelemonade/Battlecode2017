@@ -162,7 +162,7 @@ public class FlowerGardener {
 			if(battleMode != SOLDIER_RANGE&&battleMode!=TURTLE_STRAT){
 				soldierDefenseCount=3;
 			}
-			if(soldierDefenseCount<3||(battleMode==TURTLE_STRAT&&soldierDefenseCount<4)){
+			if(soldierDefenseCount<3||(battleMode==TURTLE_STRAT&&soldierDefenseCount<1)){
 				spawnType = RobotType.SOLDIER;
 			}
 			else if(spawnType!=RobotType.TANK){
