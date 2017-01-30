@@ -97,7 +97,7 @@ public class RobotPlayer {
 			}
 		}
 		TreeInfo[] nearbyTrees = controller.senseNearbyTrees(-5, Team.NEUTRAL);
-		if(nearbyTrees.length>=15){
+		if(nearbyTrees.length>=10){
 			return CRAMPED;
 		}
 		int sum = 0;
