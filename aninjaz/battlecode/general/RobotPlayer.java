@@ -99,9 +99,14 @@ public class RobotPlayer {
 		if(sum>=20){
 			return CRAMPED;
 		}
+		for(TreeInfo tree : nearbyTrees){
+			if(tree.getContainedRobot()==RobotType.TANK){
+				return CRAMPED;
+			}
+		}
 		for(MapLocation archon : ourArchons){
 			for(MapLocation theirarchon : theirArchons){
-				if(archon.distanceTo(theirarchon)<50){
+				if(archon.distanceTo(theirarchon)<71){
 					return SOLDIER_RANGE;
 				}
 			}

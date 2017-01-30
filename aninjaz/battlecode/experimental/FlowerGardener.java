@@ -46,10 +46,10 @@ public class FlowerGardener {
 		int initialLumberjack = controller.readBroadcast(Constants.CHANNEL_SPAWNED_INITIAL_LUMBERJACK);
 		int initialSoldier = controller.readBroadcast(Constants.CHANNEL_SPAWNED_INITIAL_SOLDIER);
 		int battleMode = controller.readBroadcast(Constants.CHANNEL_CURRENT_STRAT);
-		if(battleMode == CRAMPED){
+		if(battleMode == CRAMPED||battleMode == TURTLE_STRAT){
 			controller.broadcast(Constants.CHANNEL_SPAWNED_INITIAL_SOLDIER, 1);
 		}
-		else if(battleMode == TURTLE_STRAT||battleMode == SOLDIER_RANGE){
+		else if(battleMode == SOLDIER_RANGE){
 			controller.broadcast(Constants.CHANNEL_SPAWNED_INITIAL_LUMBERJACK, 1);
 		}
 		while(initialScout==0||initialLumberjack==0||initialSoldier==0){
@@ -159,10 +159,10 @@ public class FlowerGardener {
 			setupTrees(offsetDirection);
 		}
 		while(true){
-			if(battleMode != SOLDIER_RANGE&&battleMode!=TURTLE_STRAT){
+			if(battleMode != SOLDIER_RANGE){
 				soldierDefenseCount=3;
 			}
-			if(soldierDefenseCount<3||(battleMode==TURTLE_STRAT&&soldierDefenseCount<1)){
+			if(soldierDefenseCount<3){
 				spawnType = RobotType.SOLDIER;
 			}
 			else if(spawnType!=RobotType.TANK){
