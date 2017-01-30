@@ -42,9 +42,6 @@ public class FlowerGardener {
 		Direction randomDirection = Util.randomDirection();
 		//findorigin
 			//spawn initial robots
-		int initialScout = controller.readBroadcast(Constants.CHANNEL_SPAWNED_INITIAL_SCOUT);
-		int initialLumberjack = controller.readBroadcast(Constants.CHANNEL_SPAWNED_INITIAL_LUMBERJACK);
-		int initialSoldier = controller.readBroadcast(Constants.CHANNEL_SPAWNED_INITIAL_SOLDIER);
 		int battleMode = controller.readBroadcast(Constants.CHANNEL_CURRENT_STRAT);
 		if(battleMode == CRAMPED){
 			controller.broadcast(Constants.CHANNEL_SPAWNED_INITIAL_SOLDIER, 1);
@@ -52,7 +49,11 @@ public class FlowerGardener {
 		else if(battleMode == TURTLE_STRAT||battleMode == SOLDIER_RANGE){
 			controller.broadcast(Constants.CHANNEL_SPAWNED_INITIAL_LUMBERJACK, 1);
 		}
+		int initialScout = controller.readBroadcast(Constants.CHANNEL_SPAWNED_INITIAL_SCOUT);
+		int initialLumberjack = controller.readBroadcast(Constants.CHANNEL_SPAWNED_INITIAL_LUMBERJACK);
+		int initialSoldier = controller.readBroadcast(Constants.CHANNEL_SPAWNED_INITIAL_SOLDIER);
 		while(initialScout==0||initialLumberjack==0||initialSoldier==0){
+			controller.setIndicatorDot(controller.getLocation(), 0, 255, 255);
 			if(initialScout==0){
 				Direction direction = Pathfinding.findSpawn(RobotType.SCOUT.bodyRadius);
 				if(controller.canBuildRobot(RobotType.SCOUT, direction)){
