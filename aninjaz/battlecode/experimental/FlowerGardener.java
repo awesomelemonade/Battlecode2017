@@ -35,6 +35,7 @@ public class FlowerGardener {
 	private static final int CRAMPED = 2;
 	private static final int TURTLE_STRAT = 3;
 	private static final int SOLDIER_RANGE = 4;
+	private static final int FAR_SOLDIER = 5;
 	private static int soldierDefenseCount = 0;
 	public static void run(RobotController controller) throws GameActionException{
 		FlowerGardener.controller = controller;
@@ -46,7 +47,7 @@ public class FlowerGardener {
 		if(battleMode == CRAMPED||battleMode == TURTLE_STRAT){
 			controller.broadcast(Constants.CHANNEL_SPAWNED_INITIAL_SOLDIER, 1);
 		}
-		else if(battleMode == SOLDIER_RANGE){
+		else if(battleMode == SOLDIER_RANGE || battleMode == FAR_SOLDIER){
 			controller.broadcast(Constants.CHANNEL_SPAWNED_INITIAL_LUMBERJACK, 1);
 		}
 		int initialScout = controller.readBroadcast(Constants.CHANNEL_SPAWNED_INITIAL_SCOUT);
@@ -159,8 +160,11 @@ public class FlowerGardener {
 			setupTrees(offsetDirection);
 		}
 		while(true){
-			if(battleMode != SOLDIER_RANGE){
+			if(battleMode != SOLDIER_RANGE && battleMode != FAR_SOLDIER){
 				soldierDefenseCount=3;
+			}
+			else if(battleMode==FAR_SOLDIER){
+				soldierDefenseCount=2;
 			}
 			if(soldierDefenseCount<3){
 				spawnType = RobotType.SOLDIER;

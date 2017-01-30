@@ -21,6 +21,7 @@ public class RobotPlayer {
 	private static final int CRAMPED = 2;
 	private static final int TURTLE_STRAT = 3;
 	private static final int SOLDIER_RANGE = 4;
+	private static final int FAR_SOLDIER = 5;
 	
 	private static RobotController controller;
 	public static void run(RobotController controller) throws GameActionException{
@@ -46,6 +47,9 @@ public class RobotPlayer {
 			case SOLDIER_RANGE:
 				indicate(255,255,255);
 				break;
+			case FAR_SOLDIER:
+				indicate(255, 0, 255);
+				break;
 			}
 			controller.broadcast(Constants.CHANNEL_CURRENT_STRAT, currentStrat);
 		}
@@ -60,6 +64,10 @@ public class RobotPlayer {
 					break;
 				case TURTLE_STRAT:
 					runTurtleStrat();
+				case SOLDIER_RANGE:
+					runMidrangeStrat();
+				case FAR_SOLDIER:
+					runMidrangeStrat();
 				default:
 					runDefaultStrat();
 				}
@@ -106,8 +114,11 @@ public class RobotPlayer {
 		}
 		for(MapLocation archon : ourArchons){
 			for(MapLocation theirarchon : theirArchons){
-				if(archon.distanceTo(theirarchon)<71){
+				if(archon.distanceTo(theirarchon)<26){
 					return SOLDIER_RANGE;
+				}
+				else if(archon.distanceTo(theirarchon)<71){
+					return FAR_SOLDIER;
 				}
 			}
 		}
