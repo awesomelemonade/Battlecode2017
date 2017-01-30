@@ -24,6 +24,7 @@ public class DynamicTargeting {
 		int targetChannel = DynamicBroadcasting.markNextAvailableMapper();
 		controller.broadcast(targetChannel, compressedTargetData);
 		controller.broadcast(targetChannel-1, compressedTargetLocation);
+		controller.broadcast(targetChannel-2, controller.getRoundLimit());
 		controller.broadcast(targetChannel-3, 0);
 	}
 	public static void addTreeTarget(TreeInfo tree) throws GameActionException{
@@ -47,6 +48,7 @@ public class DynamicTargeting {
 		int targetChannel = DynamicBroadcasting.markNextAvailableMapper();
 		controller.broadcast(targetChannel, compressedTargetData);
 		controller.broadcast(targetChannel-1, compressedTargetLocation);
+		controller.broadcast(targetChannel-2, controller.getRoundNum());
 		controller.broadcast(targetChannel-3, CompressedData.compressFloatData(0, tree.getRadius()));
 	}
 	public static void addRobotTarget(RobotInfo robot) throws GameActionException{
@@ -111,16 +113,19 @@ public class DynamicTargeting {
 					int compressedData = controller.readBroadcast(dataChannel);
 					if(CompressedData.getIdentifier(compressedData)==TARGET_IDENTIFIER){
 						if(CompressedData.getSubIdentifier(compressedData)==SUBIDENTIFIER_ROBOT){
-							int priority = CompressedData.getData(compressedData);
-							MapLocation location = CompressedData.uncompressMapLocation(controller.readBroadcast(dataChannel-1));
-							float distance = location.distanceTo(controller.getLocation());
-							if(priority>bestPriority||(priority==bestPriority&&distance<bestDistance)){
-								bestPriority = priority;
-								bestDistance = distance;
-								targetLocation = location;
-								int data = controller.readBroadcast(dataChannel-3);
-								targetLumberjack = CompressedData.getFloatDataA(data)==1;
-								targetRadius = CompressedData.getFloatDataB(data);
+							int round = controller.readBroadcast(dataChannel-2);
+							if(controller.getRoundNum()-round<=5){
+								int priority = CompressedData.getData(compressedData);
+								MapLocation location = CompressedData.uncompressMapLocation(controller.readBroadcast(dataChannel-1));
+								float distance = location.distanceTo(controller.getLocation());
+								if(priority>bestPriority||(priority==bestPriority&&distance<bestDistance)){
+									bestPriority = priority;
+									bestDistance = distance;
+									targetLocation = location;
+									int data = controller.readBroadcast(dataChannel-3);
+									targetLumberjack = CompressedData.getFloatDataA(data)==1;
+									targetRadius = CompressedData.getFloatDataB(data);
+								}
 							}
 						}
 					}
@@ -143,16 +148,19 @@ public class DynamicTargeting {
 					int compressedData = controller.readBroadcast(dataChannel);
 					if(CompressedData.getIdentifier(compressedData)==TARGET_IDENTIFIER){
 						if(CompressedData.getSubIdentifier(compressedData)!=SUBIDENTIFIER_TREE){
-							int priority = CompressedData.getData(compressedData);
-							MapLocation location = CompressedData.uncompressMapLocation(controller.readBroadcast(dataChannel-1));
-							float distance = location.distanceTo(controller.getLocation());
-							if(priority>bestPriority||(priority==bestPriority&&distance<bestDistance)){
-								bestPriority = priority;
-								bestDistance = distance;
-								targetLocation = location;
-								int data = controller.readBroadcast(dataChannel-3);
-								targetLumberjack = CompressedData.getFloatDataA(data)==1;
-								targetRadius = CompressedData.getFloatDataB(data);
+							int round = controller.readBroadcast(dataChannel-2);
+							if(controller.getRoundNum()-round<=5){
+								int priority = CompressedData.getData(compressedData);
+								MapLocation location = CompressedData.uncompressMapLocation(controller.readBroadcast(dataChannel-1));
+								float distance = location.distanceTo(controller.getLocation());
+								if(priority>bestPriority||(priority==bestPriority&&distance<bestDistance)){
+									bestPriority = priority;
+									bestDistance = distance;
+									targetLocation = location;
+									int data = controller.readBroadcast(dataChannel-3);
+									targetLumberjack = CompressedData.getFloatDataA(data)==1;
+									targetRadius = CompressedData.getFloatDataB(data);
+								}
 							}
 						}
 					}
@@ -174,16 +182,19 @@ public class DynamicTargeting {
 					int dataChannel = DynamicBroadcasting.getDataChannel(mapper, bit);
 					int compressedData = controller.readBroadcast(dataChannel);
 					if(CompressedData.getIdentifier(compressedData)==TARGET_IDENTIFIER){
-						int priority = CompressedData.getData(compressedData);
-						MapLocation location = CompressedData.uncompressMapLocation(controller.readBroadcast(dataChannel-1));
-						float distance = location.distanceTo(controller.getLocation());
-						if(priority>bestPriority||(priority==bestPriority&&distance<bestDistance)){
-							bestPriority = priority;
-							bestDistance = distance;
-							targetLocation = location;
-							int data = controller.readBroadcast(dataChannel-3);
-							targetLumberjack = CompressedData.getFloatDataA(data)==1;
-							targetRadius = CompressedData.getFloatDataB(data);
+						int round = controller.readBroadcast(dataChannel-2);
+						if(controller.getRoundNum()-round<=5){
+							int priority = CompressedData.getData(compressedData);
+							MapLocation location = CompressedData.uncompressMapLocation(controller.readBroadcast(dataChannel-1));
+							float distance = location.distanceTo(controller.getLocation());
+							if(priority>bestPriority||(priority==bestPriority&&distance<bestDistance)){
+								bestPriority = priority;
+								bestDistance = distance;
+								targetLocation = location;
+								int data = controller.readBroadcast(dataChannel-3);
+								targetLumberjack = CompressedData.getFloatDataA(data)==1;
+								targetRadius = CompressedData.getFloatDataB(data);
+							}
 						}
 					}
 				}
