@@ -30,7 +30,7 @@ public class MidrangeSoldier {
 				}
 			}
 			
-			DynamicTargeting.getTargetNonTree();
+			DynamicTargeting.getTargetRobot();
 			
 			if(DynamicTargeting.targetLocation==null){
 				direction = Util.tryRandomMove(direction);

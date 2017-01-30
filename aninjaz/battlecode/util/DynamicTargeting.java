@@ -96,6 +96,38 @@ public class DynamicTargeting {
 	public static MapLocation targetLocation;
 	public static float targetRadius;
 	public static boolean targetLumberjack = false;
+	public static void getTargetRobot() throws GameActionException{
+		targetLocation = null;
+		targetRadius = -1;
+		targetLumberjack = false;
+		int bestPriority = 0;
+		float bestDistance = Float.MAX_VALUE;
+		for(int mapper=0;mapper<DynamicBroadcasting.MAPPERS;++mapper){
+			int mapperChannel = DynamicBroadcasting.getMapperChannel(mapper);
+			int mapperData = controller.readBroadcast(mapperChannel);
+			for(int bit=0;bit<Integer.SIZE;++bit){
+				if(((mapperData>>>bit)&1)==1){
+					int dataChannel = DynamicBroadcasting.getDataChannel(mapper, bit);
+					int compressedData = controller.readBroadcast(dataChannel);
+					if(CompressedData.getIdentifier(compressedData)==TARGET_IDENTIFIER){
+						if(CompressedData.getSubIdentifier(compressedData)==SUBIDENTIFIER_ROBOT){
+							int priority = CompressedData.getData(compressedData);
+							MapLocation location = CompressedData.uncompressMapLocation(controller.readBroadcast(dataChannel-1));
+							float distance = location.distanceTo(controller.getLocation());
+							if(priority>bestPriority||(priority==bestPriority&&distance<bestDistance)){
+								bestPriority = priority;
+								bestDistance = distance;
+								targetLocation = location;
+								int data = controller.readBroadcast(dataChannel-3);
+								targetLumberjack = CompressedData.getFloatDataA(data)==1;
+								targetRadius = CompressedData.getFloatDataB(data);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 	public static void getTargetNonTree() throws GameActionException{
 		targetLocation = null;
 		targetRadius = -1;
