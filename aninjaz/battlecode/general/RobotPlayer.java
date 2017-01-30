@@ -85,11 +85,11 @@ public class RobotPlayer {
 		for(MapLocation archon : ourArchons){
 			for(MapLocation theirarchon : theirArchons){
 				if(archon.distanceTo(theirarchon)<50){
-					
+					return MIDRANGE_STRAT;
 				}
 			}
 		}
-		return MIDRANGE_STRAT;
+		return TURTLE_STRAT;
 	}
 	public static void runAggroStrat() throws Exception{
 		switch (controller.getType()) {
