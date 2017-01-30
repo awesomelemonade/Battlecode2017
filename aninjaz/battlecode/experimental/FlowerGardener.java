@@ -38,6 +38,7 @@ public class FlowerGardener {
 	private static final int FAR_SOLDIER = 5;
 	private static int soldierDefenseCount = 0;
 	public static void run(RobotController controller) throws GameActionException{
+		Util.countChannel = Constants.CHANNEL_GARDENER_COUNT;
 		FlowerGardener.controller = controller;
 		spawnTime = controller.getRoundNum();
 		Direction randomDirection = Util.randomDirection();

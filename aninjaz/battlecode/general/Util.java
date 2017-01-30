@@ -38,9 +38,18 @@ public class Util {
 		}
 		controller.move(target);
 	}
+	public static int countChannel = -1;
+	private static boolean lowHealth = false;
 	public static void yieldByteCodes() throws GameActionException{
+		if(countChannel!=-1){
+			if(!lowHealth){
+				if(controller.getHealth()/controller.getType().maxHealth<0.15f){
+					controller.broadcast(countChannel, controller.readBroadcast(countChannel)-1);
+					lowHealth = true;
+				}
+			}
+		}
 		Util.checkWin();
-		//Tally up robots
 		Clock.yield();
 	}
 	public static void checkWin() throws GameActionException{
