@@ -23,9 +23,11 @@ public class MidrangeTank {
 			if(nearbyRobots.length>0){
 				DynamicTargeting.addRobotTarget(nearbyRobots[0]);
 			}
-			TreeInfo[] nearbyTrees = controller.senseNearbyTrees(-1, Team.NEUTRAL);
-			if(nearbyTrees.length>0){
-				controller.broadcast(Constants.CHANNEL_REQUEST_LUMBERJACKS, controller.getRoundNum());
+			if(controller.getRoundNum()<600){
+				TreeInfo[] nearbyTrees = controller.senseNearbyTrees(-1, Team.NEUTRAL);
+				if(nearbyTrees.length>0){
+					controller.broadcast(Constants.CHANNEL_REQUEST_LUMBERJACKS, controller.getRoundNum());
+				}
 			}
 			
 			DynamicTargeting.getTargetNonTree();

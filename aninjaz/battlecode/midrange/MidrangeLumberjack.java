@@ -63,7 +63,15 @@ public class MidrangeLumberjack {
 		return nearbyTrees[0];
 	}
 	public static void chopNearest() throws GameActionException{
-		TreeInfo[] nearbyTrees = controller.senseNearbyTrees();
+		TreeInfo[] nearbyTrees = controller.senseNearbyTrees(2f);
+		for(TreeInfo tree: nearbyTrees){
+			if(tree.getContainedRobot()!=null){
+				if(controller.canChop(tree.getID())){
+					controller.chop(tree.getID());
+					return;
+				}
+			}
+		}
 		for(TreeInfo tree: nearbyTrees){
 			if(tree.getTeam()!=controller.getTeam()){
 				if(controller.canChop(tree.getID())){

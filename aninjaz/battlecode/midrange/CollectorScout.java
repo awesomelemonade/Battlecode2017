@@ -16,58 +16,54 @@ public class CollectorScout {
 	public static void run(RobotController controller) throws GameActionException{
 		Direction direction = Util.randomDirection();
 		while(true){
-			TreeInfo[] nearbyTrees = controller.senseNearbyTrees(-1, Team.NEUTRAL);
-			if(nearbyTrees.length!=0){
-				move:{
-					for(TreeInfo tree: nearbyTrees){
-						if(tree.getContainedBullets()>0){
-							if(controller.canShake(tree.getID())){
-								controller.shake(tree.getID());
+			MapLocation shoot = null;
+			move:{
+				TreeInfo[] nearbyTrees = controller.senseNearbyTrees(-1, Team.NEUTRAL);
+				for(TreeInfo tree: nearbyTrees){
+					if(tree.getContainedBullets()>0){
+						if(controller.canShake(tree.getID())){
+							controller.shake(tree.getID());
+						}else{
+							MapLocation location = Pathfinding.pathfindScout(tree.getLocation());
+							if(controller.canMove(location)){
+								controller.move(location);
+								break move;
 							}else{
-								MapLocation location = Pathfinding.pathfindScout(tree.getLocation());
-								if(controller.canMove(location)){
-									controller.move(location);
-									break move;
-								}else{
-									controller.setIndicatorLine(controller.getLocation(), location, 0, 0, 0);
-								}
+								controller.setIndicatorLine(controller.getLocation(), location, 0, 0, 0);
 							}
 						}
 					}
-					direction = Util.tryRandomMove(direction);
 				}
-			}else{
 				RobotInfo[] nearbyRobots = controller.senseNearbyRobots(-1, Constants.OTHER_TEAM);
 				RobotInfo nearestGardener = getGardener(nearbyRobots);
-				move:{
-					if(nearestGardener!=null){
-						if(nearestGardener.getType()==RobotType.LUMBERJACK){
-							float distance = nearestGardener.getLocation().distanceTo(controller.getLocation());
-							if(distance<4f){
-								Direction dir = nearestGardener.getLocation().directionTo(controller.getLocation());
-								if(controller.canMove(dir)){
-									controller.move(dir);
-								}
-								break move;
-							}
-							if(distance<6f){
-								break move;
-							}
-						}
-						MapLocation location = Pathfinding.pathfindScout(nearestGardener.getLocation());
-						if(controller.canMove(location)){
-							controller.move(location);
-							break move;
-						}else{
-							controller.setIndicatorLine(controller.getLocation(), location, 0, 0, 0);
-						}
-					}
-					direction = Util.tryRandomMove(direction);
-				}
 				if(nearestGardener!=null){
-					if(controller.canFireSingleShot()){
-						controller.fireSingleShot(controller.getLocation().directionTo(nearestGardener.getLocation()));
+					shoot = nearestGardener.getLocation();
+					if(nearestGardener.getType()==RobotType.LUMBERJACK){
+						float distance = nearestGardener.getLocation().distanceTo(controller.getLocation());
+						if(distance<4f){
+							Direction dir = nearestGardener.getLocation().directionTo(controller.getLocation());
+							if(controller.canMove(dir)){
+								controller.move(dir);
+							}
+							break move;
+						}
+						if(distance<6f){
+							break move;
+						}
 					}
+					MapLocation location = Pathfinding.pathfindScout(nearestGardener.getLocation());
+					if(controller.canMove(location)){
+						controller.move(location);
+						break move;
+					}else{
+						controller.setIndicatorLine(controller.getLocation(), location, 0, 0, 0);
+					}
+				}
+				direction = Util.tryRandomMove(direction);
+			}
+			if(shoot!=null){
+				if(controller.canFireSingleShot()){
+					controller.fireSingleShot(controller.getLocation().directionTo(shoot));
 				}
 			}
 			Util.yieldByteCodes();

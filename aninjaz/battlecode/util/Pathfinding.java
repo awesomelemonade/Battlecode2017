@@ -359,9 +359,12 @@ public class Pathfinding {
 		MapLocation location = controller.getLocation();
 		float spawnOffset = radius+GameConstants.GENERAL_SPAWN_OFFSET+2f;
 		float spacing = (float) Math.PI;
-		for(int i=0;i<Constants.RANDOM_TRIES;++i){
+		for(int i=0;i<6;++i){
 			Direction direction = new Direction(0);
-			for(int angle=0;angle<Constants.TWO_PI;++spacing){
+			for(int angle=0;angle<Constants.TWO_PI;angle+=spacing){
+				if(angle%(spacing%2)==0){
+					continue;
+				}
 				MapLocation temp = location.add(direction, spawnOffset);
 				controller.setIndicatorDot(temp, 0, 255, 255);
 				if((!controller.isCircleOccupied(temp, radius))&&controller.onTheMap(temp, radius)){
