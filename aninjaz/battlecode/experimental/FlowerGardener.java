@@ -159,21 +159,21 @@ public class FlowerGardener {
 		}else{
 			setupTrees(offsetDirection);
 		}
-		if(battleMode != SOLDIER_RANGE && battleMode != FAR_SOLDIER){
-			soldierDefenseCount=3;
+		if(battleMode != SOLDIER_RANGE){
+			soldierDefenseCount=1;
 		}
 		while(true){
-			if(soldierDefenseCount<2){
-				spawnType = RobotType.SOLDIER;
-			}
-			else if(spawnType!=RobotType.TANK){
+			if(spawnType!=RobotType.TANK){
 				TreeInfo[] nearbyTrees = controller.senseNearbyTrees(-1, Team.NEUTRAL);
-				if(nearbyTrees.length>0){
+				if(nearbyTrees.length>2){
 					controller.broadcast(Constants.CHANNEL_REQUEST_LUMBERJACKS, controller.getRoundNum());
 				}
 				if(controller.getRoundNum()-controller.readBroadcast(Constants.CHANNEL_REQUEST_LUMBERJACKS)<=5){
 					spawnType = RobotType.LUMBERJACK;
 				}else{
+					spawnType = RobotType.SOLDIER;
+				}
+				if(soldierDefenseCount<1){
 					spawnType = RobotType.SOLDIER;
 				}
 			}
