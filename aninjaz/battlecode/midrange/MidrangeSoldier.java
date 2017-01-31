@@ -23,8 +23,20 @@ public class MidrangeSoldier {
 				DynamicTargeting.addRobotTarget(nearbyRobots[0]);
 			}
 			DynamicTargeting.getTargetRobot();
-			if(DynamicTargeting.targetLocation==null||controller.getRoundNum()<=100){
-				direction = Util.tryRandomMove(direction);
+			TreeInfo[] nearbyTrees = controller.senseNearbyTrees();
+			if(DynamicTargeting.targetLocation==null){
+				move:{
+					for(TreeInfo tree: nearbyTrees){
+						if(tree.getContainedBullets()>0){
+							MapLocation location = Pathfinding.pathfind(tree.getLocation(), tree.getRadius());
+							if(controller.canMove(location)){
+								controller.move(location);
+							}
+							break move;
+						}
+					}
+					direction = Util.tryRandomMove(direction);
+				}
 			}else{
 				if(DynamicTargeting.targetLumberjack){
 					float distance = controller.getLocation().distanceTo(DynamicTargeting.targetLocation);
@@ -47,13 +59,12 @@ public class MidrangeSoldier {
 				}
 				shoot(DynamicTargeting.targetLocation);
 			}
-			TreeInfo[] nearbyTrees = controller.senseNearbyTrees(2f);
 			for(TreeInfo tree: nearbyTrees){
 				if(tree.getContainedBullets()>0){
 					if(controller.canShake(tree.getID())){
 						controller.shake(tree.getID());
-						break;
 					}
+					break;
 				}
 			}
 			Util.yieldByteCodes();
