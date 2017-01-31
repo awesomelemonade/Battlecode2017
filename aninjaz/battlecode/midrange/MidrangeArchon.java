@@ -80,7 +80,7 @@ public class MidrangeArchon {
 			if(controller.isBuildReady()&&controller.getRoundNum()>80){
 				int gardeners = controller.readBroadcast(Constants.CHANNEL_GARDENER_COUNT);
 				if(controller.getTreeCount()>=(gardeners-1)*3+2
-						&&((controller.getRoundNum()-lastHireTurn)>35)){
+						&&((controller.getRoundNum()-lastHireTurn)>(controller.getRoundNum()<400?35:65))){
 					if(nearbyRobots.length==0||gardeners<=1){
 						tryHireGardener();
 					}
