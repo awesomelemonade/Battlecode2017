@@ -44,6 +44,7 @@ public class FlowerGardener {
 		int initialLumberjack = controller.readBroadcast(Constants.CHANNEL_SPAWN_INITIAL_LUMBERJACK);
 		int initialSoldier = controller.readBroadcast(Constants.CHANNEL_SPAWN_INITIAL_SOLDIER);
 		while(initialScout>0||initialLumberjack>0||initialSoldier>0){
+			System.out.println("Initial Spawning: "+initialScout+" - "+initialLumberjack+" - "+initialSoldier);
 			controller.setIndicatorDot(controller.getLocation(), 0, 255, 255);
 			if(initialScout>0){
 				Direction direction = Pathfinding.findSpawn(RobotType.SCOUT.bodyRadius);
@@ -185,7 +186,8 @@ public class FlowerGardener {
 						controller.readBroadcast(Constants.CHANNEL_GARDENER_COUNT)-1);
 				if(originChannel!=-1){
 					if(spawnType==RobotType.TANK){
-						controller.broadcast(originChannel, COMPRESSED_UNUSED_TANK_ORIGIN);
+						DynamicBroadcasting.unmarkMapper(originChannel);
+						controller.broadcast(originChannel, 0);
 					}else{
 						controller.broadcast(originChannel, COMPRESSED_UNUSED_STANDARD_ORIGIN);
 					}

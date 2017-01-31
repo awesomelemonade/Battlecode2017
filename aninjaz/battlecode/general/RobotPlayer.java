@@ -43,7 +43,7 @@ public class RobotPlayer {
 				indicate(0, 255, 0);
 				float minDistance = getMinArchonDistance();
 				TreeInfo[] nearbyTrees = controller.senseNearbyTrees(-1, Team.NEUTRAL);
-				if(hasTreesWithin(nearbyTrees, 5f)){
+				if(hasTreesWithin(nearbyTrees, 5f)||hasRobotTreeWithin(nearbyTrees)){
 					controller.broadcast(Constants.CHANNEL_SPAWN_INITIAL_LUMBERJACK, 1);
 					if(minDistance<40f){
 						controller.broadcast(Constants.CHANNEL_SPAWN_INITIAL_SOLDIER, 1);
@@ -80,6 +80,14 @@ public class RobotPlayer {
 				ex.printStackTrace();
 			}
 		}
+	}
+	public static boolean hasRobotTreeWithin(TreeInfo[] nearbyTrees){
+		for(TreeInfo tree: nearbyTrees){
+			if(tree.getContainedRobot()!=null){
+				return true;
+			}
+		}
+		return false;
 	}
 	public static boolean exceedsBullets(TreeInfo[] nearbyTrees, float bullets){
 		for(TreeInfo tree: nearbyTrees){
