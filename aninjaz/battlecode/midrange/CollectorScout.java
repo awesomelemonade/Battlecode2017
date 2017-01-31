@@ -34,29 +34,31 @@ public class CollectorScout {
 						}
 					}
 				}
-				RobotInfo[] nearbyRobots = controller.senseNearbyRobots(-1, Constants.OTHER_TEAM);
-				RobotInfo nearestGardener = getGardener(nearbyRobots);
-				if(nearestGardener!=null){
-					shoot = nearestGardener.getLocation();
-					if(nearestGardener.getType()==RobotType.LUMBERJACK){
-						float distance = nearestGardener.getLocation().distanceTo(controller.getLocation());
-						if(distance<4f){
-							Direction dir = nearestGardener.getLocation().directionTo(controller.getLocation());
-							if(controller.canMove(dir)){
-								controller.move(dir);
+				if(controller.getRoundNum()>500){
+					RobotInfo[] nearbyRobots = controller.senseNearbyRobots(-1, Constants.OTHER_TEAM);
+					RobotInfo nearestGardener = getGardener(nearbyRobots);
+					if(nearestGardener!=null){
+						shoot = nearestGardener.getLocation();
+						if(nearestGardener.getType()==RobotType.LUMBERJACK){
+							float distance = nearestGardener.getLocation().distanceTo(controller.getLocation());
+							if(distance<4f){
+								Direction dir = nearestGardener.getLocation().directionTo(controller.getLocation());
+								if(controller.canMove(dir)){
+									controller.move(dir);
+								}
+								break move;
 							}
-							break move;
+							if(distance<6f){
+								break move;
+							}
 						}
-						if(distance<6f){
+						MapLocation location = Pathfinding.pathfindScout(nearestGardener.getLocation());
+						if(controller.canMove(location)){
+							controller.move(location);
 							break move;
+						}else{
+							controller.setIndicatorLine(controller.getLocation(), location, 0, 0, 0);
 						}
-					}
-					MapLocation location = Pathfinding.pathfindScout(nearestGardener.getLocation());
-					if(controller.canMove(location)){
-						controller.move(location);
-						break move;
-					}else{
-						controller.setIndicatorLine(controller.getLocation(), location, 0, 0, 0);
 					}
 				}
 				direction = Util.tryRandomMove(direction);

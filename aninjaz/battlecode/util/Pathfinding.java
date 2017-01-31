@@ -32,8 +32,6 @@ public class Pathfinding {
 		return pathfindTankLumberjack(controller.getLocation().add(controller.getLocation().directionTo(target), controller.getLocation().distanceTo(target)-radius));
 	}
 	//Tangent Bug Pathfinding
-
-	//Tangent Bug Pathfinding
 	public static MapLocation pathfindTankLumberjack(MapLocation target) throws GameActionException{
 		currentLocation = controller.getLocation();
 		Direction direction = controller.getLocation().directionTo(target);
@@ -104,8 +102,6 @@ public class Pathfinding {
 	public static MapLocation pathfindScout(MapLocation target, float radius) throws GameActionException{
 		return pathfindScout(controller.getLocation().add(controller.getLocation().directionTo(target), controller.getLocation().distanceTo(target)-radius));
 	}
-	//Tangent Bug Pathfinding
-
 	//Tangent Bug Pathfinding
 	public static MapLocation pathfindScout(MapLocation target) throws GameActionException{
 		currentLocation = controller.getLocation();
@@ -245,7 +241,6 @@ public class Pathfinding {
 			}
 		}
 	}
-	
 	public static void generateTangentAngles() throws GameActionException{
 		robotLeftAngles = new Direction[nearbyRobots.length];
 		robotRightAngles = new Direction[nearbyRobots.length];

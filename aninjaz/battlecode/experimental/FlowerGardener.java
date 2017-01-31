@@ -154,6 +154,7 @@ public class FlowerGardener {
 		if(controller.getRoundNum()-spawnTime>80){ //forced to be settled
 			TreeInfo[] nearbyTrees = controller.senseNearbyTrees(3.5f, Team.NEUTRAL);
 			while(nearbyTrees.length>0){
+				DynamicTargeting.addTreeTarget(nearbyTrees[0], DynamicTargeting.PRIORITY_CHOP_AROUND_GARDENER);
 				Direction direction = Pathfinding.findSpawn(RobotType.LUMBERJACK.bodyRadius);
 				if(direction!=null){
 					if(controller.canBuildRobot(RobotType.LUMBERJACK, direction)){
@@ -230,7 +231,7 @@ public class FlowerGardener {
 		}else{
 			if(spawnType==RobotType.TANK){
 				if(controller.canBuildRobot(RobotType.SOLDIER, opening)){
-					controller.buildRobot(spawnType, opening);
+					controller.buildRobot(RobotType.SOLDIER, opening);
 				}
 			}
 		}
