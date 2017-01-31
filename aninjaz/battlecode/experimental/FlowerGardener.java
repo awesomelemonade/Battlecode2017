@@ -97,7 +97,7 @@ public class FlowerGardener {
 				controller.broadcast(originChannel, COMPRESSED_UNUSED_STANDARD_ORIGIN);
 				originChannel = -1;
 			}
-			if(controller.getTeamBullets()>500f){
+			if(controller.getTeamBullets()>500f||soldierDefenseCount>25){
 				spawnType = RobotType.TANK;
 			}else{
 				spawnType = RobotType.LUMBERJACK;
@@ -186,7 +186,7 @@ public class FlowerGardener {
 			}
 			else if(spawnType!=RobotType.TANK){
 				TreeInfo[] nearbyTrees = controller.senseNearbyTrees(-1, Team.NEUTRAL);
-				if(nearbyTrees.length>5){
+				if(nearbyTrees.length>10){
 					controller.broadcast(Constants.CHANNEL_REQUEST_LUMBERJACKS, controller.getRoundNum());
 				}
 				if(controller.getRoundNum()-controller.readBroadcast(Constants.CHANNEL_REQUEST_LUMBERJACKS)<=5){
@@ -194,7 +194,7 @@ public class FlowerGardener {
 				}else{
 					spawnType = RobotType.SOLDIER;
 				}
-				if(controller.senseNearbyTrees(3.5f, Team.NEUTRAL).length>1){
+				if(controller.senseNearbyTrees(3.5f, Team.NEUTRAL).length>0){
 					spawnType = RobotType.LUMBERJACK;
 				}
 				if(soldierDefenseCount<1){
