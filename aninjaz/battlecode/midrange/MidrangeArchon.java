@@ -46,6 +46,8 @@ public class MidrangeArchon {
 				}else{
 					controller.setIndicatorLine(controller.getLocation(), location, 0, 0, 0);
 				}
+				direction = Util.randomDirection();
+				DynamicTargeting.addRobotTarget(nearbyRobots[0]);
 			}else{
 				move:{
 					for(TreeInfo tree: nearbyTrees){

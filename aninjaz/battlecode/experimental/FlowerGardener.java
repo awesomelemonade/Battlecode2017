@@ -4,12 +4,14 @@ import aninjaz.battlecode.general.Constants;
 import aninjaz.battlecode.general.Util;
 import aninjaz.battlecode.util.CompressedData;
 import aninjaz.battlecode.util.DynamicBroadcasting;
+import aninjaz.battlecode.util.DynamicTargeting;
 import aninjaz.battlecode.util.Pathfinding;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
+import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
 import battlecode.common.TreeInfo;
@@ -164,6 +166,10 @@ public class FlowerGardener {
 			soldierDefenseCount=1;
 		}
 		while(true){
+			RobotInfo[] nearbyRobots = controller.senseNearbyRobots(-1, Constants.OTHER_TEAM);
+			if(nearbyRobots.length>0){
+				DynamicTargeting.addRobotTarget(nearbyRobots[0]);
+			}
 			if(spawnType!=RobotType.TANK){
 				TreeInfo[] nearbyTrees = controller.senseNearbyTrees(-1, Team.NEUTRAL);
 				if(nearbyTrees.length>2){
