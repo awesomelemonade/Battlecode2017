@@ -247,7 +247,7 @@ public class FlowerGardener {
 		}
 		TreeInfo[] nearbyTrees = controller.senseNearbyTrees(NEUTRAL_TREE_RADIUS, Team.NEUTRAL);
 		if(nearbyTrees.length>0){
-			if(controller.getRoundNum()-spawnTime<80){
+			if(controller.getRoundNum()-spawnTime<40){
 				return false;
 			}
 		}
