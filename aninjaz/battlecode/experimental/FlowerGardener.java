@@ -41,7 +41,6 @@ public class FlowerGardener {
 	private static final int SOLDIER_DEFENSE = 6;
 	private static int soldierDefenseCount = 0;
 	public static void run(RobotController controller) throws GameActionException{
-		Util.countChannel = Constants.CHANNEL_GARDENER_COUNT;
 		FlowerGardener.controller = controller;
 		spawnTime = controller.getRoundNum();
 		Direction randomDirection = Util.randomDirection();
@@ -85,7 +84,7 @@ public class FlowerGardener {
 				}
 			}
 			randomDirection = Util.tryRandomMove(randomDirection);
-			Util.yieldByteCodes();
+			yieldByteCodes();
 			initialScout = controller.readBroadcast(Constants.CHANNEL_SPAWNED_INITIAL_SCOUT);
 			initialLumberjack = controller.readBroadcast(Constants.CHANNEL_SPAWNED_INITIAL_LUMBERJACK);
 			initialSoldier = controller.readBroadcast(Constants.CHANNEL_SPAWNED_INITIAL_SOLDIER);
@@ -150,7 +149,7 @@ public class FlowerGardener {
 					randomDirection = Util.tryRandomMove(randomDirection);
 				}
 			}
-			Util.yieldByteCodes();
+			yieldByteCodes();
 		}
 		if(controller.getRoundNum()-spawnTime>40){ //forced to be settled
 			TreeInfo[] nearbyTrees = controller.senseNearbyTrees(3.5f, Team.NEUTRAL);
@@ -163,7 +162,7 @@ public class FlowerGardener {
 						controller.buildRobot(RobotType.LUMBERJACK, direction);
 					}
 				}
-				Util.yieldByteCodes();
+				yieldByteCodes();
 				nearbyTrees = controller.senseNearbyTrees(3.5f, Team.NEUTRAL);
 			}
 		}
@@ -204,8 +203,26 @@ public class FlowerGardener {
 			plantTrees();
 			spawnUnits();
 			waterTrees();
-			Util.yieldByteCodes();
+			yieldByteCodes();
 		}
+	}
+	private static boolean lowHealth = false;
+	public static void yieldByteCodes() throws GameActionException{
+		if(!lowHealth){
+			if(controller.getHealth()/controller.getType().maxHealth<0.15f){
+				controller.broadcast(Constants.CHANNEL_GARDENER_COUNT,
+						controller.readBroadcast(Constants.CHANNEL_GARDENER_COUNT)-1);
+				if(originChannel!=-1){
+					if(spawnType==RobotType.TANK){
+						controller.broadcast(originChannel, COMPRESSED_UNUSED_TANK_ORIGIN);
+					}else{
+						controller.broadcast(originChannel, COMPRESSED_UNUSED_STANDARD_ORIGIN);
+					}
+				}
+				lowHealth = true;
+			}
+		}
+		Util.yieldByteCodes();
 	}
 	public static float calcOffsetDirection() throws GameActionException{
 		for(Direction direction: Constants.CARDINAL_DIRECTIONS){
