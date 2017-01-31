@@ -151,7 +151,7 @@ public class FlowerGardener {
 			}
 			Util.yieldByteCodes();
 		}
-		if(controller.getRoundNum()-spawnTime>80){ //forced to be settled
+		if(controller.getRoundNum()-spawnTime>40){ //forced to be settled
 			TreeInfo[] nearbyTrees = controller.senseNearbyTrees(3.5f, Team.NEUTRAL);
 			while(nearbyTrees.length>0){
 				Direction direction = Pathfinding.findSpawn(RobotType.LUMBERJACK.bodyRadius);
