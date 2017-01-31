@@ -85,6 +85,7 @@ public class FlowerGardener {
 		}
 		//Determine spawntype
 		while(!settled){
+			controller.setIndicatorDot(controller.getLocation(), 255, 0, 255);
 			if(originChannel!=-1){
 				controller.broadcast(originChannel, COMPRESSED_UNUSED_STANDARD_ORIGIN);
 				originChannel = -1;
@@ -217,6 +218,12 @@ public class FlowerGardener {
 			controller.buildRobot(spawnType, opening);
 			if(spawnType==RobotType.SOLDIER){
 				soldierDefenseCount++;
+			}
+		}else{
+			if(spawnType==RobotType.TANK){
+				if(controller.canBuildRobot(RobotType.SOLDIER, opening)){
+					controller.buildRobot(spawnType, opening);
+				}
 			}
 		}
 	}
