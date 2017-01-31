@@ -1,4 +1,6 @@
-# Battlecode2017
+# ANinjaz - Battlecode2017
+
+(Pronounced AY-Ninjas)
 
 Submitted Final Branch: Rework
 
