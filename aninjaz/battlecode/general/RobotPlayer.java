@@ -54,6 +54,9 @@ public class RobotPlayer {
 			controller.broadcast(Constants.CHANNEL_CURRENT_STRAT, currentStrat);
 		}
 		while(true){
+			if(controller.getRoundNum()<100&&containsSoldiers(controller.senseNearbyRobots(-1,Constants.OTHER_TEAM))){
+				currentStrat = CRAMPED;
+			}
 			try{
 				switch(currentStrat){
 				case AGGRO_STRAT:
@@ -211,5 +214,13 @@ public class RobotPlayer {
 			MidrangeTank.run(controller);
 			break;
 		}
+	}
+	public static boolean containsSoldiers(RobotInfo[] robots){
+		for(RobotInfo robot : robots){
+			if(robot.getType()==RobotType.SOLDIER){
+				return true;
+			}
+		}
+		return false;
 	}
 }
