@@ -17,6 +17,7 @@ public class MidrangeSoldier {
 	public static void run(RobotController controller) throws GameActionException{
 		MidrangeSoldier.controller = controller;
 		Direction direction = Util.randomDirection();
+		int sameDirection = 0;
 		while(true){
 			DynamicTargeting.removeTargets();
 			RobotInfo[] nearbyRobots = controller.senseNearbyRobots(-1, Constants.OTHER_TEAM);
@@ -32,8 +33,10 @@ public class MidrangeSoldier {
 			
 			DynamicTargeting.getTargetRobot();
 			
-			if(DynamicTargeting.targetLocation==null){
+			if(DynamicTargeting.targetLocation==null||controller.getRoundNum()<=100&&sameDirection>=15){
 				direction = Util.tryRandomMove(direction);
+				sameDirection=0;
+				
 			}else{
 				if(DynamicTargeting.targetLumberjack){
 					float distance = controller.getLocation().distanceTo(DynamicTargeting.targetLocation);
@@ -52,6 +55,7 @@ public class MidrangeSoldier {
 					MapLocation location = Pathfinding.pathfind(DynamicTargeting.targetLocation, DynamicTargeting.targetRadius);
 					if(controller.canMove(location)){
 						controller.move(location);
+						sameDirection++;
 					}
 				}
 				shoot(DynamicTargeting.targetLocation);
