@@ -37,9 +37,19 @@ public class DynamicTargeting {
 			for(int bit=0;bit<Integer.SIZE;++bit){
 				if(((mapperData>>>bit)&1)==1){
 					int dataChannel = DynamicBroadcasting.getDataChannel(mapper, bit);
-					if(compressedTargetData==controller.readBroadcast(dataChannel)){
-						if(compressedTargetLocation==controller.readBroadcast(dataChannel-1)){
+					if(compressedTargetLocation==controller.readBroadcast(dataChannel-1)){
+						int compressedData = controller.readBroadcast(dataChannel);
+						if(compressedTargetData==compressedData){
+							controller.broadcast(dataChannel-2, controller.getRoundNum());
 							return;
+						}else{
+							if(CompressedData.getIdentifier(compressedData)==TARGET_IDENTIFIER){
+								if(CompressedData.getSubIdentifier(compressedData)==SUBIDENTIFIER_TREE){
+									controller.broadcast(dataChannel, compressedTargetData);
+									controller.broadcast(dataChannel-2, controller.getRoundNum());
+									return;
+								}
+							}
 						}
 					}
 				}
@@ -66,6 +76,7 @@ public class DynamicTargeting {
 					int compressedData = controller.readBroadcast(dataChannel);
 					if(compressedTargetData==compressedData){
 						if(compressedTargetLocation==controller.readBroadcast(dataChannel-1)){
+							controller.broadcast(dataChannel-2, controller.getRoundNum());
 							return;
 						}
 					}
@@ -208,11 +219,25 @@ public class DynamicTargeting {
 			for(int bit=0;bit<Integer.SIZE;++bit){
 				if(((mapperData>>>bit)&1)==1){
 					int dataChannel = DynamicBroadcasting.getDataChannel(mapper, bit);
-					if(CompressedData.getIdentifier(controller.readBroadcast(dataChannel))==DynamicTargeting.TARGET_IDENTIFIER){
+					int compressedData = controller.readBroadcast(dataChannel);
+					if(CompressedData.getIdentifier(compressedData)==DynamicTargeting.TARGET_IDENTIFIER){
 						MapLocation location = CompressedData.uncompressMapLocation(controller.readBroadcast(dataChannel-1));
 						if(location.isWithinDistance(controller.getLocation(), controller.getType().sensorRadius)){
-							DynamicBroadcasting.unmarkMapper(dataChannel);
-							controller.broadcast(dataChannel, 0);
+							int subidentifier = CompressedData.getSubIdentifier(compressedData);
+							if(subidentifier==SUBIDENTIFIER_TREE){
+								if(controller.senseTreeAtLocation(location)==null){
+									DynamicBroadcasting.unmarkMapper(dataChannel);
+									controller.broadcast(dataChannel, 0);
+								}
+							}else if(subidentifier==SUBIDENTIFIER_ROBOT){
+								if(controller.senseRobotAtLocation(location)==null){
+									DynamicBroadcasting.unmarkMapper(dataChannel);
+									controller.broadcast(dataChannel, 0);
+								}
+							}else if(subidentifier==SUBIDENTIFIER_ARCHON){
+								DynamicBroadcasting.unmarkMapper(dataChannel);
+								controller.broadcast(dataChannel, 0);
+							}
 						}
 					}
 				}
