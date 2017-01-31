@@ -38,6 +38,7 @@ public class FlowerGardener {
 	private static final int TURTLE_STRAT = 3;
 	private static final int SOLDIER_RANGE = 4;
 	private static final int FAR_SOLDIER = 5;
+	private static final int SOLDIER_DEFENSE = 6;
 	private static int soldierDefenseCount = 0;
 	public static void run(RobotController controller) throws GameActionException{
 		Util.countChannel = Constants.CHANNEL_GARDENER_COUNT;
@@ -180,7 +181,10 @@ public class FlowerGardener {
 			if(nearbyRobots.length>0){
 				DynamicTargeting.addRobotTarget(nearbyRobots[0]);
 			}
-			if(spawnType!=RobotType.TANK){
+			if(controller.getRoundNum()<150&&controller.readBroadcast(Constants.CHANNEL_CURRENT_STRAT) == SOLDIER_DEFENSE){
+				spawnType = RobotType.SOLDIER;
+			}
+			else if(spawnType!=RobotType.TANK){
 				TreeInfo[] nearbyTrees = controller.senseNearbyTrees(-1, Team.NEUTRAL);
 				if(nearbyTrees.length>5){
 					controller.broadcast(Constants.CHANNEL_REQUEST_LUMBERJACKS, controller.getRoundNum());

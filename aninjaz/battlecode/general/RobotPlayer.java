@@ -22,6 +22,7 @@ public class RobotPlayer {
 	private static final int TURTLE_STRAT = 3;
 	private static final int SOLDIER_RANGE = 4;
 	private static final int FAR_SOLDIER = 5;
+	private static final int SOLDIER_DEFENSE = 6;
 	
 	private static RobotController controller;
 	public static void run(RobotController controller) throws GameActionException{
@@ -55,7 +56,7 @@ public class RobotPlayer {
 		}
 		while(true){
 			if(controller.getRoundNum()<100&&containsSoldiers(controller.senseNearbyRobots(-1,Constants.OTHER_TEAM))){
-				currentStrat = CRAMPED;
+				currentStrat = SOLDIER_DEFENSE;
 			}
 			try{
 				switch(currentStrat){
