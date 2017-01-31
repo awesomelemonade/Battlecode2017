@@ -80,8 +80,11 @@ public class AggroSoldier {
 		if(!Util.isSafeToShoot(direction)){
 			return;
 		}
-		if(controller.canFirePentadShot()){
+		float distanceTo = controller.getLocation().distanceTo(robot.getLocation());
+		if(controller.canFirePentadShot()&&distanceTo<2+robot.getRadius()){
 			controller.firePentadShot(direction);
+		}else if(controller.canFireTriadShot()&&distanceTo<4+robot.getRadius()){
+			controller.fireTriadShot(direction);
 		}else if(controller.canFireSingleShot()){
 			controller.fireSingleShot(direction);
 		}
