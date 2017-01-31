@@ -46,6 +46,8 @@ public class MidrangeArchon {
 				}else{
 					controller.setIndicatorLine(controller.getLocation(), location, 0, 0, 0);
 				}
+				direction = Util.randomDirection();
+				DynamicTargeting.addRobotTarget(nearbyRobots[0]);
 			}else{
 				move:{
 					for(TreeInfo tree: nearbyTrees){
@@ -76,13 +78,24 @@ public class MidrangeArchon {
 				}
 			}
 			if(controller.isBuildReady()&&controller.getRoundNum()>80){
-				if(controller.getTreeCount()>=(controller.readBroadcast(Constants.CHANNEL_GARDENER_COUNT)-1)*3+2
+				int gardeners = controller.readBroadcast(Constants.CHANNEL_GARDENER_COUNT);
+				if(controller.getTreeCount()>=(gardeners-1)*3+2
 						&&((controller.getRoundNum()-lastHireTurn)>35)){
-					tryHireGardener();
+					if(gardeners<=1||(!containsArchon(nearbyRobots))){
+						tryHireGardener();
+					}
 				}
 			}
 			Util.yieldByteCodes();
 		}
+	}
+	public static boolean containsArchon(RobotInfo[] nearbyRobots){
+		for(RobotInfo robot: nearbyRobots){
+			if(robot.getType()==RobotType.ARCHON){
+				return true;
+			}
+		}
+		return false;
 	}
 	public static boolean tryHireGardener() throws GameActionException{
 		Direction direction = Pathfinding.findSpawn(RobotType.GARDENER.bodyRadius);
