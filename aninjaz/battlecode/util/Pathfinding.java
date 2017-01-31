@@ -358,7 +358,7 @@ public class Pathfinding {
 		if((!controller.isCircleOccupied(zero, radius))&&controller.onTheMap(zero, radius)){
 			return new Direction(0);
 		}
-		for(int i=0;i<Constants.RANDOM_TRIES;++i){
+		for(int i=0;i<8;++i){
 			for(float angle=spacing;angle<Constants.TWO_PI;angle+=spacing*2){
 				Direction direction = new Direction(angle);
 				MapLocation temp = location.add(direction, spawnOffset);

@@ -35,9 +35,6 @@ public class MidrangeArchon {
 			DynamicTargeting.indicateTargets();
 			TreeInfo[] nearbyTrees = controller.senseNearbyTrees(-1, Team.NEUTRAL);
 			RobotInfo[] nearbyRobots = controller.senseNearbyRobots(-1, Constants.OTHER_TEAM);
-			if(nearbyTrees.length>2&&controller.getRoundNum()<400){
-				controller.broadcast(Constants.CHANNEL_REQUEST_LUMBERJACKS, controller.getRoundNum());
-			}
 			if(nearbyRobots.length>0){
 				Direction opposite = controller.getLocation().directionTo(nearbyRobots[0].getLocation()).opposite();
 				MapLocation location = Pathfinding.pathfind(controller.getLocation().add(opposite, 4f));

@@ -17,12 +17,12 @@ import battlecode.common.*;
 
 public class RobotPlayer {
 	private static final int NO_STRAT = 0;
-	private static final int AGGRO_STRAT = 1;
-	private static final int CRAMPED = 2;
-	private static final int TURTLE_STRAT = 3;
-	private static final int SOLDIER_RANGE = 4;
-	private static final int FAR_SOLDIER = 5;
-	private static final int SOLDIER_DEFENSE = 6;
+	private static final int AGGRO_STRA = 1;
+	private static final int CRAMPE = 2;
+	private static final int TURTLE_STRA = 3;
+	private static final int SOLDIER_RANG = 4;
+	private static final int FAR_SOLDIE = 5;
+	private static final int SOLDIER_DEFENS = 6;
 	
 	private static RobotController controller;
 	public static void run(RobotController controller) throws GameActionException{

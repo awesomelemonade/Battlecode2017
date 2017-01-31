@@ -9,8 +9,6 @@ import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
-import battlecode.common.Team;
-import battlecode.common.TreeInfo;
 
 public class MidrangeTank {
 	private static RobotController controller;
@@ -22,12 +20,6 @@ public class MidrangeTank {
 			RobotInfo[] nearbyRobots = controller.senseNearbyRobots(-1, Constants.OTHER_TEAM);
 			if(nearbyRobots.length>0){
 				DynamicTargeting.addRobotTarget(nearbyRobots[0]);
-			}
-			if(controller.getRoundNum()<600){
-				TreeInfo[] nearbyTrees = controller.senseNearbyTrees(-1, Team.NEUTRAL);
-				if(nearbyTrees.length>0){
-					controller.broadcast(Constants.CHANNEL_REQUEST_LUMBERJACKS, controller.getRoundNum());
-				}
 			}
 			
 			DynamicTargeting.getTargetNonTree();

@@ -34,51 +34,38 @@ public class FlowerGardener {
 	private static Direction[] plants;
 	public static RobotType spawnType;
 	private static int spawnTime;
-	private static final int CRAMPED = 2;
-	private static final int TURTLE_STRAT = 3;
-	private static final int SOLDIER_RANGE = 4;
-	private static final int FAR_SOLDIER = 5;
-	private static final int SOLDIER_DEFENSE = 6;
-	private static int soldierDefenseCount = 0;
 	public static void run(RobotController controller) throws GameActionException{
 		FlowerGardener.controller = controller;
 		spawnTime = controller.getRoundNum();
 		Direction randomDirection = Util.randomDirection();
 		//findorigin
 			//spawn initial robots
-		int battleMode = controller.readBroadcast(Constants.CHANNEL_CURRENT_STRAT);
-		if(battleMode == CRAMPED||battleMode == TURTLE_STRAT){
-			controller.broadcast(Constants.CHANNEL_SPAWNED_INITIAL_SOLDIER, 1);
-		}
-		else if(battleMode == SOLDIER_RANGE || battleMode == FAR_SOLDIER){
-			controller.broadcast(Constants.CHANNEL_SPAWNED_INITIAL_LUMBERJACK, 1);
-		}
 		int initialScout = controller.readBroadcast(Constants.CHANNEL_SPAWNED_INITIAL_SCOUT);
 		int initialLumberjack = controller.readBroadcast(Constants.CHANNEL_SPAWNED_INITIAL_LUMBERJACK);
 		int initialSoldier = controller.readBroadcast(Constants.CHANNEL_SPAWNED_INITIAL_SOLDIER);
-		while(initialScout==0||initialLumberjack==0||initialSoldier==0){
+		while(initialScout>0||initialLumberjack>0||initialSoldier>0){
 			controller.setIndicatorDot(controller.getLocation(), 0, 255, 255);
-			if(initialScout==0){
+			if(initialScout>0){
 				Direction direction = Pathfinding.findSpawn(RobotType.SCOUT.bodyRadius);
 				if(direction!=null){
 					if(controller.canBuildRobot(RobotType.SCOUT, direction)){
-						controller.broadcast(Constants.CHANNEL_SPAWNED_INITIAL_SCOUT, 1);
+						controller.broadcast(Constants.CHANNEL_SPAWNED_INITIAL_SCOUT, initialScout-1);
 						controller.buildRobot(RobotType.SCOUT, direction);
 					}
 				}
-			}else if(initialLumberjack==0){
+			}else if(initialLumberjack>0){
 				Direction direction = Pathfinding.findSpawn(RobotType.LUMBERJACK.bodyRadius);
 				if(direction!=null){
 					if(controller.canBuildRobot(RobotType.LUMBERJACK, direction)){
-						controller.broadcast(Constants.CHANNEL_SPAWNED_INITIAL_LUMBERJACK, 1);
+						controller.broadcast(Constants.CHANNEL_SPAWNED_INITIAL_LUMBERJACK, initialLumberjack-1);
 						controller.buildRobot(RobotType.LUMBERJACK, direction);
 					}
 				}
-			}else if(initialSoldier==0){
+			}else if(initialSoldier>0){
 				Direction direction = Pathfinding.findSpawn(RobotType.SOLDIER.bodyRadius);
 				if(direction!=null){
 					if(controller.canBuildRobot(RobotType.SOLDIER, direction)){
-						controller.broadcast(Constants.CHANNEL_SPAWNED_INITIAL_SOLDIER, 1);
+						controller.broadcast(Constants.CHANNEL_SPAWNED_INITIAL_SOLDIER, initialSoldier-1);
 						controller.buildRobot(RobotType.SOLDIER, direction);
 					}
 				}
@@ -96,7 +83,7 @@ public class FlowerGardener {
 				controller.broadcast(originChannel, COMPRESSED_UNUSED_STANDARD_ORIGIN);
 				originChannel = -1;
 			}
-			if(controller.getTeamBullets()>500f||soldierDefenseCount>25){
+			if(controller.getTeamBullets()>500f){
 				spawnType = RobotType.TANK;
 			}else{
 				spawnType = RobotType.LUMBERJACK;
@@ -172,31 +159,16 @@ public class FlowerGardener {
 		}else{
 			setupTrees(offsetDirection);
 		}
-		if(battleMode != SOLDIER_RANGE){
-			soldierDefenseCount=1;
-		}
 		while(true){
 			RobotInfo[] nearbyRobots = controller.senseNearbyRobots(-1, Constants.OTHER_TEAM);
 			if(nearbyRobots.length>0){
 				DynamicTargeting.addRobotTarget(nearbyRobots[0]);
 			}
-			if(controller.getRoundNum()<150&&controller.readBroadcast(Constants.CHANNEL_CURRENT_STRAT) == SOLDIER_DEFENSE){
-				spawnType = RobotType.SOLDIER;
-			}
-			else if(spawnType!=RobotType.TANK){
-				TreeInfo[] nearbyTrees = controller.senseNearbyTrees(-1, Team.NEUTRAL);
-				if(nearbyTrees.length>10){
-					controller.broadcast(Constants.CHANNEL_REQUEST_LUMBERJACKS, controller.getRoundNum());
-				}
-				if(controller.getRoundNum()-controller.readBroadcast(Constants.CHANNEL_REQUEST_LUMBERJACKS)<=5){
+			if(spawnType!=RobotType.TANK){
+				TreeInfo[] nearbyTrees = controller.senseNearbyTrees(3.5f, Team.NEUTRAL);
+				if(nearbyTrees.length>0){
 					spawnType = RobotType.LUMBERJACK;
 				}else{
-					spawnType = RobotType.SOLDIER;
-				}
-				if(controller.senseNearbyTrees(3.5f, Team.NEUTRAL).length>0){
-					spawnType = RobotType.LUMBERJACK;
-				}
-				if(soldierDefenseCount<1){
 					spawnType = RobotType.SOLDIER;
 				}
 			}
@@ -249,13 +221,10 @@ public class FlowerGardener {
 		}
 		if(controller.canBuildRobot(spawnType, opening)){
 			controller.buildRobot(spawnType, opening);
-			if(spawnType==RobotType.SOLDIER){
-				soldierDefenseCount++;
-			}
 		}else{
 			if(spawnType==RobotType.TANK){
-				if(controller.canBuildRobot(RobotType.TANK, opening)){
-					controller.buildRobot(RobotType.TANK, opening);
+				if(controller.canBuildRobot(RobotType.SOLDIER, opening)){
+					controller.buildRobot(RobotType.SOLDIER, opening);
 				}
 			}
 		}
