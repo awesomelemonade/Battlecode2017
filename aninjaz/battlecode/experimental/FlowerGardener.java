@@ -222,9 +222,9 @@ public class FlowerGardener {
 			controller.buildRobot(spawnType, opening);
 		}else{
 			if(spawnType==RobotType.TANK){
-				if(controller.getTeamBullets()<150f){
-					if(controller.canBuildRobot(RobotType.LUMBERJACK, opening)){
-						controller.buildRobot(RobotType.LUMBERJACK, opening);
+				if(controller.readBroadcast(Constants.CHANNEL_GARDENER_COUNT)<5){
+					if(controller.canBuildRobot(RobotType.SOLDIER, opening)){
+						controller.buildRobot(RobotType.SOLDIER, opening);
 					}
 				}
 			}

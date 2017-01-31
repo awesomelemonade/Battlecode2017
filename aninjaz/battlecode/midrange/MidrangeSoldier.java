@@ -28,6 +28,7 @@ public class MidrangeSoldier {
 				move:{
 					for(TreeInfo tree: nearbyTrees){
 						if(tree.getContainedBullets()>0){
+							controller.setIndicatorDot(tree.getLocation(), 0, 0, 255);
 							MapLocation location = Pathfinding.pathfind(tree.getLocation(), tree.getRadius());
 							if(controller.canMove(location)){
 								controller.move(location);

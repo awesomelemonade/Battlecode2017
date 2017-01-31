@@ -43,14 +43,21 @@ public class RobotPlayer {
 				indicate(0, 255, 0);
 				float minDistance = getMinArchonDistance();
 				TreeInfo[] nearbyTrees = controller.senseNearbyTrees(-1, Team.NEUTRAL);
-				if(exceedsBullets(nearbyTrees, 40)){
-					controller.broadcast(Constants.CHANNEL_SPAWN_INITIAL_SCOUT, 1);
-					
+				if(hasTreesWithin(nearbyTrees, 5f)){
+					controller.broadcast(Constants.CHANNEL_SPAWN_INITIAL_LUMBERJACK, 1);
+					if(minDistance<40f){
+						controller.broadcast(Constants.CHANNEL_SPAWN_INITIAL_SOLDIER, 1);
+					}else if(exceedsBullets(nearbyTrees, 20)){
+						controller.broadcast(Constants.CHANNEL_SPAWN_INITIAL_SCOUT, 1);
+					}
 				}else{
-					
+					controller.broadcast(Constants.CHANNEL_SPAWN_INITIAL_SOLDIER, 1);
+					if(minDistance<40f){
+						controller.broadcast(Constants.CHANNEL_SPAWN_INITIAL_SOLDIER, 2);
+					}else if(exceedsBullets(nearbyTrees, 20)){
+						controller.broadcast(Constants.CHANNEL_SPAWN_INITIAL_SCOUT, 1);
+					}
 				}
-				controller.broadcast(Constants.CHANNEL_SPAWN_INITIAL_SOLDIER, 1);
-				controller.broadcast(Constants.CHANNEL_SPAWN_INITIAL_LUMBERJACK, 0);
 			}else{
 				indicate(0, 0, 0);
 			}
@@ -85,7 +92,7 @@ public class RobotPlayer {
 	}
 	public static boolean hasTreesWithin(TreeInfo[] nearbyTrees, float distance){
 		for(TreeInfo tree: nearbyTrees){
-			if(tree.getLocation().distanceTo(controller.getLocation())<=distance){
+			if(tree.getLocation().distanceTo(controller.getLocation())-tree.getRadius()<=distance){
 				return true;
 			}
 		}
