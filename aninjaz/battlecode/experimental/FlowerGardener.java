@@ -233,8 +233,8 @@ public class FlowerGardener {
 			}
 		}else{
 			if(spawnType==RobotType.TANK){
-				if(controller.canBuildRobot(RobotType.SOLDIER, opening)){
-					controller.buildRobot(RobotType.SOLDIER, opening);
+				if(controller.canBuildRobot(RobotType.TANK, opening)){
+					controller.buildRobot(RobotType.TANK, opening);
 				}
 			}
 		}
