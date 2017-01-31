@@ -60,21 +60,27 @@ public class FlowerGardener {
 			controller.setIndicatorDot(controller.getLocation(), 0, 255, 255);
 			if(initialScout==0){
 				Direction direction = Pathfinding.findSpawn(RobotType.SCOUT.bodyRadius);
-				if(controller.canBuildRobot(RobotType.SCOUT, direction)){
-					controller.broadcast(Constants.CHANNEL_SPAWNED_INITIAL_SCOUT, 1);
-					controller.buildRobot(RobotType.SCOUT, direction);
+				if(direction!=null){
+					if(controller.canBuildRobot(RobotType.SCOUT, direction)){
+						controller.broadcast(Constants.CHANNEL_SPAWNED_INITIAL_SCOUT, 1);
+						controller.buildRobot(RobotType.SCOUT, direction);
+					}
 				}
 			}else if(initialLumberjack==0){
 				Direction direction = Pathfinding.findSpawn(RobotType.LUMBERJACK.bodyRadius);
-				if(controller.canBuildRobot(RobotType.LUMBERJACK, direction)){
-					controller.broadcast(Constants.CHANNEL_SPAWNED_INITIAL_LUMBERJACK, 1);
-					controller.buildRobot(RobotType.LUMBERJACK, direction);
+				if(direction!=null){
+					if(controller.canBuildRobot(RobotType.LUMBERJACK, direction)){
+						controller.broadcast(Constants.CHANNEL_SPAWNED_INITIAL_LUMBERJACK, 1);
+						controller.buildRobot(RobotType.LUMBERJACK, direction);
+					}
 				}
 			}else if(initialSoldier==0){
 				Direction direction = Pathfinding.findSpawn(RobotType.SOLDIER.bodyRadius);
-				if(controller.canBuildRobot(RobotType.SOLDIER, direction)){
-					controller.broadcast(Constants.CHANNEL_SPAWNED_INITIAL_SOLDIER, 1);
-					controller.buildRobot(RobotType.SOLDIER, direction);
+				if(direction!=null){
+					if(controller.canBuildRobot(RobotType.SOLDIER, direction)){
+						controller.broadcast(Constants.CHANNEL_SPAWNED_INITIAL_SOLDIER, 1);
+						controller.buildRobot(RobotType.SOLDIER, direction);
+					}
 				}
 			}
 			randomDirection = Util.tryRandomMove(randomDirection);
@@ -149,9 +155,11 @@ public class FlowerGardener {
 			TreeInfo[] nearbyTrees = controller.senseNearbyTrees(3.5f, Team.NEUTRAL);
 			while(nearbyTrees.length>0){
 				Direction direction = Pathfinding.findSpawn(RobotType.LUMBERJACK.bodyRadius);
-				if(controller.canBuildRobot(RobotType.LUMBERJACK, direction)){
-					controller.broadcast(Constants.CHANNEL_SPAWNED_INITIAL_LUMBERJACK, 1);
-					controller.buildRobot(RobotType.LUMBERJACK, direction);
+				if(direction!=null){
+					if(controller.canBuildRobot(RobotType.LUMBERJACK, direction)){
+						controller.broadcast(Constants.CHANNEL_SPAWNED_INITIAL_LUMBERJACK, 1);
+						controller.buildRobot(RobotType.LUMBERJACK, direction);
+					}
 				}
 				Util.yieldByteCodes();
 				nearbyTrees = controller.senseNearbyTrees(3.5f, Team.NEUTRAL);
