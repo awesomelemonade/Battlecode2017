@@ -47,14 +47,14 @@ public class RobotPlayer {
 					controller.broadcast(Constants.CHANNEL_SPAWN_INITIAL_LUMBERJACK, 1);
 					if(minDistance<40f){
 						controller.broadcast(Constants.CHANNEL_SPAWN_INITIAL_SOLDIER, 1);
-					}else if(exceedsBullets(nearbyTrees, 20)){
+					}else if(exceedsBullets(nearbyTrees, 20, 5)){
 						controller.broadcast(Constants.CHANNEL_SPAWN_INITIAL_SCOUT, 1);
 					}
 				}else{
 					controller.broadcast(Constants.CHANNEL_SPAWN_INITIAL_SOLDIER, 1);
 					if(minDistance<40f){
 						controller.broadcast(Constants.CHANNEL_SPAWN_INITIAL_SOLDIER, 2);
-					}else if(exceedsBullets(nearbyTrees, 20)){
+					}else if(exceedsBullets(nearbyTrees, 20, 5)){
 						controller.broadcast(Constants.CHANNEL_SPAWN_INITIAL_SCOUT, 1);
 					}
 				}
@@ -89,10 +89,13 @@ public class RobotPlayer {
 		}
 		return false;
 	}
-	public static boolean exceedsBullets(TreeInfo[] nearbyTrees, float bullets){
+	public static boolean exceedsBullets(TreeInfo[] nearbyTrees, float bullets, int trees){
 		for(TreeInfo tree: nearbyTrees){
 			bullets-=tree.getContainedBullets();
-			if(bullets<=0){
+			if(tree.getContainedBullets()>0){
+				trees--;
+			}
+			if(bullets<=0||trees<=0){
 				return true;
 			}
 		}

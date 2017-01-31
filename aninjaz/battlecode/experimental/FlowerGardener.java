@@ -52,6 +52,7 @@ public class FlowerGardener {
 					if(controller.canBuildRobot(RobotType.SCOUT, direction)){
 						controller.broadcast(Constants.CHANNEL_SPAWN_INITIAL_SCOUT, initialScout-1);
 						controller.buildRobot(RobotType.SCOUT, direction);
+						controller.broadcast(Constants.CHANNEL_SPAWNED_SCOUT, 1);
 					}
 				}
 			}else if(initialLumberjack>0){

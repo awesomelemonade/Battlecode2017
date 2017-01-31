@@ -35,6 +35,12 @@ public class MidrangeArchon {
 			DynamicTargeting.indicateTargets();
 			TreeInfo[] nearbyTrees = controller.senseNearbyTrees(-1, Team.NEUTRAL);
 			RobotInfo[] nearbyRobots = controller.senseNearbyRobots(-1, Constants.OTHER_TEAM);
+			if(controller.readBroadcast(Constants.CHANNEL_SPAWNED_SCOUT)==0){
+				if(exceedsBullets(nearbyTrees, 20, 5)){
+					controller.broadcast(Constants.CHANNEL_SPAWN_INITIAL_SCOUT, 1);
+					controller.broadcast(Constants.CHANNEL_SPAWNED_SCOUT, 1);
+				}
+			}
 			if(nearbyRobots.length>0){
 				Direction opposite = controller.getLocation().directionTo(nearbyRobots[0].getLocation()).opposite();
 				MapLocation location = Pathfinding.pathfind(controller.getLocation().add(opposite, 4f));
@@ -85,6 +91,18 @@ public class MidrangeArchon {
 			}
 			Util.yieldByteCodes();
 		}
+	}
+	public static boolean exceedsBullets(TreeInfo[] nearbyTrees, float bullets, int trees){
+		for(TreeInfo tree: nearbyTrees){
+			bullets-=tree.getContainedBullets();
+			if(tree.getContainedBullets()>0){
+				trees--;
+			}
+			if(bullets<=0||trees<=0){
+				return true;
+			}
+		}
+		return false;
 	}
 	public static boolean tryHireGardener() throws GameActionException{
 		Direction direction = Pathfinding.findSpawn(RobotType.GARDENER.bodyRadius);
