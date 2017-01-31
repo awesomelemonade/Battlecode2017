@@ -81,21 +81,13 @@ public class MidrangeArchon {
 				int gardeners = controller.readBroadcast(Constants.CHANNEL_GARDENER_COUNT);
 				if(controller.getTreeCount()>=(gardeners-1)*3+2
 						&&((controller.getRoundNum()-lastHireTurn)>35)){
-					if(gardeners<=1||(!containsArchon(nearbyRobots))){
+					if(nearbyRobots.length==0||gardeners<=1){
 						tryHireGardener();
 					}
 				}
 			}
 			Util.yieldByteCodes();
 		}
-	}
-	public static boolean containsArchon(RobotInfo[] nearbyRobots){
-		for(RobotInfo robot: nearbyRobots){
-			if(robot.getType()==RobotType.ARCHON){
-				return true;
-			}
-		}
-		return false;
 	}
 	public static boolean tryHireGardener() throws GameActionException{
 		Direction direction = Pathfinding.findSpawn(RobotType.GARDENER.bodyRadius);
