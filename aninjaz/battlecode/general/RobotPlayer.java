@@ -96,7 +96,7 @@ public class RobotPlayer {
 				return AGGRO_STRAT;
 			}
 		}
-		TreeInfo[] nearbyTrees = controller.senseNearbyTrees(-5, Team.NEUTRAL);
+		TreeInfo[] nearbyTrees = controller.senseNearbyTrees(7, Team.NEUTRAL);
 		if(nearbyTrees.length>=10){
 			return CRAMPED;
 		}

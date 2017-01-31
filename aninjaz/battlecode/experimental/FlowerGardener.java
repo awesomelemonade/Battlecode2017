@@ -165,13 +165,16 @@ public class FlowerGardener {
 		while(true){
 			if(spawnType!=RobotType.TANK){
 				TreeInfo[] nearbyTrees = controller.senseNearbyTrees(-1, Team.NEUTRAL);
-				if(nearbyTrees.length>2){
+				if(nearbyTrees.length>5){
 					controller.broadcast(Constants.CHANNEL_REQUEST_LUMBERJACKS, controller.getRoundNum());
 				}
 				if(controller.getRoundNum()-controller.readBroadcast(Constants.CHANNEL_REQUEST_LUMBERJACKS)<=5){
 					spawnType = RobotType.LUMBERJACK;
 				}else{
 					spawnType = RobotType.SOLDIER;
+				}
+				if(controller.senseNearbyTrees(3.5f, Team.NEUTRAL).length>1){
+					spawnType = RobotType.LUMBERJACK;
 				}
 				if(soldierDefenseCount<1){
 					spawnType = RobotType.SOLDIER;
