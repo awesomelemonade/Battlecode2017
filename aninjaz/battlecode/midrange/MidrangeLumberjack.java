@@ -23,7 +23,8 @@ public class MidrangeLumberjack {
 			RobotInfo[] nearbyRobots = controller.senseNearbyRobots(-1, Constants.OTHER_TEAM);
 			TreeInfo bestTree = findBestTree(nearbyTrees);
 			if(bestTree!=null){
-				DynamicTargeting.addTreeTarget(bestTree);
+				DynamicTargeting.addTreeTarget(bestTree,
+						bestTree.getContainedRobot()==null?DynamicTargeting.PRIORITY_CHOP_STANDARD_TREE:DynamicTargeting.PRIORITY_CHOP_ROBOT_TREE);
 			}
 			if(nearbyRobots.length>0){
 				DynamicTargeting.addRobotTarget(nearbyRobots[0]);

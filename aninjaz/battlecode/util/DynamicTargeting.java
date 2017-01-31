@@ -15,8 +15,9 @@ public class DynamicTargeting {
 	public static final int SUBIDENTIFIER_ARCHON = 3;
 	public static final int PRIORITY_TARGET_ARCHON = 3;
 	public static final int PRIORITY_CHOP_STANDARD_TREE = 5;
-	public static final int PRIORITY_CHOP_ROBOT_TREE = 10;
-	public static final int PRIORITY_ATTACK_ENEMY = 15;
+	public static final int PRIORITY_CHOP_ROBOT_TREE = 8;
+	public static final int PRIORITY_ATTACK_ENEMY = 10;
+	public static final int PRIORITY_CHOP_AROUND_GARDENER = 12;
 	public static void addArchonTarget(MapLocation target) throws GameActionException{
 		int compressedTargetData = CompressedData.compressData(TARGET_IDENTIFIER, SUBIDENTIFIER_ARCHON, PRIORITY_TARGET_ARCHON);
 		int compressedTargetLocation = CompressedData.compressMapLocation(target);
@@ -27,9 +28,8 @@ public class DynamicTargeting {
 		controller.broadcast(targetChannel-2, controller.getRoundLimit());
 		controller.broadcast(targetChannel-3, 0);
 	}
-	public static void addTreeTarget(TreeInfo tree) throws GameActionException{
-		int compressedTargetData = CompressedData.compressData(TARGET_IDENTIFIER, SUBIDENTIFIER_TREE,
-				tree.getContainedRobot()==null?PRIORITY_CHOP_STANDARD_TREE:PRIORITY_CHOP_ROBOT_TREE);
+	public static void addTreeTarget(TreeInfo tree, int priority) throws GameActionException{
+		int compressedTargetData = CompressedData.compressData(TARGET_IDENTIFIER, SUBIDENTIFIER_TREE, priority);
 		int compressedTargetLocation = CompressedData.compressMapLocation(tree.getLocation());
 		for(int mapper=0;mapper<DynamicBroadcasting.MAPPERS;++mapper){
 			int mapperChannel = DynamicBroadcasting.getMapperChannel(mapper);
