@@ -45,7 +45,9 @@ public class DynamicTargeting {
 						}else{
 							if(CompressedData.getIdentifier(compressedData)==TARGET_IDENTIFIER){
 								if(CompressedData.getSubIdentifier(compressedData)==SUBIDENTIFIER_TREE){
-									controller.broadcast(dataChannel, compressedTargetData);
+									if(priority>CompressedData.getData(compressedData)){
+										controller.broadcast(dataChannel, compressedTargetData);
+									}
 									controller.broadcast(dataChannel-2, controller.getRoundNum());
 									return;
 								}

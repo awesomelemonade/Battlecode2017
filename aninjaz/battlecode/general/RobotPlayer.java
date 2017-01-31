@@ -17,14 +17,14 @@ import battlecode.common.*;
 
 public class RobotPlayer {
 	private static final int NO_STRAT = 0;
-	private static final int AGGRO_STRA = 1;
-	private static final int CRAMPE = 2;
-	private static final int TURTLE_STRA = 3;
-	private static final int SOLDIER_RANG = 4;
-	private static final int FAR_SOLDIE = 5;
-	private static final int SOLDIER_DEFENS = 6;
+	private static final int AGGRO_STRAT = 1;
+	private static final int MIDRANGE_STRAT = 2;
 	
 	private static RobotController controller;
+	
+	private static MapLocation[] ourArchons;
+	private static MapLocation[] theirArchons;
+	
 	public static void run(RobotController controller) throws GameActionException{
 		RobotPlayer.controller = controller;
 		Pathfinding.init(controller);
@@ -34,46 +34,36 @@ public class RobotPlayer {
 		Constants.OTHER_TEAM = controller.getTeam()==Team.A?Team.B:Team.A;
 		int currentStrat = controller.readBroadcast(Constants.CHANNEL_CURRENT_STRAT);
 		if(currentStrat==NO_STRAT){
+			ourArchons = controller.getInitialArchonLocations(controller.getTeam());
+			theirArchons = controller.getInitialArchonLocations(Constants.OTHER_TEAM);
 			currentStrat = findBestStrat();
-			switch(currentStrat){
-			case AGGRO_STRAT:
+			if(currentStrat==AGGRO_STRAT){
 				indicate(255, 0, 0);
-				break;
-			case CRAMPED:
+			}else if(currentStrat==MIDRANGE_STRAT){
 				indicate(0, 255, 0);
-				break;
-			case TURTLE_STRAT:
-				indicate(0, 0, 255);
-				break;
-			case SOLDIER_RANGE:
-				indicate(255,255,255);
-				break;
-			case FAR_SOLDIER:
-				indicate(255, 0, 255);
-				break;
+				float minDistance = getMinArchonDistance();
+				TreeInfo[] nearbyTrees = controller.senseNearbyTrees(-1, Team.NEUTRAL);
+				if(exceedsBullets(nearbyTrees, 40)){
+					controller.broadcast(Constants.CHANNEL_SPAWN_INITIAL_SCOUT, 1);
+					
+				}else{
+					
+				}
+				controller.broadcast(Constants.CHANNEL_SPAWN_INITIAL_SOLDIER, 1);
+				controller.broadcast(Constants.CHANNEL_SPAWN_INITIAL_LUMBERJACK, 0);
+			}else{
+				indicate(0, 0, 0);
 			}
 			controller.broadcast(Constants.CHANNEL_CURRENT_STRAT, currentStrat);
 		}
 		while(true){
-			if(controller.getRoundNum()<100&&containsSoldiers(controller.senseNearbyRobots(-1,Constants.OTHER_TEAM))){
-				currentStrat = SOLDIER_DEFENSE;
-			}
 			try{
 				switch(currentStrat){
 				case AGGRO_STRAT:
 					runAggroStrat();
 					break;
-				case CRAMPED:
-					runMidrangeStrat();
-					break;
-				case TURTLE_STRAT:
-					runTurtleStrat();
-				case SOLDIER_RANGE:
-					runMidrangeStrat();
-				case FAR_SOLDIER:
-					runMidrangeStrat();
 				default:
-					runDefaultStrat();
+					runMidrangeStrat();
 				}
 			}catch(GameActionException ex){
 				System.out.println(ex.getMessage());
@@ -84,6 +74,35 @@ public class RobotPlayer {
 			}
 		}
 	}
+	public static boolean exceedsBullets(TreeInfo[] nearbyTrees, float bullets){
+		for(TreeInfo tree: nearbyTrees){
+			bullets-=tree.getContainedBullets();
+			if(bullets<=0){
+				return true;
+			}
+		}
+		return false;
+	}
+	public static boolean hasTreesWithin(TreeInfo[] nearbyTrees, float distance){
+		for(TreeInfo tree: nearbyTrees){
+			if(tree.getLocation().distanceTo(controller.getLocation())<=distance){
+				return true;
+			}
+		}
+		return false;
+	}
+	public static float getMinArchonDistance(){
+		float minDistance = Float.MAX_VALUE;
+		for(MapLocation ourArchon: ourArchons){
+			for(MapLocation theirArchon: theirArchons){
+				float distance = ourArchon.distanceTo(theirArchon);
+				if(distance<minDistance){
+					minDistance = distance;
+				}
+			}
+		}
+		return minDistance;
+	}
 	public static void indicate(int red, int green, int blue) throws GameActionException{
 		for(int i=-10;i<=10;++i){
 			for(int j=-10;j<=10;++j){
@@ -92,41 +111,13 @@ public class RobotPlayer {
 		}
 	}
 	public static int findBestStrat(){
-		MapLocation[] ourArchons = controller.getInitialArchonLocations(controller.getTeam());
-		MapLocation[] theirArchons = controller.getInitialArchonLocations(Constants.OTHER_TEAM);
 		if(ourArchons.length==1){
 			if(ourArchons[0].distanceTo(theirArchons[0])<=10){
 				//Check trees in between
 				return AGGRO_STRAT;
 			}
 		}
-		TreeInfo[] nearbyTrees = controller.senseNearbyTrees(7, Team.NEUTRAL);
-		if(nearbyTrees.length>=5){
-			return CRAMPED;
-		}
-		int sum = 0;
-		for(TreeInfo tree: nearbyTrees){
-			sum+=tree.radius;
-		}
-		if(sum>=20){
-			return CRAMPED;
-		}
-		for(TreeInfo tree : nearbyTrees){
-			if(tree.getContainedRobot()==RobotType.TANK){
-				return CRAMPED;
-			}
-		}
-		for(MapLocation archon : ourArchons){
-			for(MapLocation theirarchon : theirArchons){
-				if(archon.distanceTo(theirarchon)<26){
-					return SOLDIER_RANGE;
-				}
-				else if(archon.distanceTo(theirarchon)<71){
-					return FAR_SOLDIER;
-				}
-			}
-		}
-		return TURTLE_STRAT;
+		return MIDRANGE_STRAT;
 	}
 	public static void runAggroStrat() throws Exception{
 		switch (controller.getType()) {
@@ -171,57 +162,5 @@ public class RobotPlayer {
 			MidrangeTank.run(controller);
 			break;
 		}
-	}
-	public static void runTurtleStrat() throws Exception{
-		switch (controller.getType()) {
-		case ARCHON:
-			MidrangeArchon.run(controller);
-			break;
-		case GARDENER:
-			FlowerGardener.run(controller);
-			break;
-		case SOLDIER:
-			MidrangeSoldier.run(controller);
-			break;
-		case LUMBERJACK:
-			MidrangeLumberjack.run(controller);
-			break;
-		case SCOUT:
-			CollectorScout.run(controller);
-			break;
-		case TANK:
-			MidrangeTank.run(controller);
-			break;
-		}
-	}
-	public static void runDefaultStrat() throws Exception{
-		switch (controller.getType()) {
-		case ARCHON:
-			MidrangeArchon.run(controller);
-			break;
-		case GARDENER:
-			FlowerGardener.run(controller);
-			break;
-		case SOLDIER:
-			MidrangeSoldier.run(controller);
-			break;
-		case LUMBERJACK:
-			MidrangeLumberjack.run(controller);
-			break;
-		case SCOUT:
-			CollectorScout.run(controller);
-			break;
-		case TANK:
-			MidrangeTank.run(controller);
-			break;
-		}
-	}
-	public static boolean containsSoldiers(RobotInfo[] robots){
-		for(RobotInfo robot : robots){
-			if(robot.getType()==RobotType.SOLDIER){
-				return true;
-			}
-		}
-		return false;
 	}
 }

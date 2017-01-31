@@ -9,26 +9,22 @@ import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
+import battlecode.common.TreeInfo;
 
 public class MidrangeSoldier {
 	private static RobotController controller;
 	public static void run(RobotController controller) throws GameActionException{
 		MidrangeSoldier.controller = controller;
 		Direction direction = Util.randomDirection();
-		int sameDirection = 0;
 		while(true){
 			DynamicTargeting.removeTargets();
 			RobotInfo[] nearbyRobots = controller.senseNearbyRobots(-1, Constants.OTHER_TEAM);
 			if(nearbyRobots.length>0){
 				DynamicTargeting.addRobotTarget(nearbyRobots[0]);
 			}
-			
 			DynamicTargeting.getTargetRobot();
-			
-			if(DynamicTargeting.targetLocation==null||controller.getRoundNum()<=100&&sameDirection>=15){
+			if(DynamicTargeting.targetLocation==null||controller.getRoundNum()<=100){
 				direction = Util.tryRandomMove(direction);
-				sameDirection=0;
-				
 			}else{
 				if(DynamicTargeting.targetLumberjack){
 					float distance = controller.getLocation().distanceTo(DynamicTargeting.targetLocation);
@@ -47,10 +43,18 @@ public class MidrangeSoldier {
 					MapLocation location = Pathfinding.pathfind(DynamicTargeting.targetLocation, DynamicTargeting.targetRadius);
 					if(controller.canMove(location)){
 						controller.move(location);
-						sameDirection++;
 					}
 				}
 				shoot(DynamicTargeting.targetLocation);
+			}
+			TreeInfo[] nearbyTrees = controller.senseNearbyTrees(2f);
+			for(TreeInfo tree: nearbyTrees){
+				if(tree.getContainedBullets()>0){
+					if(controller.canShake(tree.getID())){
+						controller.shake(tree.getID());
+						break;
+					}
+				}
 			}
 			Util.yieldByteCodes();
 		}

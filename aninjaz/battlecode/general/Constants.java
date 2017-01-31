@@ -26,9 +26,9 @@ public class Constants {
 	public static final int CHANNEL_CURRENT_STRAT = 0;
 	public static final int CHANNEL_SPAWNED_INITIAL_GARDENER = 1;
 	public static final int CHANNEL_REQUEST_LUMBERJACK = 2;
-	public static final int CHANNEL_SPAWNED_INITIAL_SCOUT = 3;
-	public static final int CHANNEL_SPAWNED_INITIAL_LUMBERJACK = 4;
-	public static final int CHANNEL_SPAWNED_INITIAL_SOLDIER = 5;
+	public static final int CHANNEL_SPAWN_INITIAL_SCOUT = 3;
+	public static final int CHANNEL_SPAWN_INITIAL_LUMBERJACK = 4;
+	public static final int CHANNEL_SPAWN_INITIAL_SOLDIER = 5;
 
 	/*public static final int CHANNEL_SPAWNED_INITIAL_SCOUT = 2;
 	public static final int CHANNEL_SPAWNED_INITIAL_LUMBERJACK = 3;
